@@ -58,6 +58,7 @@ export const userSettings = sqliteTable("user_settings", {
   weeklySummaryEnabled: integer("weekly_summary_enabled", { mode: "boolean" }).notNull().default(true),
   weeklySummaryWeekday: integer("weekly_summary_weekday").notNull().default(0), // 0=日
   weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"),
+  weekStartsOn: integer("week_starts_on").notNull().default(1), // 0=日 〜 6=土。週次サマリー・ヒートマップの週区切りに使う
   channel: text("channel").$type<"WEB_PUSH" | "EMAIL" | "LINE">().notNull().default("WEB_PUSH"),
   lineUserId: text("line_user_id"),                      // Pro のみ
 });
