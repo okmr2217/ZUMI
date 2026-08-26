@@ -12,52 +12,33 @@
 - ✅ **1-4 カスタムドメイン**: `zumi-web` Worker をデプロイし、`zumi.paritto.dev` にカスタムドメインとして紐付け済み（`apps/web/wrangler.toml` の `routes` で管理）。動作確認済み（200 OK）
 - ✅ **1-5 VAPID鍵**: 生成し、`zumi-web`・`zumi-notify` 両方に `wrangler secret put` で登録済み
 - ✅ **2 Sentry**: `zumi-web` / `zumi-notify` の DSN を取得し、両 Worker に `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` として登録済み。`zumi-web` の本番ビルドは DSN を埋め込んだ状態でデプロイ済み
-- ✅ **3 better-auth**: `BETTER_AUTH_SECRET` を生成し `zumi-web` に登録済み（better-auth 自体の実設定はフェーズ1で行う）
+- ✅ **2-補足 Sentry ソースマップアップロード**: `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` を GitHub Actions Secrets に登録済み。`deploy.yml` の `zumi-web` ビルドステップ（`next build` 実行箇所）で読み込み、ソースマップをアップロードする
+- ✅ **3-a better-auth の `BETTER_AUTH_SECRET`**: 生成し `zumi-web` に登録済み
 - ✅ **4 Resend**: API Key を `zumi-web` に `RESEND_API_KEY` として登録済み
 - ✅ **apps/web・apps/notify の初回デプロイ**:
   - https://zumi.paritto.dev （zumi-web、カスタムドメイン。`workers.dev` のプレビューURLは `routes` 設定により無効化される仕様のため使用不可）
   - https://zumi-notify.okumuradaichi2007.workers.dev （zumi-notify、毎分 Cron 動作中）
+- ✅ **GitHub Actions からの自動デプロイ**: `.github/workflows/deploy.yml` を追加し、`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` を GitHub Actions Secrets に登録済み。`main` への push（または手動実行）で `zumi-notify`・`zumi-web` が自動デプロイされることを確認済み
 
-## 未完了
+## 未完了（着手時期が決まっているもの）
 
-### LINE Messaging API（Pro機能・後回し可）
+### LINE Messaging API 連携 → **MVP以降（v1.1、Proプラン実装時）に実施**
 
-フェーズ4（通知）でも MVP は Web Push のみのため急ぎではない。必要になったら
+MVPでは Web Push のみで通知を成立させる方針のため、フェーズ4（通知）では対応しない。
+Pro プランの課金連携（[06-billing.md](./06-billing.md)）を実装するタイミングで、
 LINE Developers コンソールでチャネル作成 → `LINE_CHANNEL_ACCESS_TOKEN` /
-`LINE_CHANNEL_SECRET` を取得し、`wrangler secret put` で登録する。
+`LINE_CHANNEL_SECRET` を取得し、両 Worker に `wrangler secret put` で登録する。
+（[09-implementation-tasks.md](./09-implementation-tasks.md) のフェーズ4節に明記済み）
 
-### Sentry ソースマップアップロード（任意）
-
-現状 `SENTRY_AUTH_TOKEN` は未設定のため、ビルド時のソースマップアップロードは
-無効（`apps/web/next.config.ts` の `sourcemaps.disable` 参照）。有効化したい場合:
-
-1. Sentry の `Settings > Auth Tokens` で Auth Token を発行
-2. `SENTRY_AUTH_TOKEN` / `SENTRY_ORG=parittodev` / `SENTRY_PROJECT=zumi-web` を
-   ローカル `.env.local` に設定してビルドするか、デプロイCIを追加する場合は
-   GitHub Secrets に登録する
-
-### GitHub Actions からの自動デプロイ
-
-現在の `.github/workflows/ci.yml` は lint/typecheck/build のみで、Cloudflareへの
-自動デプロイは行っていない（今回はこの場から手動で `wrangler deploy` した）。
-自動デプロイを追加したい場合は、リポジトリの `Settings > Secrets and variables
-> Actions` に以下を登録すること。
-
-| Secret名 | 値 |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token |
-| `CLOUDFLARE_ACCOUNT_ID` | `55b4467be01cbb1f5104758b2a728da9` |
-
-デプロイ時、`apps/web` は `NEXT_PUBLIC_SENTRY_DSN` を**ビルド時の環境変数**として
-渡す必要がある点に注意（Next.js の `NEXT_PUBLIC_*` はビルド時にクライアント
-バンドルへ埋め込まれるため、Workers の実行時シークレットだけでは反映されない）。
-
-### better-auth の実設定・再マイグレーション（フェーズ1）
+### better-auth の実設定・再マイグレーション → **フェーズ1で実施**
 
 `packages/db/src/auth-schema.ts` は better-auth の標準スキーマを手書きした
-プレースホルダー。フェーズ1で `apps/web/lib/auth.ts` の実設定（メール送信元、
-セッション有効期限など）を詰めたら、`npx @better-auth/cli generate` 相当の
-コマンドで内容を確定させ、マイグレーションを再生成・適用すること。
+プレースホルダーで、`BETTER_AUTH_SECRET` の値のみ発行・登録済み。フェーズ1
+（[09-implementation-tasks.md](./09-implementation-tasks.md) フェーズ1節）で
+`apps/web/lib/auth.ts` の実設定（メール送信元、セッション有効期限、メール認証・
+パスワードリセットフローなど）を詰め、`npx @better-auth/cli generate` 相当の
+コマンドで内容を確定させてからマイグレーションを再生成・適用する。オーナー側の
+追加作業は基本的に不要（Resendのメール送信元ドメイン認証が必要になった場合を除く）。
 
 ### 課金（Stripe等）
 
