@@ -1,6 +1,6 @@
 # ZUMI（済） - 実装優先順位
 
-> 関連: [Duty管理・記録・振り返り・アカウント](./03-duty-log-review-account.md) / [通知](./02-notifications.md) / [技術スタック・インフラ](./05-tech-stack.md)
+> 関連: [Duty管理・記録・振り返り・アカウント](./03-duty-log-review-account.md) / [通知](./02-notifications.md) / [技術スタック・インフラ](./05-tech-stack.md) / [MVP実装タスク一覧](./09-implementation-tasks.md)
 
 ## 7. 実装優先順位
 
@@ -44,3 +44,6 @@ MVPでは「コア機能（繰り返しタイプ6種）の網羅性」を優先�
 - 前夜通知（Duty単位）
 - データエクスポート（JSON/CSV）
 - メールアドレス変更
+- 課金（Stripe等の決済連携・Proプラン制御）: MVPでは無料プランの制約ロジックのみ実装し、決済導線は持たない（[06-billing.md](./06-billing.md) 参照）
+
+各フェーズをタスクレベルまで分解したチェックリスト、および基盤構築（フェーズ0）・PWA対応・QA/リリース準備・法務ドキュメント作成など本ファイルに明記していない横断タスクは [09-implementation-tasks.md](./09-implementation-tasks.md) を参照。

@@ -14,3 +14,5 @@
 | [05-tech-stack.md](./05-tech-stack.md) | 技術スタック・インフラ・DB設計・通知配信設計・リポジトリ構成 |
 | [06-billing.md](./06-billing.md) | 課金 |
 | [07-roadmap.md](./07-roadmap.md) | 実装優先順位 |
+| [08-lp-draft.md](./08-lp-draft.md) | LP下書き |
+| [09-implementation-tasks.md](./09-implementation-tasks.md) | MVP実装タスク一覧（フェーズ別チェックリスト） |
