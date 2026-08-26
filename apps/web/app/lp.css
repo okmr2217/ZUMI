@@ -1,0 +1,583 @@
+/* ZUMI LP — カスタムCSS（shadcn/uiに依存しない独立スタイル）。/app 側の Tailwind とは切り離す。 */
+
+.zumi-lp {
+  --paper: #faf6ef;
+  --paper-raised: #ffffff;
+  --paper-sunken: #f4eee0;
+  --ink: #2b2620;
+  --ink-soft: #8a8072;
+  --ink-faint: #b6ab99;
+  --vermillion: #c8402a;
+  --vermillion-deep: #9c2e1c;
+  --vermillion-soft: rgba(200, 64, 42, 0.1);
+  --warn: #b07a2e;
+  --warn-bg: #f3e6ce;
+  --success-bg: #e4ecdd;
+  --success-text: #5d7a49;
+  --line: #e7dfce;
+  --line-strong: #d7cbb0;
+  --shadow: 0 1px 2px rgba(43, 38, 32, 0.06), 0 8px 24px -12px rgba(43, 38, 32, 0.22);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Noto Sans JP", "Zen Kaku Gothic New", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+  .zumi-lp {
+    --paper: #221d17;
+    --paper-raised: #2b241c;
+    --paper-sunken: #1b1712;
+    --ink: #f0e8d8;
+    --ink-soft: #b7aa92;
+    --ink-faint: #7f7360;
+    --vermillion: #e2664a;
+    --vermillion-deep: #f08a6e;
+    --vermillion-soft: rgba(226, 102, 74, 0.16);
+    --warn: #d9a855;
+    --warn-bg: rgba(217, 168, 85, 0.14);
+    --success-bg: rgba(139, 179, 110, 0.16);
+    --success-text: #9cc27f;
+    --line: rgba(240, 232, 216, 0.14);
+    --line-strong: rgba(240, 232, 216, 0.26);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px -12px rgba(0, 0, 0, 0.6);
+  }
+}
+
+.zumi-lp * { box-sizing: border-box; }
+.zumi-lp { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  .zumi-lp { scroll-behavior: auto; }
+  .zumi-lp * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+.zumi-lp .grain {
+  position: fixed;
+  inset: 0;
+  background-image: var(--grain);
+  pointer-events: none;
+  z-index: 500;
+  mix-blend-mode: multiply;
+}
+@media (prefers-color-scheme: dark) {
+  .zumi-lp .grain { mix-blend-mode: overlay; }
+}
+
+.zumi-lp a { color: inherit; }
+
+.zumi-lp h1, .zumi-lp h2, .zumi-lp h3, .zumi-lp h4 {
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-weight: 900;
+  margin: 0;
+  text-wrap: balance;
+  word-break: keep-all;
+  letter-spacing: 0.01em;
+}
+.zumi-lp p, .zumi-lp li { word-break: keep-all; overflow-wrap: break-word; }
+
+.zumi-lp .stamp-glyph {
+  font-family: "Yuji Syuku", serif;
+  color: var(--vermillion);
+}
+
+.zumi-lp .wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 48px);
+}
+
+.zumi-lp .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--vermillion);
+  margin-bottom: 1.1rem;
+}
+.zumi-lp .eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vermillion);
+  display: inline-block;
+}
+
+.zumi-lp .subsection { margin-top: clamp(48px, 7vw, 76px); }
+.zumi-lp .subrule { border-top: 1px dashed var(--line-strong); margin-bottom: clamp(40px, 6vw, 64px); }
+.zumi-lp .sub-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  margin-bottom: 0.9rem;
+}
+.zumi-lp .sub-eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  border: 1.4px solid var(--vermillion);
+  display: inline-block;
+  transform: rotate(45deg);
+}
+.zumi-lp h3.sub-heading {
+  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.25rem, 2.4vw, 1.55rem);
+  line-height: 1.5;
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* ============ header ============ */
+.zumi-lp header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+.zumi-lp .nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px clamp(20px, 5vw, 48px);
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.zumi-lp .wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-weight: 900;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.zumi-lp .wordmark .seal-mini {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1.6px solid var(--vermillion);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vermillion);
+  font-family: "Yuji Syuku", serif;
+  font-size: 1rem;
+  transform: rotate(-4deg);
+}
+
+.zumi-lp .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.zumi-lp .btn-primary {
+  background: var(--vermillion);
+  color: #fdf6ec;
+  box-shadow: var(--shadow);
+}
+.zumi-lp .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -10px var(--vermillion-soft); }
+.zumi-lp .btn-primary:active { transform: translateY(0); }
+.zumi-lp .btn-primary:focus-visible { outline: 3px solid var(--vermillion); outline-offset: 3px; }
+.zumi-lp .btn-small { padding: 9px 18px; font-size: 0.82rem; }
+
+/* ============ hero ============ */
+.zumi-lp .hero {
+  padding: clamp(56px, 10vw, 108px) 0 clamp(48px, 8vw, 88px);
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: clamp(32px, 6vw, 64px);
+  align-items: center;
+}
+@media (max-width: 860px) { .zumi-lp .hero { grid-template-columns: 1fr; } }
+
+.zumi-lp .hero h1 {
+  font-size: clamp(2.1rem, 4.6vw, 3.4rem);
+  line-height: 1.35;
+}
+.zumi-lp .hero .sub {
+  margin-top: 1.4rem;
+  font-size: 1.08rem;
+  color: var(--ink-soft);
+  max-width: 34ch;
+}
+.zumi-lp .hero .cta-row { margin-top: 2.3rem; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.zumi-lp .hero .hint { font-size: 0.82rem; color: var(--ink-faint); }
+
+/* ============ app-shell (shared: hero + daily demo) ============ */
+.zumi-lp .app-shell {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 32px;
+  box-shadow: var(--shadow);
+  padding: 24px 20px;
+  position: relative;
+  max-width: 380px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.zumi-lp .app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--grain);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.zumi-lp .app-topbar { display: flex; align-items: center; gap: 10px; }
+.zumi-lp .app-datebar { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.zumi-lp .app-navbtn {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  background: var(--paper-raised); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; color: var(--ink-soft);
+  cursor: pointer; padding: 0; transition: border-color 0.18s ease, color 0.18s ease;
+}
+.zumi-lp .app-navbtn:hover:not(:disabled) { border-color: var(--vermillion); color: var(--vermillion); }
+.zumi-lp .app-navbtn:disabled { opacity: 0.35; cursor: default; }
+.zumi-lp .app-navbtn:focus-visible { outline: 2px solid var(--vermillion); outline-offset: 2px; }
+.zumi-lp .app-datecenter { flex: 1; min-width: 0; text-align: center; }
+.zumi-lp .app-date { font-size: 0.72rem; color: var(--ink-soft); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.zumi-lp .app-title { font-size: 1.15rem; font-weight: 700; margin-top: 1px; }
+.zumi-lp .app-gear {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: var(--paper-raised); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; color: var(--ink-soft);
+}
+.zumi-lp .app-pill {
+  display: inline-flex; align-items: center; gap: 4px; margin: 10px auto 0;
+  padding: 5px 12px; border-radius: 20px; background: var(--paper-raised); border: 1px solid var(--line);
+  color: var(--vermillion); font-size: 0.72rem; font-weight: 700; width: fit-content;
+  cursor: pointer; visibility: hidden;
+}
+.zumi-lp .app-pill.visible { visibility: visible; }
+.zumi-lp .app-progress-row { padding: 14px 2px 4px; display: flex; flex-direction: column; gap: 7px; }
+.zumi-lp .app-progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.zumi-lp .app-progress-track { height: 6px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.zumi-lp .app-progress-fill { height: 100%; background: var(--vermillion); border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+.zumi-lp .app-scroll { padding-top: 6px; display: flex; flex-direction: column; gap: 18px; }
+.zumi-lp .app-group-label { font-size: 0.7rem; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.07em; margin-bottom: 8px; }
+.zumi-lp .app-group-label.warn { color: var(--warn); }
+.zumi-lp .app-cardlist { display: flex; flex-direction: column; gap: 8px; }
+.zumi-lp .app-row {
+  background: var(--paper-raised); border: 1px solid var(--line); border-radius: 15px;
+  padding: 12px 12px; display: flex; align-items: center; gap: 11px;
+}
+.zumi-lp .app-icon-badge {
+  width: 38px; height: 38px; border-radius: 11px; background: var(--paper-sunken); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: var(--ink);
+}
+.zumi-lp .app-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.zumi-lp .app-row-name { font-size: 0.9rem; font-weight: 700; }
+.zumi-lp .app-row-sub { font-size: 0.72rem; color: var(--ink-soft); }
+.zumi-lp .badge-warn {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+  background: var(--warn-bg); color: var(--warn); font-size: 0.66rem; font-weight: 700; width: fit-content;
+}
+.zumi-lp .tap-empty { width: 27px; height: 27px; border-radius: 50%; border: 2px solid var(--line-strong); flex-shrink: 0; padding: 0; background: none; cursor: pointer; }
+.zumi-lp button.tap-empty:hover { border-color: var(--vermillion); }
+.zumi-lp .hanko {
+  width: 40px; height: 40px; border-radius: 50%; border: 2.3px solid var(--vermillion); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: var(--vermillion);
+  font-family: "Yuji Syuku", serif; font-size: 1.15rem; transform: rotate(-8deg);
+  box-shadow: inset 0 0 0 1px var(--vermillion-soft);
+}
+.zumi-lp button.hanko { padding: 0; background: none; cursor: pointer; }
+.zumi-lp .hanko.animate { animation: zumi-stampdown 0.42s cubic-bezier(.2,1.4,.4,1); }
+@keyframes zumi-stampdown {
+  0% { transform: scale(1.7) rotate(-16deg); opacity: 0; }
+  55% { transform: scale(0.92) rotate(-4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-8deg); opacity: 1; }
+}
+.zumi-lp .lock-badge {
+  width: 27px; height: 27px; border-radius: 50%; border: 2px dashed var(--line-strong); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: var(--ink-soft);
+}
+.zumi-lp .app-row.dim { opacity: 0.6; }
+.zumi-lp .app-collapsed { display: flex; align-items: center; justify-content: space-between; padding: 9px 3px; color: var(--ink-soft); font-size: 0.78rem; font-weight: 500; }
+.zumi-lp .app-hint { font-size: 0.7rem; color: var(--ink-soft); text-align: center; padding: 2px 8px 0; min-height: 1.4em; }
+.zumi-lp .app-tabbar { display: flex; align-items: center; justify-content: space-around; margin: 18px -20px -24px; padding: 14px 0 16px; background: var(--paper-raised); border-top: 1px solid var(--line); }
+.zumi-lp .app-tab { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 0.6rem; color: var(--ink-soft); }
+.zumi-lp .app-tab.active { color: var(--vermillion); font-weight: 700; }
+
+/* ============ sections ============ */
+.zumi-lp section { padding: clamp(56px, 9vw, 100px) 0; }
+.zumi-lp .rule { border-top: 1px solid var(--line); }
+
+.zumi-lp .split {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: clamp(32px, 6vw, 72px);
+  align-items: center;
+}
+.zumi-lp .split.reverse { grid-template-columns: 1.05fr 0.95fr; }
+.zumi-lp .split.reverse .split-visual { order: -1; }
+@media (max-width: 860px) {
+  .zumi-lp .split, .zumi-lp .split.reverse { grid-template-columns: 1fr; }
+  .zumi-lp .split.reverse .split-visual { order: 0; }
+}
+
+.zumi-lp h2 { font-size: clamp(1.6rem, 3vw, 2.15rem); line-height: 1.45; }
+.zumi-lp .body-text { color: var(--ink-soft); margin-top: 1.1rem; max-width: 46ch; }
+
+.zumi-lp ul.feature-list { list-style: none; margin: 1.6rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.9rem; }
+.zumi-lp ul.feature-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 0.98rem;
+}
+.zumi-lp ul.feature-list li::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-top: 0.55em;
+  border-radius: 1px;
+  background: var(--vermillion);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+.zumi-lp .card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+.zumi-lp .card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background-image: var(--grain);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ============ duty examples grid ============ */
+.zumi-lp .duty-grid {
+  margin-top: 2.6rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 860px) { .zumi-lp .duty-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .zumi-lp .duty-grid { grid-template-columns: 1fr; } }
+
+.zumi-lp .duty-card { padding: 20px 18px; display: flex; align-items: center; gap: 14px; }
+.zumi-lp .duty-icon {
+  width: 44px; height: 44px; border-radius: 13px; background: var(--paper-sunken); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: var(--ink);
+}
+.zumi-lp .duty-name { font-weight: 700; font-family: "Zen Kaku Gothic New", sans-serif; font-size: 0.98rem; }
+.zumi-lp .duty-sub { font-size: 0.8rem; color: var(--ink-soft); margin-top: 2px; }
+.zumi-lp .cat-note { margin-top: 1.8rem; font-size: 0.86rem; color: var(--ink-faint); text-align: center; }
+
+/* ============ notifications ============ */
+.zumi-lp .notify-grid {
+  margin-top: 2.6rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 780px) { .zumi-lp .notify-grid { grid-template-columns: 1fr; } }
+
+.zumi-lp .toast-stack { display: flex; flex-direction: column; gap: 12px; }
+.zumi-lp .toast-card { padding: 15px 16px; display: flex; gap: 12px; align-items: flex-start; }
+.zumi-lp .toast-icon {
+  width: 36px; height: 36px; border-radius: 11px; background: var(--vermillion); color: #fdf6ec; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.zumi-lp .toast-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.zumi-lp .toast-app { font-size: 0.68rem; color: var(--ink-soft); font-weight: 700; letter-spacing: 0.05em; }
+.zumi-lp .toast-title { font-size: 0.92rem; font-weight: 700; }
+.zumi-lp .toast-msg { font-size: 0.8rem; color: var(--ink-soft); line-height: 1.5; }
+.zumi-lp .toast-time { font-size: 0.68rem; color: var(--ink-faint); flex-shrink: 0; }
+
+.zumi-lp .settings-card { padding: 18px 4px; }
+.zumi-lp .settings-eyebrow { font-size: 0.72rem; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.08em; padding: 0 16px 10px; }
+.zumi-lp .settings-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; border-top: 1px solid var(--line);
+}
+.zumi-lp .settings-item:first-of-type { border-top: none; }
+.zumi-lp .settings-item-label { font-size: 0.88rem; font-weight: 600; }
+.zumi-lp .settings-item-sub { font-size: 0.72rem; color: var(--ink-soft); margin-top: 2px; }
+.zumi-lp .settings-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.zumi-lp .toggle { width: 34px; height: 20px; border-radius: 20px; background: var(--vermillion); position: relative; flex-shrink: 0; }
+.zumi-lp .toggle .knob { position: absolute; top: 2px; left: 16px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+.zumi-lp .time-pill {
+  display: inline-flex; align-items: center; gap: 3px; font-size: 0.74rem; font-weight: 700; color: var(--ink);
+  background: var(--paper-sunken); padding: 4px 9px 4px 10px; border-radius: 20px; font-variant-numeric: tabular-nums;
+}
+.zumi-lp .time-pill svg { color: var(--ink-soft); }
+.zumi-lp .settings-note { font-size: 0.76rem; color: var(--ink-faint); padding: 12px 16px 0; }
+
+.zumi-lp .notify-total {
+  text-align: center;
+  margin-top: 2.4rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.zumi-lp .notify-total strong { color: var(--ink); }
+
+/* ============ due patterns ============ */
+.zumi-lp .pattern-grid {
+  margin-top: 2.6rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 700px) { .zumi-lp .pattern-grid { grid-template-columns: 1fr; } }
+.zumi-lp .pattern-card { padding: 28px 26px; }
+.zumi-lp .pattern-card h4 { font-size: 1.02rem; font-weight: 700; margin-bottom: 14px; }
+.zumi-lp .pattern-card.accent {
+  background: var(--vermillion-soft);
+  border-color: color-mix(in srgb, var(--vermillion) 40%, var(--line));
+}
+.zumi-lp .pattern-card.accent::before { display: none; }
+.zumi-lp .pattern-card.accent h4 { color: var(--vermillion); }
+.zumi-lp .tag-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.zumi-lp .tag-list li {
+  font-size: 0.92rem;
+  padding: 9px 12px;
+  background: var(--paper-sunken);
+  border-radius: 8px;
+}
+.zumi-lp .pattern-card.accent .tag-list li { background: var(--paper-raised); }
+.zumi-lp .since-quote { margin-top: 16px; font-size: 0.9rem; color: var(--ink-soft); border-left: 2px solid var(--vermillion); padding-left: 12px; }
+
+/* ============ review (weekly / heatmap / history) ============ */
+.zumi-lp .review-block + .review-block { margin-top: clamp(48px, 7vw, 76px); }
+.zumi-lp .review-block .subrule { margin-bottom: clamp(28px, 4vw, 40px); }
+
+.zumi-lp .summary-visual, .zumi-lp .heat-visual, .zumi-lp .hist-visual { padding: 24px 22px 18px; }
+
+.zumi-lp .summary-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+.zumi-lp .summary-range { font-size: 0.8rem; color: var(--ink-soft); letter-spacing: 0.04em; }
+.zumi-lp .summary-week { font-size: 0.8rem; color: var(--ink-soft); opacity: 0.65; }
+.zumi-lp .summary-scorerow { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.zumi-lp .summary-num { font-family: "Zen Kaku Gothic New", sans-serif; font-weight: 500; font-size: 2.7rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.zumi-lp .summary-den { font-size: 1.1rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.zumi-lp .summary-diff { margin-left: auto; font-size: 0.74rem; padding: 4px 10px; border-radius: 20px; background: var(--success-bg); color: var(--success-text); font-weight: 700; }
+.zumi-lp .summary-caption { margin: 0 0 16px; font-size: 0.85rem; color: var(--ink-soft); }
+.zumi-lp .summary-list { border-top: 1px solid var(--line); }
+.zumi-lp .summary-row { display: flex; align-items: center; gap: 11px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.zumi-lp .summary-row:last-child { border-bottom: none; }
+.zumi-lp .summary-row .icon { color: var(--ink-soft); flex-shrink: 0; }
+.zumi-lp .summary-row .info { flex: 1; min-width: 0; }
+.zumi-lp .summary-row .name { font-size: 0.88rem; }
+.zumi-lp .summary-row .name.muted { color: var(--ink-soft); }
+.zumi-lp .summary-row .sub { font-size: 0.72rem; color: var(--ink-soft); margin-top: 1px; }
+.zumi-lp .summary-stamp {
+  width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--vermillion); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Yuji Syuku", serif; font-size: 1.1rem; color: var(--vermillion);
+}
+.zumi-lp .summary-stamp.dashed {
+  border: 2px dashed var(--line-strong); font-family: "Zen Kaku Gothic New", sans-serif;
+  font-size: 0.62rem; font-weight: 700; color: var(--ink-soft);
+}
+.zumi-lp .summary-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.zumi-lp .summary-brand { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; }
+.zumi-lp .summary-domain { font-size: 0.66rem; color: var(--ink-soft); }
+
+.zumi-lp .heat-head2 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.zumi-lp .heat-month { font-size: 0.92rem; font-weight: 700; }
+.zumi-lp .heat-navbtn { width: 27px; height: 27px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--ink-soft); flex-shrink: 0; }
+.zumi-lp .weekday-row2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 6px; }
+.zumi-lp .weekday-row2 span { font-size: 0.6rem; color: var(--ink-soft); text-align: center; }
+.zumi-lp .heat-grid2 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.zumi-lp .heat-cell2 { aspect-ratio: 1; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+.zumi-lp .heat-cell2 span { font-size: 0.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.zumi-lp .legend2 { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; }
+.zumi-lp .legend2 .lbl { font-size: 0.64rem; color: var(--ink-soft); }
+.zumi-lp .legend2 .scale { display: flex; gap: 3px; }
+.zumi-lp .legend2 .sw { width: 11px; height: 11px; border-radius: 3px; }
+.zumi-lp .heat-note2 { font-size: 0.7rem; color: var(--ink-soft); text-align: center; margin-top: 12px; }
+
+.zumi-lp .hist-filters { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
+.zumi-lp .hist-chip { flex-shrink: 0; font-size: 0.72rem; font-weight: 700; color: var(--ink); background: var(--paper); border: 1px solid var(--line); padding: 6px 12px; border-radius: 20px; }
+.zumi-lp .hist-chip.active { color: #fdf6ec; background: var(--vermillion); border-color: var(--vermillion); }
+.zumi-lp .hist-group { display: flex; flex-direction: column; gap: 7px; }
+.zumi-lp .hist-group + .hist-group { margin-top: 14px; }
+.zumi-lp .hist-date2 { font-size: 0.72rem; color: var(--ink-soft); font-weight: 700; }
+.zumi-lp .hist-row2 { background: var(--paper); border: 1px solid var(--line); border-radius: 13px; padding: 10px 12px; display: flex; align-items: center; gap: 9px; }
+.zumi-lp .hist-icon2 { width: 32px; height: 32px; border-radius: 9px; background: var(--paper-sunken); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--ink); }
+.zumi-lp .hist-name2 { font-size: 0.82rem; font-weight: 600; flex: 1; }
+.zumi-lp .hist-time2 { font-size: 0.66rem; color: var(--ink-soft); }
+.zumi-lp .hist-badge2 { font-size: 0.62rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
+.zumi-lp .hist-badge2.done { color: var(--vermillion); background: var(--vermillion-soft); }
+.zumi-lp .hist-badge2.skip { color: var(--ink-soft); background: var(--paper-sunken); }
+
+/* ============ footer cta ============ */
+.zumi-lp .final-cta {
+  text-align: center;
+  padding: clamp(64px, 11vw, 120px) 0;
+  position: relative;
+}
+.zumi-lp .final-cta .seal-big {
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 1.6rem;
+  border-radius: 18px;
+  border: 2px solid var(--vermillion);
+  color: var(--vermillion);
+  font-family: "Yuji Syuku", serif;
+  font-size: 2.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-4deg);
+}
+.zumi-lp .final-cta h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.zumi-lp .final-cta .cta-row { margin-top: 2.2rem; display: flex; justify-content: center; }
+
+.zumi-lp footer {
+  border-top: 1px solid var(--line);
+  padding: 28px 0 40px;
+}
+.zumi-lp .footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+.zumi-lp .footer-links { display: flex; gap: 20px; list-style: none; padding: 0; margin: 0; }
+.zumi-lp .footer-links a { text-decoration: none; }
+.zumi-lp .footer-links a:hover { color: var(--vermillion); }
+
+/* reveal */
+.zumi-lp .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.zumi-lp .reveal.in { opacity: 1; transform: translateY(0); }

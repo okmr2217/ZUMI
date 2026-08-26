@@ -102,9 +102,9 @@ Web Push のみで通知を成立させる。
 
 **フェーズ1（認証+DBスキーマ）完了後に着手可能。** アプリ本体（フェーズ2〜7）には依存しないため、並行して進めてよい。
 
-- [ ] `docs/08-lp-draft.md` を基にLPコンテンツ確定
-- [ ] LP実装（カスタムCSS、ルート`/`に配置、`/app`と単一ドメイン共存）
-- [ ] LPからサインアップ導線
+- [x] `docs/08-lp-draft.md` を基にLPコンテンツ確定（デザインcanvasのコピーで確定。`docs/04-screens.md` 冒頭リンク先と同様に [LPデザインcanvas](https://claude.ai/code/artifact/3baa3ec2-9ca5-4111-968c-297453f86e5d) を参照）
+- [x] LP実装（カスタムCSS、ルート`/`に配置、`/app`と単一ドメイン共存）— `apps/web/app/page.tsx` + `apps/web/app/lp.css`（`.zumi-lp` スコープで shadcn/Tailwind と分離）
+- [x] LPからサインアップ導線（CTAは `/app` へリンク。フェーズ1でサインアップ画面が実装され次第、実URLに差し替える）
 
 ### 横断: PWA対応
 
