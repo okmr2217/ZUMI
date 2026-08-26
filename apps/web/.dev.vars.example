@@ -1,0 +1,7 @@
+# wrangler のローカル開発バインディング用シークレット。
+# `apps/web/.dev.vars` にコピーして値を埋める（.dev.vars は gitignore 済み）。
+# `getCloudflareContext().env` 経由で読むため、.env ではなくこちらを使うこと。
+
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=http://localhost:3000
+RESEND_API_KEY=

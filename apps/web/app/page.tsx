@@ -25,8 +25,7 @@ import {
 
 // フェーズ8: LP。docs/08-lp-draft.md のコピーを、デザインcanvas
 // （https://claude.ai/code/artifact/3baa3ec2-9ca5-4111-968c-297453f86e5d）のレイアウト・配色に沿って実装。
-// 認証（フェーズ1）が未実装のため、CTAは暫定的に /app へのリンクとする。
-const SIGNUP_HREF = "/app";
+const SIGNUP_HREF = "/signup";
 
 type DailyRowState = "done" | "empty" | "lock";
 
@@ -874,7 +873,7 @@ export default function LandingPage() {
           <span>ZUMI（済） — 定期的な「やらなきゃ」を記録するアプリ</span>
           <ul className="footer-links">
             <li>
-              <a href="/app">ログイン</a>
+              <a href="/login">ログイン</a>
             </li>
             <li>
               <a href="/terms">利用規約</a>

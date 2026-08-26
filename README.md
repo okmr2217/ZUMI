@@ -43,11 +43,11 @@
 
 ## 現在の状況
 
-フェーズ0（プロジェクト基盤構築）完了。Turborepo モノレポとして `apps/web`（Next.js）・
-`apps/notify`（Cron Worker）・`packages/db`（Drizzle スキーマ）・`packages/types`
-（共有型）を用意済み。実装は [docs/07-roadmap.md](./docs/07-roadmap.md) のフェーズ順
+フェーズ0（プロジェクト基盤構築）・フェーズ1（認証+DBスキーマ）完了。better-auth に
+よるメール+パスワード認証（メール認証必須・パスワードリセット・退会）を実装済み。
+実装は [docs/07-roadmap.md](./docs/07-roadmap.md) のフェーズ順
 （認証・DB → Duty CRUD → 今日タブ → 通知 → 振り返り → シェア画像 → 設定/オンボーディング → LP）
-に進める。
+に進める。次はフェーズ2（Duty タブ CRUD）。
 
 ## リポジトリ構成
 

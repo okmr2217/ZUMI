@@ -23,3 +23,5 @@ database_id = "3201b980-daf5-4a39-a458-54196917f777"
 # シークレット（VAPID鍵・Resend APIキー等）は `wrangler secret put` で設定し、
 # ここには書かない。
 NEXT_PUBLIC_APP_ENV = "development"
+# better-auth の baseURL（シークレットではないためここで管理する）。
+BETTER_AUTH_URL = "https://zumi.paritto.dev"

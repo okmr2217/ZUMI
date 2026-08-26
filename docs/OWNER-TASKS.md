@@ -15,6 +15,12 @@
 - ✅ **2-補足 Sentry ソースマップアップロード**: `SENTRY_AUTH_TOKEN` / `SENTRY_ORG` / `SENTRY_PROJECT` を GitHub Actions Secrets に登録済み。`deploy.yml` の `zumi-web` ビルドステップ（`next build` 実行箇所）で読み込み、ソースマップをアップロードする
 - ✅ **3-a better-auth の `BETTER_AUTH_SECRET`**: 生成し `zumi-web` に登録済み
 - ✅ **4 Resend**: API Key を `zumi-web` に `RESEND_API_KEY` として登録済み
+- ✅ **3-b better-auth の実設定**: メール+パスワード、メール認証必須、パスワードリセット、
+  退会確認メールを `apps/web/lib/auth.ts` に実装済み。認証系メールは `apps/web/lib/email.ts`
+  経由で Resend から送信する（送信元: `noreply@paritto.dev`。ドメイン認証済み）
+- ✅ **フェーズ1のマイグレーション（`0001_curly_puma.sql`）を本番 D1 に適用**: `wrangler d1
+  migrations apply zumi-db --remote` で適用済み。`user`/`session`/`account`/`verification`
+  のインデックス追加・タイムスタンプ列の `timestamp_ms` 化を反映
 - ✅ **apps/web・apps/notify の初回デプロイ**:
   - https://zumi.paritto.dev （zumi-web、カスタムドメイン。`workers.dev` のプレビューURLは `routes` 設定により無効化される仕様のため使用不可）
   - https://zumi-notify.okumuradaichi2007.workers.dev （zumi-notify、毎分 Cron 動作中）
@@ -29,16 +35,6 @@ Pro プランの課金連携（[06-billing.md](./06-billing.md)）を実装す�
 LINE Developers コンソールでチャネル作成 → `LINE_CHANNEL_ACCESS_TOKEN` /
 `LINE_CHANNEL_SECRET` を取得し、両 Worker に `wrangler secret put` で登録する。
 （[09-implementation-tasks.md](./09-implementation-tasks.md) のフェーズ4節に明記済み）
-
-### better-auth の実設定・再マイグレーション → **フェーズ1で実施**
-
-`packages/db/src/auth-schema.ts` は better-auth の標準スキーマを手書きした
-プレースホルダーで、`BETTER_AUTH_SECRET` の値のみ発行・登録済み。フェーズ1
-（[09-implementation-tasks.md](./09-implementation-tasks.md) フェーズ1節）で
-`apps/web/lib/auth.ts` の実設定（メール送信元、セッション有効期限、メール認証・
-パスワードリセットフローなど）を詰め、`npx @better-auth/cli generate` 相当の
-コマンドで内容を確定させてからマイグレーションを再生成・適用する。オーナー側の
-追加作業は基本的に不要（Resendのメール送信元ドメイン認証が必要になった場合を除く）。
 
 ### 課金（Stripe等）
 
