@@ -17,35 +17,16 @@
 - ✅ **4 Resend**: API Key を `zumi-web` に `RESEND_API_KEY` として登録済み
 - ✅ **3-b better-auth の実設定**: メール+パスワード、メール認証必須、パスワードリセット、
   退会確認メールを `apps/web/lib/auth.ts` に実装済み。認証系メールは `apps/web/lib/email.ts`
-  経由で Resend から送信する（送信元: `noreply@zumi.paritto.dev`）
+  経由で Resend から送信する（送信元: `noreply@paritto.dev`。ドメイン認証済み）
+- ✅ **フェーズ1のマイグレーション（`0001_curly_puma.sql`）を本番 D1 に適用**: `wrangler d1
+  migrations apply zumi-db --remote` で適用済み。`user`/`session`/`account`/`verification`
+  のインデックス追加・タイムスタンプ列の `timestamp_ms` 化を反映
 - ✅ **apps/web・apps/notify の初回デプロイ**:
   - https://zumi.paritto.dev （zumi-web、カスタムドメイン。`workers.dev` のプレビューURLは `routes` 設定により無効化される仕様のため使用不可）
   - https://zumi-notify.okumuradaichi2007.workers.dev （zumi-notify、毎分 Cron 動作中）
 - ✅ **GitHub Actions からの自動デプロイ**: `.github/workflows/deploy.yml` を追加し、`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` を GitHub Actions Secrets に登録済み。`main` への push（または手動実行）で `zumi-notify`・`zumi-web` が自動デプロイされることを確認済み
 
 ## 未完了（着手時期が決まっているもの）
-
-### フェーズ1のマイグレーション（`0001_curly_puma.sql`）を本番 D1 に適用 → **次回デプロイ前に実施**
-
-better-auth の実設定（メール認証必須・パスワードリセット・退会確認メール）確定に伴い、
-`user`/`session`/`account`/`verification` テーブルにインデックス追加・タイムスタンプ列の
-`timestamp_ms` 化を行うマイグレーションを生成済み（`packages/db/migrations/0001_curly_puma.sql`）。
-ローカル D1 には適用・動作確認済みだが、本番 D1 への適用はアカウント操作を伴うため
-オーナー側で実施する。
-
-```bash
-wrangler d1 migrations apply zumi-db --remote
-```
-
-対象テーブルは better-auth 管理下でまだ実データ（サインアップ）が無い前提のため、
-既存データの移行は発生しない想定。
-
-### Resend の送信元ドメイン認証（`zumi.paritto.dev`） → **次回デプロイ前に実施**
-
-認証系メール（確認メール・パスワードリセット・退会確認）は `noreply@zumi.paritto.dev`
-から送信する実装になっている。Resend 側でこのドメインの送信元認証（DNSレコード設定）が
-済んでいない場合、メール送信が失敗する。Resend ダッシュボードでドメインを追加し、
-指示される DNS レコード（SPF/DKIM等）を登録する。
 
 ### LINE Messaging API 連携 → **MVP以降（v1.1、Proプラン実装時）に実施**
 

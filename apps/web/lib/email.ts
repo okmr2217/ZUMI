@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-const FROM_ADDRESS = "ZUMI（済） <noreply@zumi.paritto.dev>";
+const FROM_ADDRESS = "ZUMI（済） <noreply@paritto.dev>";
 
 /**
  * Resend 経由でメールを送信する。認証フロー（確認メール・パスワードリセット・
