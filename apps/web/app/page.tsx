@@ -456,7 +456,9 @@ export default function LandingPage() {
             <div>
               <span className="eyebrow">定期的な「やらなきゃ」の記録アプリ</span>
               <h1>
-                定期的な「やらなきゃ」を、
+                定期的な
+                <br />
+                「やらなきゃ」を、
                 <br />
                 可視化しよう。
               </h1>
