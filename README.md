@@ -43,4 +43,55 @@
 
 ## 現在の状況
 
-現時点ではコードは未着手で、`docs/` 配下の要件定義のみが存在します。実装は [docs/07-roadmap.md](./docs/07-roadmap.md) のフェーズ順（認証・DB → Duty CRUD → 今日タブ → 通知 → 振り返り → シェア画像 → 設定/オンボーディング → LP）に進める予定です。
+フェーズ0（プロジェクト基盤構築）完了。Turborepo モノレポとして `apps/web`（Next.js）・
+`apps/notify`（Cron Worker）・`packages/db`（Drizzle スキーマ）・`packages/types`
+（共有型）を用意済み。実装は [docs/07-roadmap.md](./docs/07-roadmap.md) のフェーズ順
+（認証・DB → Duty CRUD → 今日タブ → 通知 → 振り返り → シェア画像 → 設定/オンボーディング → LP）
+に進める。
+
+## リポジトリ構成
+
+```
+/
+├── apps/
+│   ├── web/      # 本体（LP + アプリ + API） Next.js / Cloudflare Workers
+│   └── notify/   # 通知配信（Cron Trigger Worker）
+├── packages/
+│   ├── db/       # Drizzle スキーマ・マイグレーション
+│   └── types/    # 共有型定義（ScheduleConfig など）
+└── docs/         # 要件定義
+```
+
+## 開発の始め方
+
+```bash
+npm install
+
+# 開発サーバー（apps/web, apps/notify を並行起動）
+npm run dev
+
+# Lint / 型チェック / ビルド（Turborepo 経由で全ワークスペースに実行）
+npm run lint
+npm run typecheck
+npm run build
+```
+
+### ローカル D1
+
+```bash
+# マイグレーション SQL 生成（packages/db/src/schema.ts を変更したら実行）
+npm run db:generate
+
+# ローカル D1（Miniflare）にマイグレーション適用
+npm run db:migrate:local
+
+# 開発用シードデータ投入
+npm run db:seed
+```
+
+詳細は [packages/db/README.md](./packages/db/README.md) を参照。
+
+## オーナーが手動で行う必要があるタスク
+
+Cloudflare/Sentry/GitHub 側のアカウント操作が必要な項目は
+[docs/OWNER-TASKS.md](./docs/OWNER-TASKS.md) にまとめてあります。

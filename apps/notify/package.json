@@ -1,0 +1,29 @@
+{
+  "name": "@zumi/notify",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc --noEmit",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@zumi/db": "*",
+    "@zumi/types": "*",
+    "@sentry/cloudflare": "^8.47.0",
+    "drizzle-orm": "^0.38.3",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "@eslint/js": "^9.18.0",
+    "@types/web-push": "^3.6.4",
+    "eslint": "^9.18.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.19.1",
+    "wrangler": "^3.101.0"
+  }
+}

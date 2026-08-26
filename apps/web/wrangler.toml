@@ -1,0 +1,26 @@
+# apps/web 本体（LP + アプリ + API）の Cloudflare Workers 設定。
+# @opennextjs/cloudflare によって `.open-next/worker.js` にビルドされたものを
+# デプロイする。database_id / KV 等はオーナーによる実リソース作成後に反映する。
+name = "zumi-web"
+main = ".open-next/worker.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# LP はルート `/`、アプリ本体は `/app` 配下（docs/05-tech-stack.md 参照）。
+# 独自ドメインは zumi.paritto.dev をダッシュボードから紐付ける。
+# routes = [{ pattern = "zumi.paritto.dev", custom_domain = true }]
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zumi-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[vars]
+# Sentry 等の非シークレットな設定値はここに追加する。
+# シークレット（VAPID鍵・Resend APIキー等）は `wrangler secret put` で設定し、
+# ここには書かない。
+NEXT_PUBLIC_APP_ENV = "development"
