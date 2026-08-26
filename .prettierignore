@@ -1,0 +1,9 @@
+node_modules
+.next
+.turbo
+.wrangler
+dist
+out
+.open-next
+pnpm-lock.yaml
+package-lock.json

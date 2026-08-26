@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+.wrangler/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.vercel/
+coverage/
+.open-next/
+worker-configuration.d.ts
