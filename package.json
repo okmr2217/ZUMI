@@ -1,0 +1,29 @@
+{
+  "name": "zumi",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "npm@10.9.7",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "npm run generate --workspace=@zumi/db",
+    "db:migrate:local": "npm run migrate:local --workspace=@zumi/db",
+    "db:seed": "npm run seed --workspace=@zumi/db"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

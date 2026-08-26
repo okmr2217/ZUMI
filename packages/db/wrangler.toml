@@ -1,0 +1,12 @@
+# packages/db 単体からローカル D1 (`wrangler d1 migrations apply --local` /
+# `wrangler d1 execute --local`) を操作するための最小構成。
+# apps/web・apps/notify の wrangler.toml と同じ database_name / database_id を
+# 指すこと（実体作成後に反映。手順は README を参照）。
+name = "zumi-db-local-tools"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zumi-db"
+database_id = "3201b980-daf5-4a39-a458-54196917f777"
+migrations_dir = "./migrations"

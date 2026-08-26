@@ -1,0 +1,20 @@
+# 通知配信専用 Worker（Cron Trigger）。ドメイン不要（docs/05-tech-stack.md）。
+# デバッグ用には notify-zumi.<account>.workers.dev を使う。
+name = "zumi-notify"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 毎分実行し、user_settings の timezone + notify_at を現在時刻と突き合わせて
+# 該当ユーザーのみ配信する（docs/05-tech-stack.md の通知配信設計）。
+[triggers]
+crons = ["* * * * *"]
+
+# apps/web と同じ database_id を指すこと。
+[[d1_databases]]
+binding = "DB"
+database_name = "zumi-db"
+database_id = "3201b980-daf5-4a39-a458-54196917f777"
+
+[vars]
+NEXT_PUBLIC_APP_ENV = "development"

@@ -1,0 +1,10 @@
+{
+  "name": "ZUMI（済）",
+  "short_name": "ZUMI",
+  "description": "定期的にやってくる活動をリマインド・記録する",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1c1917",
+  "icons": []
+}
