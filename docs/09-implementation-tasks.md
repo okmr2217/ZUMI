@@ -6,21 +6,28 @@
 
 `07-roadmap.md` のフェーズ構成を実装タスクレベルまで分解したもの。フェーズ0（基盤構築）・PWA対応・QA/リリース準備は `07-roadmap.md` の8フェーズには明記されていないが、実装上必須のため本ファイルで独立して洗い出す。
 
-### フェーズ0: プロジェクト基盤構築
+### フェーズ0: プロジェクト基盤構築 ✅ 完了
 
-- [ ] Turborepo モノレポ初期化（`package.json` workspaces, `turbo.json`）
-- [ ] `apps/web`（Next.js App Router + TypeScript）雛形作成
-- [ ] `apps/notify`（Cron Trigger Worker）雛形作成
-- [ ] `packages/db`（Drizzle スキーマ置き場）、`packages/types`（共有型）雛形作成
-- [ ] `@opennextjs/cloudflare` アダプタ導入、`wrangler.toml`（web/notify 双方）設定
-- [ ] Cloudflare D1 データベース作成、`database_id` を両 Worker の `wrangler.toml` に設定
-- [ ] Tailwind CSS + shadcn/ui セットアップ
-- [ ] ESLint / Prettier / TypeScript strict 設定、Turborepo 経由のスクリプト整備（lint/build/dev）
-- [ ] Sentry 初期設定（web/notify 双方）
-- [ ] CI（GitHub Actions）: lint/typecheck/build のパイプライン
-- [ ] ローカル開発用 D1（`wrangler d1` ローカルモード）とシードスクリプト
+- [x] Turborepo モノレポ初期化（`package.json` workspaces, `turbo.json`）
+- [x] `apps/web`（Next.js App Router + TypeScript）雛形作成
+- [x] `apps/notify`（Cron Trigger Worker）雛形作成
+- [x] `packages/db`（Drizzle スキーマ置き場）、`packages/types`（共有型）雛形作成
+- [x] `@opennextjs/cloudflare` アダプタ導入、`wrangler.toml`（web/notify 双方）設定
+- [x] Cloudflare D1 データベース作成、`database_id` を両 Worker の `wrangler.toml` に設定
+- [x] Tailwind CSS + shadcn/ui セットアップ
+- [x] ESLint / Prettier / TypeScript strict 設定、Turborepo 経由のスクリプト整備（lint/build/dev）
+- [x] Sentry 初期設定（web/notify 双方。DSN・ソースマップアップロード用トークンまで設定済み）
+- [x] CI（GitHub Actions）: lint/typecheck/build のパイプライン
+- [x] CD（GitHub Actions）: `main` push / 手動実行で `zumi-web`・`zumi-notify` を Cloudflare Workers へ自動デプロイ
+- [ ] ローカル開発用 D1（`wrangler d1` ローカルモード）とシードスクリプトの動作確認（スクリプト自体は用意済み、実行確認は未実施）
 
-### フェーズ1: 認証 + DBスキーマ
+zumi-web（https://zumi.paritto.dev）・zumi-notify は本番 Cloudflare 環境に実デプロイ済み。詳細・残タスクは [OWNER-TASKS.md](./OWNER-TASKS.md) を参照。
+
+### フェーズ1: 認証 + DBスキーマ（次フェーズで着手）
+
+better-auth の実設定はこのフェーズで行う。`packages/db/src/auth-schema.ts` は
+フェーズ0時点では better-auth 標準スキーマを手書きしたプレースホルダーであり、
+このフェーズで実設定確定後に再生成・再マイグレーションする。
 
 - [ ] `packages/db/schema.ts`: `userSettings` / `pushSubscriptions` / `duties` / `logs` テーブル定義
 - [ ] better-auth 導入、Drizzle アダプタ設定（`user`/`session`/`account`/`verification`）
@@ -63,6 +70,10 @@
 - [ ] 週次サマリー通知（曜日・時刻設定を尊重）
 - [ ] 期日不確定型の通知組み込み判定をフェーズ3の共有ロジックで実装（web/notify不整合防止）
 - [ ] 通知設定UI（許可ボタン、朝/夜/週次のON/OFF・時刻、タイムゾーン）
+
+**LINE Messaging API連携はこのフェーズ・MVPには含めない。** Pro プランの目玉機能として
+課金連携（v1.1以降、[06-billing.md](./06-billing.md) 参照）とあわせて実装する。MVPでは
+Web Push のみで通知を成立させる。
 
 ### フェーズ5: 振り返りタブ
 
