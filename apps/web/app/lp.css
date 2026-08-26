@@ -210,17 +210,17 @@
 
 /* ============ hero ============ */
 .zumi-lp .hero {
-  padding: clamp(56px, 10vw, 108px) 0 clamp(48px, 8vw, 88px);
+  padding: clamp(36px, 6vw, 66px) 0;
   display: grid;
   grid-template-columns: 0.95fr 1.05fr;
-  gap: clamp(32px, 6vw, 64px);
+  gap: clamp(32px, 5vw, 64px);
   align-items: center;
 }
 .zumi-lp .hero > * { min-width: 0; }
 @media (max-width: 860px) { .zumi-lp .hero { grid-template-columns: 1fr; } }
 
 .zumi-lp .hero h1 {
-  font-size: clamp(2.1rem, 3.4vw, 2.5rem);
+  font-size: clamp(2.1rem, 3.6vw, 3.0rem);
   line-height: 1.35;
 }
 .zumi-lp .hero .sub {
@@ -329,7 +329,7 @@
 .zumi-lp .app-tab.active { color: var(--vermillion); font-weight: 700; }
 
 /* ============ sections ============ */
-.zumi-lp section { padding: clamp(56px, 9vw, 100px) 0; }
+.zumi-lp section { padding: clamp(48px, 8vw, 88px) 0; }
 .zumi-lp .rule { border-top: 1px solid var(--line); }
 
 .zumi-lp .split {
@@ -482,7 +482,7 @@
 .zumi-lp .since-quote { margin-top: 16px; font-size: 0.9rem; color: var(--ink-soft); border-left: 2px solid var(--vermillion); padding-left: 12px; }
 
 /* ============ review (weekly / heatmap / history) ============ */
-.zumi-lp .review-block + .review-block { margin-top: clamp(48px, 7vw, 76px); }
+.zumi-lp .review-block + .review-block { margin-top: clamp(28px, 4vw, 40px); }
 .zumi-lp .review-block .subrule { margin-bottom: clamp(28px, 4vw, 40px); }
 
 .zumi-lp .summary-visual, .zumi-lp .heat-visual, .zumi-lp .hist-visual { padding: 24px 22px 18px; }
