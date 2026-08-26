@@ -20,7 +20,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 | `docs/01-glossary.md` | 用語定義（Duty・ログ・催促 など） |
 | `docs/02-notifications.md` | 通知要件（朝夜2通・週次サマリー） |
 | `docs/03-duty-log-review-account.md` | Duty管理・記録（Log）・振り返り/シェア・アカウント |
-| `docs/04-screens.md` | 画面構成（今日／振り返り／Duty の3タブ） |
+| `docs/04-screens.md` | 画面構成（今日／振り返り／Duty の3タブ）。冒頭に画面モックのArtifact（Design canvas）へのリンクとアートボード対応表あり |
 | `docs/05-tech-stack.md` | 技術スタック・インフラ・DB設計（Drizzleスキーマ）・通知配信設計・リポジトリ構成 |
 | `docs/06-billing.md` | 課金（無料 / Pro プラン） |
 | `docs/07-roadmap.md` | 実装優先順位（MVPスコープ・フェーズ） |
@@ -28,6 +28,8 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 | `docs/09-implementation-tasks.md` | MVP実装タスク一覧（フェーズ別チェックリスト） |
 
 コードを書く前に、関連する docs ファイルの「なぜそう設計したか」の記述（各節の理由書き）を必ず踏まえること。設計判断には理由が明記されていることが多く、それを無視した実装は要件と矛盾しやすい。
+
+画面（UI）を実装する際は、`docs/04-screens.md` 冒頭の画面モックArtifact（Design canvas、URL: https://claude.ai/code/artifact/1fa990f3-52f8-4f6b-8cee-805f5409f512）を Artifact ツールの `action: "read"` で参照し、レイアウト・余白・配色・コンポーネント構成の実装リファレンスとすること。要件文書とモックの見た目が食い違う場合、機能要件は要件文書を優先し、UI構造・スタイルの解釈はモックを優先する。
 
 ## 技術スタック（予定）
 

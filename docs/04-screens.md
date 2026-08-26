@@ -2,6 +2,31 @@
 
 > 関連: [Duty管理・記録・振り返り・アカウント](./03-duty-log-review-account.md)
 
+## 画面モック（Artifact）
+
+各画面の実装時は、以下の Design canvas アーティファクト（Claude Code の Artifact ツールで `action: "read"` により参照可能）を必ず確認し、レイアウト・余白・配色・コンポーネント構成の実装リファレンスとすること。要件（本ファイル・`03-duty-log-review-account.md` 等）と齟齬がある場合は要件側を優先し、見た目・UI構造の解釈にはモックを優先する。
+
+- URL: https://claude.ai/code/artifact/1fa990f3-52f8-4f6b-8cee-805f5409f512
+- タイトル: ZUMI 画面モックアップ
+
+アートボード（`.dc.html`）と本ドキュメントの節・実装フェーズの対応:
+
+| アートボード | 内容 | 対応節 | 実装フェーズ |
+|---|---|---|---|
+| `SignUp.dc.html` | サインアップ | ([03](./03-duty-log-review-account.md)) | フェーズ1 |
+| `Login.dc.html` | ログイン | ([03](./03-duty-log-review-account.md)) | フェーズ1 |
+| `Onboarding.dc.html` | オンボーディング（テンプレート選択） | — | フェーズ7 |
+| `Main.dc.html` | 今日タブ（当日・押印・進捗バー・日付ナビ） | [4-1](#4-1-今日) | フェーズ3 |
+| `MainPast.dc.html` | 今日タブ（過去日を開いた状態） | [4-1](#4-1-今日) | フェーズ3 |
+| `MainFuture.dc.html` | 今日タブ（未来日を開いた状態） | [4-1](#4-1-今日) | フェーズ3 |
+| `ReviewSummary.dc.html` | 振り返り／週次サマリー | [4-2](#4-2-振り返り) | フェーズ5 |
+| `ReviewHeatmap.dc.html` | 振り返り／月次ヒートマップ | [4-2](#4-2-振り返り) | フェーズ5（ヒートマップ自体はMVP対象外） |
+| `ReviewHistory.dc.html` | 振り返り／履歴 | [4-2](#4-2-振り返り) | フェーズ5 |
+| `DutyList.dc.html` | Dutyタブ／一覧・並び替え | [4-3](#4-3-duty) | フェーズ2 |
+| `DutyCreate.dc.html` | Dutyタブ／追加モーダル | [4-3](#4-3-duty) | フェーズ2 |
+| `DutyEdit.dc.html` | Dutyタブ／編集モーダル | [4-3](#4-3-duty) | フェーズ2 |
+| `Settings.dc.html` | 設定モーダル | [4-4](#4-4-設定モーダル) | フェーズ7 |
+
 ## 4. 画面構成
 
 ```
