@@ -18,5 +18,9 @@ export default withSentryConfig(nextConfig, {
   authToken: process.env.SENTRY_AUTH_TOKEN,
   sourcemaps: {
     disable: !process.env.SENTRY_AUTH_TOKEN,
+    // Sentryへアップロード後、ビルド成果物からソースマップを削除する。
+    // 削除しないと .open-next/assets 経由で本番サイトから .js.map が
+    // 誰でも閲覧できる状態でホスティングされてしまう。
+    deleteSourcemapsAfterUpload: true,
   },
 });
