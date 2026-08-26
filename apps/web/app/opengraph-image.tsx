@@ -1,6 +1,12 @@
 import { ImageResponse } from "next/og";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { ZKG_400_B64, ZKG_700_B64, ZKG_900_B64, YUJI_SYUKU_B64 } from "./_og-fonts/data";
+
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
 
 export const alt = "ZUMI（済） — 定期的な「やらなきゃ」を、可視化しよう。";
 export const size = { width: 1200, height: 630 };
@@ -227,13 +233,10 @@ function TabItem({ label, active }: { label: string; active?: boolean }) {
 }
 
 export default async function Image() {
-  const fontsDir = join(process.cwd(), "app/_og-fonts");
-  const [zkg400, zkg700, zkg900, yuji] = await Promise.all([
-    readFile(join(fontsDir, "zkg-400.ttf")),
-    readFile(join(fontsDir, "zkg-700.ttf")),
-    readFile(join(fontsDir, "zkg-900.ttf")),
-    readFile(join(fontsDir, "yuji-syuku.ttf")),
-  ]);
+  const zkg400 = base64ToArrayBuffer(ZKG_400_B64);
+  const zkg700 = base64ToArrayBuffer(ZKG_700_B64);
+  const zkg900 = base64ToArrayBuffer(ZKG_900_B64);
+  const yuji = base64ToArrayBuffer(YUJI_SYUKU_B64);
 
   return new ImageResponse(
     (
