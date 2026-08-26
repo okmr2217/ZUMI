@@ -23,22 +23,23 @@
 
 zumi-web（https://zumi.paritto.dev）・zumi-notify は本番 Cloudflare 環境に実デプロイ済み。詳細・残タスクは [OWNER-TASKS.md](./OWNER-TASKS.md) を参照。
 
-### フェーズ1: 認証 + DBスキーマ（次フェーズで着手）
+### フェーズ1: 認証 + DBスキーマ ✅ 完了
 
-better-auth の実設定はこのフェーズで行う。`packages/db/src/auth-schema.ts` は
-フェーズ0時点では better-auth 標準スキーマを手書きしたプレースホルダーであり、
-このフェーズで実設定確定後に再生成・再マイグレーションする。
+better-auth の実設定（メール+パスワード、メール認証必須、パスワードリセット、
+退会確認メール）を確定し、`npx @better-auth/cli generate` の出力を
+`packages/db/src/auth-schema.ts` に反映、`drizzle-kit generate` で
+マイグレーション（`0001_curly_puma.sql`）を生成してローカル D1 へ適用済み。
 
-- [ ] `packages/db/schema.ts`: `userSettings` / `pushSubscriptions` / `duties` / `logs` テーブル定義
-- [ ] better-auth 導入、Drizzle アダプタ設定（`user`/`session`/`account`/`verification`）
-- [ ] `drizzle-kit generate` → `wrangler d1 migrations apply` のマイグレーションフロー確立
-- [ ] メール+パスワードのサインアップ/ログイン/ログアウト API・画面
-- [ ] メール認証（サインアップ時の確認メール送信・未認証時の利用制限）
-- [ ] パスワードリセット（リセットメール送信 → トークン検証 → 再設定画面）
-- [ ] 認証系メール送信基盤（Resend等。通知用メールとは別に、認証フローに最低限必要な送信経路を先に用意する）
-- [ ] 退会機能（アカウント削除、関連データのカスケード削除確認）
-- [ ] 認証ミドルウェア（`/app` 配下の保護）
-- [ ] 利用規約・プライバシーポリシーへの同意チェックボックス（サインアップ時）
+- [x] `packages/db/schema.ts`: `userSettings` / `pushSubscriptions` / `duties` / `logs` テーブル定義
+- [x] better-auth 導入、Drizzle アダプタ設定（`user`/`session`/`account`/`verification`）
+- [x] `drizzle-kit generate` → `wrangler d1 migrations apply` のマイグレーションフロー確立（本番適用はオーナータスク、[OWNER-TASKS.md](./OWNER-TASKS.md) 参照）
+- [x] メール+パスワードのサインアップ/ログイン/ログアウト API・画面
+- [x] メール認証（サインアップ時の確認メール送信・未認証時の利用制限）
+- [x] パスワードリセット（リセットメール送信 → トークン検証 → 再設定画面）
+- [x] 認証系メール送信基盤（Resend。`apps/web/lib/email.ts`）
+- [x] 退会機能（アカウント削除、関連データのカスケード削除確認。確認メール経由）
+- [x] 認証ミドルウェア（`/app` 配下の保護。`apps/web/middleware.ts`）
+- [x] 利用規約・プライバシーポリシーへの同意チェックボックス（サインアップ時。`/terms` `/privacy` は本文未確定のプレースホルダー）
 
 ### フェーズ2: Duty タブ（CRUD）
 

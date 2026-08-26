@@ -16,12 +16,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const now = Math.floor(Date.now() / 1000);
+const nowMs = Date.now();
 const userId = randomUUID();
 const dutyId = randomUUID();
 
 const sql = `
 INSERT INTO user (id, name, email, email_verified, created_at, updated_at)
-VALUES ('${userId}', 'Seed User', 'seed@example.com', 1, ${now}, ${now});
+VALUES ('${userId}', 'Seed User', 'seed@example.com', 1, ${nowMs}, ${nowMs});
 
 INSERT INTO user_settings (id, user_id, timezone)
 VALUES ('${randomUUID()}', '${userId}', 'Asia/Tokyo');

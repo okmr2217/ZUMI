@@ -1,4 +1,6 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function LandingPage() {
   return (
@@ -7,7 +9,14 @@ export default function LandingPage() {
       <p className="text-muted-foreground">
         定期的にやってくる活動をリマインド・記録する。完了操作は「済」の朱印をワンタップ。
       </p>
-      <Button>はじめる</Button>
+      <div className="flex gap-3">
+        <Link href="/signup" className={cn(buttonVariants())}>
+          はじめる
+        </Link>
+        <Link href="/login" className={cn(buttonVariants({ variant: "outline" }))}>
+          ログイン
+        </Link>
+      </div>
     </main>
   );
 }
