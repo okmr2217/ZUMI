@@ -8,5 +8,5 @@ compatibility_date = "2025-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "zumi-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "3201b980-daf5-4a39-a458-54196917f777"
 migrations_dir = "./migrations"

@@ -11,7 +11,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...compat.extends("next/core-web-vitals"),
   {
-    ignores: [".next/**", ".open-next/**", ".wrangler/**", "node_modules/**"],
+    ignores: [".next/**", ".open-next/**", ".wrangler/**", "node_modules/**", "next-env.d.ts"],
   },
   {
     rules: {

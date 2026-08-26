@@ -14,7 +14,7 @@ crons = ["* * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "zumi-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "3201b980-daf5-4a39-a458-54196917f777"
 
 [vars]
 NEXT_PUBLIC_APP_ENV = "development"

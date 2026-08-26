@@ -1,134 +1,79 @@
-# オーナーが手動で行う必要があるタスク（フェーズ0完了時点）
+# オーナーが手動で行う必要があるタスク
 
-フェーズ0ではコード側の雛形のみ用意した。以下はアカウント権限・APIキーが
-必要でこの場では実行していない作業。実装が進むにつれて増減するため、
-フェーズが進むたびに更新すること。
+フェーズ0のインフラ構築状況。実装が進むにつれて増減するため、フェーズが
+進むたびに更新すること。
 
-## 1. Cloudflare
+## 完了済み
 
-### 1-1. D1 データベースの作成
+- ✅ **1-1 D1データベース作成**: `zumi-db`（database_id: `3201b980-daf5-4a39-a458-54196917f777`）を作成し、
+  `apps/web` / `apps/notify` / `packages/db` の各 `wrangler.toml` に反映済み
+- ✅ **1-2 マイグレーション適用**: 初期マイグレーション（`packages/db/migrations/0000_bouncy_roxanne_simpson.sql`）を本番 D1 に適用済み
+- ✅ **1-3 Cloudflare API Token / Account ID**: 環境変数 `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` として設定済み（account: `okmr2217`）
+- ✅ **1-4 カスタムドメイン**: `zumi-web` Worker をデプロイし、`zumi.paritto.dev` にカスタムドメインとして紐付け済み（`apps/web/wrangler.toml` の `routes` で管理）。動作確認済み（200 OK）
+- ✅ **1-5 VAPID鍵**: 生成し、`zumi-web`・`zumi-notify` 両方に `wrangler secret put` で登録済み
+- ✅ **2 Sentry**: `zumi-web` / `zumi-notify` の DSN を取得し、両 Worker に `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` として登録済み。`zumi-web` の本番ビルドは DSN を埋め込んだ状態でデプロイ済み
+- ✅ **3 better-auth**: `BETTER_AUTH_SECRET` を生成し `zumi-web` に登録済み（better-auth 自体の実設定はフェーズ1で行う）
+- ✅ **4 Resend**: API Key を `zumi-web` に `RESEND_API_KEY` として登録済み
+- ✅ **apps/web・apps/notify の初回デプロイ**:
+  - https://zumi.paritto.dev （zumi-web、カスタムドメイン。`workers.dev` のプレビューURLは `routes` 設定により無効化される仕様のため使用不可）
+  - https://zumi-notify.okumuradaichi2007.workers.dev （zumi-notify、毎分 Cron 動作中）
 
-```bash
-npx wrangler login
-npx wrangler d1 create zumi-db
-```
+## 未完了
 
-出力される `database_id` を以下3ファイルの `REPLACE_WITH_D1_DATABASE_ID` に反映する。
+### LINE Messaging API（Pro機能・後回し可）
 
-- `apps/web/wrangler.toml`
-- `apps/notify/wrangler.toml`
-- `packages/db/wrangler.toml`
+フェーズ4（通知）でも MVP は Web Push のみのため急ぎではない。必要になったら
+LINE Developers コンソールでチャネル作成 → `LINE_CHANNEL_ACCESS_TOKEN` /
+`LINE_CHANNEL_SECRET` を取得し、`wrangler secret put` で登録する。
 
-3ファイルとも同じ `database_id` を指す必要がある（`docs/05-tech-stack.md` の設計）。
+### Sentry ソースマップアップロード（任意）
 
-### 1-2. マイグレーションの適用
+現状 `SENTRY_AUTH_TOKEN` は未設定のため、ビルド時のソースマップアップロードは
+無効（`apps/web/next.config.ts` の `sourcemaps.disable` 参照）。有効化したい場合:
 
-```bash
-npm run db:generate                 # migrations/ に SQL を生成
-npx wrangler d1 migrations apply zumi-db --remote   # 本番 D1 に適用
-```
+1. Sentry の `Settings > Auth Tokens` で Auth Token を発行
+2. `SENTRY_AUTH_TOKEN` / `SENTRY_ORG=parittodev` / `SENTRY_PROJECT=zumi-web` を
+   ローカル `.env.local` に設定してビルドするか、デプロイCIを追加する場合は
+   GitHub Secrets に登録する
 
-better-auth のテーブル（`user`/`session`/`account`/`verification`）は
-`packages/db/src/auth-schema.ts` のプレースホルダーを使っているため、
-フェーズ1で better-auth の実設定確定後に `npx @better-auth/cli generate`
-相当のコマンドで内容を確定させ、再度マイグレーションを生成すること。
+### GitHub Actions からの自動デプロイ
 
-### 1-3. アカウントID・APIトークンの取得（CI/CD用）
+現在の `.github/workflows/ci.yml` は lint/typecheck/build のみで、Cloudflareへの
+自動デプロイは行っていない（今回はこの場から手動で `wrangler deploy` した）。
+自動デプロイを追加したい場合は、リポジトリの `Settings > Secrets and variables
+> Actions` に以下を登録すること。
 
-GitHub Actions からデプロイする場合に必要（現時点の CI は lint/typecheck/build
-のみで、デプロイジョブは未追加）。
-
-- **Account ID**: Cloudflare ダッシュボード右サイドバーに表示される
-- **API Token**: `My Profile > API Tokens > Create Token` で
-  「Edit Cloudflare Workers」テンプレートを使用して発行
-
-デプロイワークフローを追加する際に GitHub Secrets へ以下を登録する。
-
-| Secret名 | 値 | 取得元 |
-|---|---|---|
-| `CLOUDFLARE_API_TOKEN` | 上記で発行したトークン | Cloudflare ダッシュボード |
-| `CLOUDFLARE_ACCOUNT_ID` | Account ID | Cloudflare ダッシュボード |
-
-### 1-4. カスタムドメイン設定
-
-`docs/05-tech-stack.md` の想定ドメイン構成:
-
-| 用途 | ドメイン |
+| Secret名 | 値 |
 |---|---|
-| 本体（LP + アプリ） | `zumi.paritto.dev` |
-| 通知 Worker | 不要（デバッグ用に `notify-zumi.<account>.workers.dev`） |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare API Token |
+| `CLOUDFLARE_ACCOUNT_ID` | `55b4467be01cbb1f5104758b2a728da9` |
 
-手順:
+デプロイ時、`apps/web` は `NEXT_PUBLIC_SENTRY_DSN` を**ビルド時の環境変数**として
+渡す必要がある点に注意（Next.js の `NEXT_PUBLIC_*` はビルド時にクライアント
+バンドルへ埋め込まれるため、Workers の実行時シークレットだけでは反映されない）。
 
-1. `paritto.dev` が Cloudflare でゾーン管理されていることを確認
-2. `zumi-web` Worker（`apps/web`）に対して
-   Cloudflare ダッシュボード → Workers & Pages → zumi-web → Settings →
-   Domains & Routes から `zumi.paritto.dev` をカスタムドメインとして追加
-   （`apps/web/wrangler.toml` の `routes` コメントアウトを有効化してもよい）
-3. DNS レコードは Cloudflare が自動作成する（ゾーンが Cloudflare 管理下の場合）
+### better-auth の実設定・再マイグレーション（フェーズ1）
 
-### 1-5. Web Push 用 VAPID 鍵の生成
+`packages/db/src/auth-schema.ts` は better-auth の標準スキーマを手書きした
+プレースホルダー。フェーズ1で `apps/web/lib/auth.ts` の実設定（メール送信元、
+セッション有効期限など）を詰めたら、`npx @better-auth/cli generate` 相当の
+コマンドで内容を確定させ、マイグレーションを再生成・適用すること。
 
-```bash
-npx web-push generate-vapid-keys
-```
+### 課金（Stripe等）
 
-生成した鍵は以下に設定する（フェーズ4で使用）。
+MVPでは決済連携を実装しない前提のため、本フェーズ・次フェーズでは対応不要。
+無料プランの制約（Duty5件・履歴3ヶ月）はコード側のロジックのみで実装する。
+決済導線が必要になった時点（v1.1以降）で Stripe アカウント作成・Webhook設定
+などが必要になる。
 
-- `apps/web` / `apps/notify` それぞれで `wrangler secret put VAPID_PUBLIC_KEY`
-  / `wrangler secret put VAPID_PRIVATE_KEY`
-- ローカル開発では `.dev.vars`（gitignore 対象）に記載
+## 参考: 各リソースの識別子
 
-## 2. Sentry
-
-1. https://sentry.io でプロジェクトを2つ作成（`zumi-web` / `zumi-notify` など、
-   Next.js 用と Cloudflare Workers 用）
-2. 発行された DSN を以下に設定する
-   - ローカル: `apps/web/.env.local`（`.env.example` をコピー）の
-     `NEXT_PUBLIC_SENTRY_DSN` / `SENTRY_DSN`
-   - 本番: `wrangler secret put SENTRY_DSN`（Workers 側）、
-     Cloudflare Pages/Workers の環境変数として `NEXT_PUBLIC_SENTRY_DSN` を設定
-3. ソースマップアップロードを有効にする場合は Sentry の
-   `Settings > Auth Tokens` で `SENTRY_AUTH_TOKEN` を発行し、
-   GitHub Secrets とローカル `.env.local` の両方に設定
-   （未設定でもビルド自体は通る。`apps/web/next.config.ts` 参照）
-
-| Secret名 | 値 | 取得元 |
-|---|---|---|
-| `SENTRY_AUTH_TOKEN` | Auth Token | Sentry ダッシュボード |
-| `SENTRY_ORG` | Organization slug | Sentry ダッシュボード |
-| `SENTRY_PROJECT` | Project slug | Sentry ダッシュボード |
-
-## 3. better-auth
-
-- `BETTER_AUTH_SECRET`: `npx @better-auth/cli secret` 等で生成したランダム値。
-  `wrangler secret put BETTER_AUTH_SECRET` で登録し、ローカルは `.env.local` へ。
-- メール認証・パスワードリセットメールの送信元は Resend を使う想定
-  （下記4章）。better-auth 側の設定は未着手（フェーズ1）。
-
-## 4. メール送信（Resend）／LINE Messaging API（Pro機能・後回し可）
-
-フェーズ4（通知）実装時に必要。MVPスコープではメールフォールバックは
-v1.1以降のため、Web Push のみで先に進めてよい。
-
-- Resend: https://resend.com でアカウント作成 → API Key 発行 →
-  `RESEND_API_KEY` として登録
-- LINE Messaging API: Pro機能のため後回し可。LINE Developers コンソールで
-  チャネル作成 → `LINE_CHANNEL_ACCESS_TOKEN` / `LINE_CHANNEL_SECRET`
-
-## 5. GitHub Actions Secrets（現時点でのCI）
-
-現在の `.github/workflows/ci.yml` は lint/typecheck/build のみで、
-Cloudflare へのデプロイや Sentry へのソースマップアップロードは行っていない
-ため、**フェーズ0時点では追加の GitHub Secrets 設定は不要**。
-
-デプロイワークフローを追加するタイミングで、1-3・Sentry章の表にある
-Secrets をリポジトリの `Settings > Secrets and variables > Actions` に
-登録すること。
-
-## 6. 課金（Stripe等）
-
-タスク依頼の前提通り、MVPでは決済連携を実装しないため本フェーズでは
-何も設定不要。無料プランの制約（Duty5件・履歴3ヶ月）はコード側で
-実装するが、決済導線が必要になった時点（v1.1以降）で Stripe アカウント
-作成・Webhook設定などが必要になる。
+| リソース | 値 |
+|---|---|
+| Cloudflare Account | `okmr2217` (`55b4467be01cbb1f5104758b2a728da9`) |
+| D1 database_id | `3201b980-daf5-4a39-a458-54196917f777` |
+| Sentry Org | `parittodev` |
+| Sentry Project (web) | `zumi-web` |
+| Sentry Project (notify) | `zumi-notify` |
+| 本番URL | https://zumi.paritto.dev |
+| notify Worker URL | https://zumi-notify.okumuradaichi2007.workers.dev |

@@ -7,8 +7,7 @@ compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
 # LP はルート `/`、アプリ本体は `/app` 配下（docs/05-tech-stack.md 参照）。
-# 独自ドメインは zumi.paritto.dev をダッシュボードから紐付ける。
-# routes = [{ pattern = "zumi.paritto.dev", custom_domain = true }]
+routes = [{ pattern = "zumi.paritto.dev", custom_domain = true }]
 
 [assets]
 directory = ".open-next/assets"
@@ -17,7 +16,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "zumi-db"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "3201b980-daf5-4a39-a458-54196917f777"
 
 [vars]
 # Sentry 等の非シークレットな設定値はここに追加する。
