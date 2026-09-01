@@ -428,13 +428,6 @@ export default function LandingPage() {
 
   return (
     <div className="zumi-lp" ref={rootRef}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Yuji+Syuku&display=swap"
-        rel="stylesheet"
-      />
-
       <div className="grain" />
 
       <header>
