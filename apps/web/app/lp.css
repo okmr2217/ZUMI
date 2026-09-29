@@ -32,12 +32,13 @@
 
 @media (prefers-color-scheme: dark) {
   .zumi-lp {
-    --paper: #221d17;
-    --paper-raised: #2b241c;
-    --paper-sunken: #1b1712;
-    --ink: #f0e8d8;
-    --ink-soft: #b7aa92;
-    --ink-faint: #7f7360;
+    /* 背景は茶色に寄せすぎず、ほぼ無彩色のウォームグレーに抑える（紙の温かみはごく僅かに残す） */
+    --paper: #1c1a17;
+    --paper-raised: #252320;
+    --paper-sunken: #161412;
+    --ink: #ece7df;
+    --ink-soft: #aaa397;
+    --ink-faint: #767067;
     --vermillion: #e2664a;
     --vermillion-deep: #f08a6e;
     --vermillion-soft: rgba(226, 102, 74, 0.16);
@@ -45,8 +46,8 @@
     --warn-bg: rgba(217, 168, 85, 0.14);
     --success-bg: rgba(139, 179, 110, 0.16);
     --success-text: #9cc27f;
-    --line: rgba(240, 232, 216, 0.14);
-    --line-strong: rgba(240, 232, 216, 0.26);
+    --line: rgba(236, 231, 223, 0.12);
+    --line-strong: rgba(236, 231, 223, 0.22);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px -12px rgba(0, 0, 0, 0.6);
   }
 }
