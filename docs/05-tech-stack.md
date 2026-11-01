@@ -16,7 +16,7 @@
 | 通知スケジューラ | Cloudflare Workers（Cron Trigger） |
 | プッシュ送信 | Web Push（VAPID）/ Resend（メール）/ LINE Messaging API（Pro） |
 | 配信キュー | Cloudflare Queues（配信数が増えた段階で導入。初期は不要） |
-| シェア画像生成 | `workers-og`（Satori ベース、Workers 上で動作） |
+| シェア画像生成 | `next/og`（Satori ベース。LP の OGP 画像で Workers 上での動作を確認済み。当初の `workers-og` から変更） |
 | エラー監視 | Sentry |
 | モノレポ管理 | Turborepo |
 
@@ -56,8 +56,9 @@ export const userSettings = sqliteTable("user_settings", {
   eveningNotifyEnabled: integer("evening_notify_enabled", { mode: "boolean" }).notNull().default(false),
   eveningNotifyAt: text("evening_notify_at"),            // "21:00"
   weeklySummaryEnabled: integer("weekly_summary_enabled", { mode: "boolean" }).notNull().default(true),
-  weeklySummaryWeekday: integer("weekly_summary_weekday").notNull().default(0), // 0=日
-  weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"),
+  weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"), // 送るのは週の最終日固定
+  weekStart: integer("week_start").notNull().default(1), // 1=月 / 0=日
+  onboardedAt: integer("onboarded_at", { mode: "timestamp" }), // null = オンボーディング未完了
   channel: text("channel").$type<"WEB_PUSH" | "EMAIL" | "LINE">().notNull().default("WEB_PUSH"),
   lineUserId: text("line_user_id"),                      // Pro のみ
 });
@@ -93,8 +94,19 @@ export const duties = sqliteTable("duties", {
   sortOrder: integer("sort_order").notNull().default(0),
   status: text("status").$type<"ACTIVE" | "PAUSED" | "ARCHIVED">().notNull().default("ACTIVE"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  archivedAt: integer("archived_at", { mode: "timestamp" }),
 }, (t) => ({
   byUserStatus: index("duties_user_status_idx").on(t.userId, t.status),
+}));
+
+// 一時停止の期間。過去の週の分母から PAUSED 期間を外すために使う
+export const dutyPauses = sqliteTable("duty_pauses", {
+  id: text("id").primaryKey(),
+  dutyId: text("duty_id").notNull().references(() => duties.id, { onDelete: "cascade" }),
+  startDate: text("start_date").notNull(),               // "2026-08-24"
+  endDate: text("end_date"),                             // null = 一時停止中
+}, (t) => ({
+  byDuty: index("duty_pauses_duty_idx").on(t.dutyId),
 }));
 
 export const logs = sqliteTable("logs", {
@@ -110,6 +122,8 @@ export const logs = sqliteTable("logs", {
   byUserDate: index("logs_user_date_idx").on(t.userId, t.targetDate),
 }));
 ```
+
+**2026/11 のスキーマ変更（フェーズ2でマイグレーション）**: `user_settings` に `weekStart`・`onboardedAt` を追加し、`weeklySummaryWeekday` を削除する（送る曜日は週の最終日に固定したため）。`duties` に `archivedAt` を追加し、`duty_pauses` テーブルを新設する。理由は [Duty 管理](./03-duty-log-review-account.md#3-2-duty-管理) を参照。`user_settings` の行は、サインアップ時に better-auth の `databaseHooks` で作成する。
 
 `SINCE_LAST` の判定に「前回完了日」が要るが、専用カラムは持たず `logs` から `MAX(target_date) WHERE status = 'DONE'` で取る。非正規化キャッシュを持つと、遡り記録・取り消しのたびに整合を取る必要が出て割に合わない。ここが遅くなったら `logs_user_date_idx` の効きを確認する。
 
@@ -138,6 +152,8 @@ Cron Trigger は UTC で動作するため、「ユーザーが設定した現�
 | 通知 Worker | ドメイン不要（Cron Trigger 専用。デバッグ用に `notify-zumi.<account>.workers.dev`） |
 
 LP はルート `/`、アプリ本体は `/app` 配下に置き、単一ドメインで完結させる。シェア画像の OG エンドポイントは `/og/w/:token`。
+
+**公開前のサインアップ制限（2026/11 確定）**: 本番の LP はすでに公開されているが、アプリ本体と利用規約・プライバシーポリシーが完成するまでは、本番のサインアップを閉じておく。環境変数（例: `SIGNUP_ENABLED`）で切り替え、閉じている間はサインアップ画面と API の両方で受け付けない。LP の CTA にも準備中であることを表示する。中身のない規約に同意させた状態でユーザーを登録しないため。
 
 ### リポジトリ構成
 
