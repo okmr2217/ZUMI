@@ -8,7 +8,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 
 前身は Habito（Vercel + Supabase + Prisma 構成）で、ZUMI では Cloudflare（Workers + D1 + Drizzle）に全面移行する。
 
-**現在の進捗: フェーズ0（基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）が完了し、`zumi.paritto.dev` に本番デプロイ済み。フェーズ2・3に着手済みで、`development` には S1（土台: スキーマ変更・`ScheduleConfig`/zod・アイコン/テンプレート・vitest）、S3（期日計算の純粋関数とテスト）、S4（公開前のサインアップ制限）、Next.js 16 への更新、開発環境の小修正（ローカル D1 を `apps/web/.wrangler/state` に一本化・prettier）がマージ済み（`main` へは未リリース。本番 D1 への migration `0002_nebulous_rattler.sql` も未適用）。次は S2・S5・S7・S8。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
+**現在の進捗: フェーズ0（基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）が完了し、`zumi.paritto.dev` に本番デプロイ済み。`development` には S1（土台）・S2（Duty CRUD・3タブの枠組み）・S3（期日計算）・S4（サインアップ制限）・S5（PWA 基盤）・S8（notify Cron）、Next.js 16 への更新、開発環境の小修正がマージ済み（`main` へは未リリース。本番 D1 への migration `0002_nebulous_rattler.sql` も未適用）。S7（Web Push）は PR 待ち。次は S6（今日タブ）。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
 
 ## ドキュメント構成
 
@@ -117,6 +117,7 @@ QA・法務などの残りの横断タスクは S1〜S11 の完了後に指揮�
 
 - **スキーマ**: `packages/db/src/schema.ts` と `migrations/` を変更するのは一度に1セッションだけ（`drizzle-kit generate` の番号衝突を避けるため）。S1 以外でスキーマ変更が必要になったら、指揮役に報告して直列の小さな PR にする
 - **進捗の記録**: 作業セッションは `docs/09-implementation-tasks.md` のうち**自分の担当範囲のチェックボックスだけ**を更新する。CLAUDE.md の「現在の進捗」は指揮役がマージ時に更新する（並行セッションが同じ行を書き換えて衝突するのを避けるため）
+- **ローカルの dev サーバー**: 複数の worktree で `localhost` の dev サーバーを動かすと、ポートが違っても better-auth の Cookie が上書きされてログインが外れる。画面を確認するときは `next dev -H 127.0.0.1` で起動し、`.dev.vars` の `BETTER_AUTH_URL` も合わせる
 - **完了条件**: lint・typecheck・test・build が通る。UI の変更はモック Artifact と照らし合わせ、実際の画面で確認する（`/run` や Chrome）。PR 前に `/code-review` を実行する
 - **サブエージェント**: モック Artifact の読み取りはサブエージェントに任せ、必要なアートボードの寸法・配色・構成だけを受け取る。S3 のテストケースは、実装を見ていないサブエージェントに docs/03 の境界ルールだけを渡して書かせる（実装と同じ思い込みがテストに入るのを防ぐため）。コンポーネントを共有する UI 実装は複数のエージェントに分けない
 - **リリース**: `main` への push は本番（`zumi.paritto.dev`）に自動デプロイされる。`main` へのマージは指揮役が区切りのよいところで行う
