@@ -32,6 +32,14 @@
 
 ## 未完了（着手時期が決まっているもの）
 
+### 公開時にサインアップを開く → **アプリ本体と利用規約・プライバシーポリシーの完成後**
+
+本番のサインアップは `apps/web/wrangler.toml` の `[vars]` の `SIGNUP_ENABLED = "false"` で
+閉じている（"true" 以外は閉じる側に倒す）。`wrangler deploy` は `[vars]` でダッシュボードの値を
+上書きするため、ダッシュボードやシークレットではなく、`wrangler.toml` を `"true"` に変えて
+`main` にマージ（自動デプロイ）することで開く。ローカルでは `apps/web/.dev.vars` に
+`SIGNUP_ENABLED=true` を書く（`.dev.vars.example` 参照）。
+
 ### LINE Messaging API 連携 → **MVP以降（v1.1、Proプラン実装時）に実施**
 
 MVPでは Web Push のみで通知を成立させる方針のため、フェーズ4（通知）では対応しない。

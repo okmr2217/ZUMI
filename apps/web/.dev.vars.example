@@ -5,3 +5,5 @@
 BETTER_AUTH_SECRET=
 BETTER_AUTH_URL=http://localhost:3000
 RESEND_API_KEY=
+# ローカルではサインアップを開いておく（未設定だと閉じる。wrangler.toml の [vars] より優先される）。
+SIGNUP_ENABLED=true
