@@ -4,6 +4,9 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // 並行する worktree の dev サーバーを `<セッション名>.localhost:<ポート>` で開き分けるため
+  // （Cookie はポートで分かれない。CLAUDE.md「ローカルの dev サーバー」）。dev 時のみ効く
+  allowedDevOrigins: ["*.localhost"],
 };
 
 // Cloudflare Workers 上でのローカル開発時に `getCloudflareContext` 等が
