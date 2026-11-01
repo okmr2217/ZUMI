@@ -40,6 +40,30 @@
 `main` にマージ（自動デプロイ）することで開く。ローカルでは `apps/web/.dev.vars` に
 `SIGNUP_ENABLED=true` を書く（`.dev.vars.example` 参照）。
 
+### Web Push の VAPID 鍵の確認 → **通知（フェーズ4）を `main` にマージする前**
+
+鍵の組は 1-5 で登録済み。購読（`zumi-web`）と送信（`zumi-notify`）で同じ組を使っていないと、
+送信がすべて失敗する。次を確認する。
+
+- `zumi-web` の `VAPID_PUBLIC_KEY` と、`zumi-notify` の `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` が
+  同じ組であること。シークレットは値を読み出せないため、確信が持てなければ下の手順で作り直す
+  （公開前で購読者がいないので、作り直しても影響はない）
+- `zumi-web` の `VAPID_PRIVATE_KEY` は使わない（送信は notify だけが行う）。消してよい:
+  `npx wrangler secret delete VAPID_PRIVATE_KEY --name zumi-web`
+
+作り直す手順:
+
+```bash
+npx web-push generate-vapid-keys            # Public Key / Private Key が表示される
+cd apps/web && npx wrangler secret put VAPID_PUBLIC_KEY      # 公開鍵
+cd apps/notify && npx wrangler secret put VAPID_PUBLIC_KEY   # 同じ公開鍵
+cd apps/notify && npx wrangler secret put VAPID_PRIVATE_KEY  # 秘密鍵
+```
+
+`zumi-web` は公開鍵を実行時に読む（`apps/web/lib/vapid.ts`）ので、再ビルドは要らない。公開後に
+鍵を作り直すと既存の購読はすべて送れなくなる（端末側は次に設定画面で許可し直したときに作り直す）。
+ローカル用の鍵は本番と分け、`apps/web/.dev.vars`（`.dev.vars.example` 参照）に書く。
+
 ### LINE Messaging API 連携 → **MVP以降（v1.1、Proプラン実装時）に実施**
 
 MVPでは Web Push のみで通知を成立させる方針のため、フェーズ4（通知）では対応しない。

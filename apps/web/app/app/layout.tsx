@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth";
 import { TimezoneSync } from "@/components/app/timezone-sync";
+import { ServiceWorkerRegister } from "@/components/app/service-worker-register";
 import { TabBar } from "@/components/app/tab-bar";
 
 // `getCloudflareContext` はリクエストスコープでのみ使えるため、
@@ -18,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="bg-zumi-bg font-zumi text-zumi-ink min-h-dvh">
       <TimezoneSync />
+      <ServiceWorkerRegister />
       <div className="mx-auto max-w-[430px] pb-[calc(96px+env(safe-area-inset-bottom))]">
         {children}
       </div>
