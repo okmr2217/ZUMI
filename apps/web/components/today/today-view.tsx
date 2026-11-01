@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
@@ -51,7 +51,7 @@ const toLogs = (items: readonly TodayItem[]): Logs =>
 /**
  * 今日タブの本体（docs/04-screens.md「4-1. 今日」、モックの Main / MainPast / MainFuture）。
  *
- * 押印・取り消しは楽観的に表示を変え、失敗したら直前に確定していた状態に戻す。
+ * 押印・取り消しは楽観的に表示を変え、失敗したらサーバーで確定していた状態に戻す。
  * この画面で記録した Duty は、朱印を付けたまま元の位置に残す（次に開いたときに「済んだもの」へ入る）。
  * 押した瞬間に行が消えると、下の行が指の下に来て続けて誤タップしやすいため。
  * 同じ Duty へのリクエストは順番に送り、連打しても届く順が入れ替わらないようにする。
@@ -74,27 +74,28 @@ export function TodayView({
   vapidPublicKey: string | null;
 }) {
   const router = useRouter();
-  const [logs, setLogs] = useState<Logs>(() => toLogs(items));
+  /** サーバーで確定した状態。失敗したときは、ここに戻る */
+  const [confirmed, setConfirmed] = useState<Logs>(() => toLogs(items));
   const [prevItems, setPrevItems] = useState(items);
+  /** 送信中のリクエストによる楽観的な表示。その Duty の最後のリクエストが終わったら外す */
+  const [pending, setPending] = useState<Logs>({});
   /** この画面で記録した Duty。元の位置に残す */
   const [kept, setKept] = useState<ReadonlySet<string>>(new Set());
   const [doneOpen, setDoneOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  /** サーバーで確定した状態。失敗したときの戻し先 */
-  const confirmed = useRef<Logs>(toLogs(items));
   const queues = useRef(new Map<string, Promise<unknown>>());
+  /** Duty ごとの最後のリクエストの番号。古いリクエストの完了で新しい表示を上書きしないため */
+  const latest = useRef(new Map<string, number>());
   const toastTimer = useRef<number | null>(null);
 
-  // 再取得（対象日の変更の後）で届いた値に合わせる
+  // 再取得（対象日の変更の後）で届いた値に合わせる。送信中の表示（pending）はそのまま
   if (items !== prevItems) {
     setPrevItems(items);
-    setLogs(toLogs(items));
+    setConfirmed(toLogs(items));
   }
-  useEffect(() => {
-    confirmed.current = toLogs(items);
-  }, [items]);
+  const logs: Logs = { ...confirmed, ...pending };
 
   useEffect(
     () => () => {
@@ -103,50 +104,55 @@ export function TodayView({
     [],
   );
 
-  const showToast = useCallback((next: string) => {
+  function showToast(message: string) {
     if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
-    setToast(next);
+    setToast(message);
     toastTimer.current = window.setTimeout(() => setToast(null), TOAST_MS);
-  }, []);
+  }
+
+  /** 同じ Duty のリクエストは前のものが終わってから送る（連打しても届く順が入れ替わらない） */
+  function enqueue<T>(id: string, task: () => Promise<T>): Promise<T> {
+    const queued = (queues.current.get(id) ?? Promise.resolve()).then(task);
+    queues.current.set(id, queued);
+    return queued;
+  }
 
   /**
-   * 表示を `next` に変えてからリクエストを送る。同じ Duty のリクエストは前のものが終わってから送る。
+   * 表示を `next` に変えてからリクエストを送る。
    * `keep` なら、この画面にいる間は元の位置（セクション）に残す
    */
-  const mutate = useCallback(
-    (id: string, next: TodayLog | null, keep: boolean, request: () => Promise<LogApiResult>) => {
-      setLogs((prev) => ({ ...prev, [id]: next }));
-      if (keep) setKept((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
-      const run = async () => {
-        const result = await request();
-        if (result.ok) {
-          confirmed.current = { ...confirmed.current, [id]: next };
-          setLogs((prev) => ({ ...prev, [id]: next }));
-        } else {
-          setLogs((prev) => ({ ...prev, [id]: confirmed.current[id] ?? null }));
-          showToast(logErrorMessage(result.error));
-        }
-      };
-      const queued = (queues.current.get(id) ?? Promise.resolve()).then(run);
-      queues.current.set(id, queued);
-    },
-    [showToast],
-  );
+  function mutate(
+    id: string,
+    next: TodayLog | null,
+    keep: boolean,
+    request: () => Promise<LogApiResult>,
+  ) {
+    const seq = (latest.current.get(id) ?? 0) + 1;
+    latest.current.set(id, seq);
+    setPending((prev) => ({ ...prev, [id]: next }));
+    if (keep) setKept((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
+    void enqueue(id, async () => {
+      const result = await request();
+      if (result.ok) setConfirmed((prev) => ({ ...prev, [id]: next }));
+      else showToast(logErrorMessage(result.error));
+      if (latest.current.get(id) === seq) {
+        setPending((prev) => {
+          const rest = { ...prev };
+          delete rest[id];
+          return rest;
+        });
+      }
+    });
+  }
 
-  const unstamp = useCallback(
-    (item: TodayItem) => mutate(item.id, null, true, () => deleteLogRequest(item.id, date)),
-    [mutate, date],
-  );
+  const unstamp = (item: TodayItem) =>
+    mutate(item.id, null, true, () => deleteLogRequest(item.id, date));
 
-  const stamp = useCallback(
-    (item: TodayItem) => {
-      // ワンタップではメモを送らず、既存のメモは API 側でそのまま残る
-      mutate(item.id, { status: "DONE", note: logs[item.id]?.note ?? null }, true, () =>
-        recordLogRequest(item.id, date, { status: "DONE" }),
-      );
-    },
-    [mutate, date, logs],
-  );
+  // ワンタップではメモを送らず、既存のメモは API 側でそのまま残る
+  const stamp = (item: TodayItem) =>
+    mutate(item.id, { status: "DONE", note: logs[item.id]?.note ?? null }, true, () =>
+      recordLogRequest(item.id, date, { status: "DONE" }),
+    );
 
   /** 記録済みで「済んだもの」に入るか（この画面で記録したものは元の位置に残す） */
   const handled = (item: TodayItem) => logs[item.id] != null && !kept.has(item.id);
@@ -170,8 +176,9 @@ export function TodayView({
       );
       return { ok: true };
     }
-    // 別の日への記録・付け替えは、その日のセクション（週の残回数・前回からの日数）も変えうるので再取得する
-    const result = await recordLogRequest(item.id, targetDate, input);
+    // 別の日への記録・付け替えは、その日のセクション（週の残回数・前回からの日数）も変えうるので再取得する。
+    // 送信中の押印・取り消しより先に届くと付け替え元が食い違うため、同じ列に並べる
+    const result = await enqueue(item.id, () => recordLogRequest(item.id, targetDate, input));
     if (result.ok) {
       setDetailId(null);
       showToast(`「${item.name}」を${formatShortDate(targetDate)}の分として記録しました`);
@@ -180,7 +187,9 @@ export function TodayView({
     return result;
   }
 
-  const doneCount = items.filter((item) => logs[item.id]?.status === "DONE").length;
+  // 進捗はセクションに出る Duty だけで数える（期日でない日の記録は分母にも分子にも入れない）
+  const scheduled = items.filter((item) => item.section !== null);
+  const doneCount = scheduled.filter((item) => logs[item.id]?.status === "DONE").length;
   const text = TEXT[mode];
 
   const row = (item: TodayItem) => (
@@ -207,14 +216,14 @@ export function TodayView({
         <div className="text-zumi-soft flex justify-between text-[13px]">
           <span>{text.progress}</span>
           <span>
-            {doneCount} / {items.length}
+            {doneCount} / {scheduled.length}
           </span>
         </div>
         <div
           role="progressbar"
           aria-label={text.progress}
           aria-valuemin={0}
-          aria-valuemax={items.length}
+          aria-valuemax={scheduled.length}
           aria-valuenow={doneCount}
           className="bg-zumi-line h-1.5 overflow-hidden rounded"
         >
@@ -223,7 +232,9 @@ export function TodayView({
               "h-full rounded transition-[width] duration-300",
               mode === "future" ? "bg-zumi-soft opacity-40" : "bg-zumi-shu",
             )}
-            style={{ width: items.length === 0 ? 0 : `${(doneCount / items.length) * 100}%` }}
+            style={{
+              width: scheduled.length === 0 ? 0 : `${(doneCount / scheduled.length) * 100}%`,
+            }}
           />
         </div>
       </div>

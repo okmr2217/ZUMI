@@ -34,7 +34,11 @@ export interface TodayItem {
   noteEnabled: boolean;
   /** 作成日（ユーザーのタイムゾーン）。詳細モーダルの対象日の下限 */
   createdDate: string;
-  section: TodaySection;
+  /**
+   * 出るセクション。null はその日が期日ではないがログがある Duty（対象日の変更で付けた記録など）で、
+   * 取り消し・修正ができるよう「済んだもの」（過去日は一覧）に出す。進捗の分母には数えない
+   */
+  section: TodaySection | null;
   /** 名前の下の補足（「火・金」「最後から2日」「あと1回・日曜まで」） */
   detail: string;
   /** その日のログ */
@@ -44,7 +48,8 @@ export interface TodayItem {
 const SECTION_ORDER: Record<TodaySection, number> = { TODAY: 0, SOON: 1, THIS_WEEK: 2 };
 
 /**
- * `date` に出る Duty。並びは「今日」「そろそろ」「今週」の順、セクション内は `sortOrder` 順。
+ * `date` に出る Duty。並びは「今日」「そろそろ」「今週」、セクション外でログがあるものの順で、
+ * それぞれの中は `sortOrder` 順。
  * セクションは当日のログより前の状態で決まるため、当日に済ませても同じセクションのまま `log` だけが変わる。
  */
 export function buildTodayItems(
@@ -55,9 +60,10 @@ export function buildTodayItems(
   const items: TodayItem[] = [];
   for (const { duty, schedule, log } of dayDuties) {
     const evaluation = evaluateDutyOn(schedule, date);
-    if (evaluation.section === null) continue;
+    if (evaluation.section === null && log === null) continue;
     let detail: string;
     switch (evaluation.section) {
+      case null:
       case "TODAY":
         detail = summarizeSchedule(duty.scheduleConfig, weekStart);
         break;
@@ -83,7 +89,8 @@ export function buildTodayItems(
     });
   }
   // Array#sort は安定なので、セクション内は渡された順（sortOrder 順）のまま
-  return items.sort((a, b) => SECTION_ORDER[a.section] - SECTION_ORDER[b.section]);
+  const order = (item: TodayItem) => (item.section === null ? 3 : SECTION_ORDER[item.section]);
+  return items.sort((a, b) => order(a) - order(b));
 }
 
 /** 日付ナビの日付（例: 「11月2日（月）」） */

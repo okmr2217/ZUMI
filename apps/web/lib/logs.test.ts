@@ -306,6 +306,17 @@ describe("loadDayDuties + buildTodayItems", () => {
     expect(await items("2026-11-02")).toEqual([]);
   });
 
+  it("期日でない日でもログがあれば、セクションなし（null）で最後に出す", async () => {
+    const trash = await create({ scheduleConfig: { type: "WEEKDAYS", weekdays: [1, 4] } });
+    const protein = await create({ scheduleConfig: { type: "DAILY" } });
+    // 火曜はゴミ出しの期日ではないが、対象日の変更などで記録が付いている
+    await record(trash, "2026-11-03", { status: "DONE" });
+    expect(await items("2026-11-03")).toMatchObject([
+      { id: protein, section: "TODAY", log: null },
+      { id: trash, section: null, detail: "月・木", log: { status: "DONE" } },
+    ]);
+  });
+
   it("その日のメモを返す", async () => {
     const id = await create({ noteEnabled: true, scheduleConfig: { type: "DAILY" } });
     await record(id, "2026-11-03", { status: "SKIP", note: "雨" });
