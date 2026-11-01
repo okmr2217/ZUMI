@@ -35,7 +35,7 @@ function SignupCta({ enabled, small = false }: { enabled: boolean; small?: boole
   const size = small ? " btn-small" : "";
   if (!enabled) {
     return (
-      <span className={`btn btn-soon${size}`} aria-disabled="true">
+      <span className={`btn btn-soon${size}`}>
         公開準備中
       </span>
     );
