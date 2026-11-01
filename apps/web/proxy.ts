@@ -6,7 +6,7 @@ import { getSessionCookie } from "better-auth/cookies";
  * Cookie の有無のみを軽量にチェックする（実際の検証は各 Route/Server
  * Component 側で `auth.api.getSession` を使う）。
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   if (!sessionCookie) {

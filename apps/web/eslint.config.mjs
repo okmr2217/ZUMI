@@ -1,15 +1,12 @@
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
-
-export default tseslint.config(
+export default defineConfig(
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  ...compat.extends("next/core-web-vitals"),
+  ...nextCoreWebVitals,
   {
     ignores: [".next/**", ".open-next/**", ".wrangler/**", "node_modules/**", "next-env.d.ts"],
   },
