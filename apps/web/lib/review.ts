@@ -302,22 +302,16 @@ export async function loadHistory(
     lt(logs.targetDate, before),
     dutyFilter,
   );
-  // このページに入る日付（1日多く読み、続きがあるかを知る）
+  // このページに入る日付。1日多く読み、その日があれば続きがある（その日の分は次のページで出す）
   const pageDates = db
     .selectDistinct({ date: logs.targetDate })
     .from(logs)
     .where(inRange)
     .orderBy(desc(logs.targetDate))
-    .limit(HISTORY_PAGE_DAYS)
+    .limit(HISTORY_PAGE_DAYS + 1)
     .as("page_dates");
 
-  const [dateRows, entryRows, olderRows] = await db.batch([
-    db
-      .selectDistinct({ date: logs.targetDate })
-      .from(logs)
-      .where(inRange)
-      .orderBy(desc(logs.targetDate))
-      .limit(HISTORY_PAGE_DAYS + 1),
+  const [entryRows, olderRows] = await db.batch([
     db
       .select({
         targetDate: logs.targetDate,
@@ -358,10 +352,11 @@ export async function loadHistory(
       loggedTime: formatLoggedTime(row.loggedAt, row.targetDate, timeZone),
     });
   }
-  const hasMore = dateRows.length > HISTORY_PAGE_DAYS;
+  const hasMore = days.length > HISTORY_PAGE_DAYS;
+  if (hasMore) days.pop();
   return {
     days,
-    nextBefore: hasMore ? dateRows[HISTORY_PAGE_DAYS - 1]!.date : null,
+    nextBefore: hasMore ? days.at(-1)!.date : null,
     reachedLimit: !hasMore && olderRows.length > 0,
   };
 }

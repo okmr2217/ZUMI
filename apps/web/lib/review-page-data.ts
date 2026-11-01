@@ -10,7 +10,8 @@ const REVIEW_PATH = "/app/review";
 
 /**
  * 振り返りタブのデータ。`requestedWeek`（`?week=YYYY-MM-DD`、週の初日）で過去の週のサマリーも開ける。
- * 開ける週は、無料プランの履歴の範囲（直近3ヶ月）に掛かる週から今週まで。
+ * 開ける週は、無料プランの履歴の範囲（直近3ヶ月）にまるごと入る週から今週まで
+ * （範囲の初日が週の途中なら、その週は開けない。範囲より前の日の記録を集計に出さないため）。
  * 範囲外・不正な日付・今週は `/app/review` に、週の途中の日は週の初日にそろえる。
  */
 export async function getReviewPageData(requestedWeek: string | undefined) {
@@ -22,7 +23,10 @@ export async function getReviewPageData(requestedWeek: string | undefined) {
   const calendar = await getUserCalendar(db, userId);
   const today = toLocalDate(new Date(), calendar.timeZone);
   const currentWeek = getWeekRange(today, calendar.weekStart).start;
-  const oldestWeek = getWeekRange(getHistoryStartDate(today), calendar.weekStart).start;
+  const historyStart = getHistoryStartDate(today);
+  const historyStartWeek = getWeekRange(historyStart, calendar.weekStart).start;
+  const oldestWeek =
+    historyStartWeek === historyStart ? historyStartWeek : addDays(historyStartWeek, 7);
 
   let week = currentWeek;
   if (requestedWeek !== undefined) {
