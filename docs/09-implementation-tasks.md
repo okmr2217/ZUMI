@@ -69,14 +69,14 @@ better-auth の実設定（メール+パスワード、メール認証必須、�
 
 ### フェーズ4: 通知
 
-- [ ] Service Worker（`apps/web/public/sw.js`）: push イベント受信・通知表示
-- [ ] Web Push 購読フロー（VAPID鍵生成、許可ボタン、`pushSubscriptions`保存）
+- [x] Service Worker（`apps/web/public/sw.js`）: push イベント受信・通知表示
+- [x] Web Push 購読フロー（VAPID鍵生成、許可ボタン、`pushSubscriptions`保存）
 - [ ] `apps/notify` Cron Trigger（毎分実行）: タイムゾーン+通知時刻でユーザー抽出
 - [ ] 朝の日次まとめ通知（対象ゼロなら送らない。文面は [通知の文面](./02-notifications.md#通知の文面)）
 - [ ] 締め切りアラート（夜・未完了Duty）
 - [ ] 週次サマリー通知（週の最終日に、設定した時刻で送る）
 - [ ] 期日不確定型の通知組み込み判定をフェーズ3の共有ロジックで実装（web/notify不整合防止。`WEEKLY_COUNT` は残回数 ≥ 残り日数）
-- [ ] 通知設定UI（許可ボタン、朝/夜/週次のON/OFF・時刻、タイムゾーン）
+- [x] 通知設定UI（許可ボタン、朝/夜/週次のON/OFF・時刻、タイムゾーン）
 
 **LINE Messaging API連携はこのフェーズ・MVPには含めない。** Pro プランの目玉機能として
 課金連携（v1.1以降、[06-billing.md](./06-billing.md) 参照）とあわせて実装する。MVPでは
