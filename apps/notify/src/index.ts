@@ -1,5 +1,7 @@
-import { drizzle } from "drizzle-orm/d1";
-import * as schema from "@zumi/db/schema";
+import * as Sentry from "@sentry/cloudflare";
+import { runNotificationTick, type PushSender } from "./notify";
+import { createD1Store } from "./store";
+import { createVapidSigner, sendPush } from "./webpush";
 
 export interface Env {
   DB: D1Database;
@@ -7,19 +9,52 @@ export interface Env {
   SENTRY_DSN?: string;
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
+  /** VAPID の連絡先（`https:` か `mailto:`） */
+  VAPID_SUBJECT: string;
+  /** "true" のときだけ、ログに通知の文面（Duty 名を含む）を出す。ローカル確認用 */
+  LOG_NOTIFICATION_TEXT?: string;
 }
 
-export default {
-  /**
-   * 毎分起動（wrangler.toml の `[triggers] crons`）。
-   * user_settings を timezone + 各 notify_at で絞り込み、現在時刻（UTC）を
-   * 各ユーザーのタイムゾームに変換した上で一致するユーザーだけに配信する。
-   * 期日計算は packages/types の純粋関数を web と共有し、判定のズレを防ぐ
-   * （フェーズ4で実装。現時点は起動確認のみ）。
-   */
-  async scheduled(_controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
-    const db = drizzle(env.DB, { schema });
-    void db; // フェーズ4で対象ユーザー抽出クエリを実装する
-    console.log("zumi-notify: scheduled tick", new Date().toISOString());
+const MS_PER_MINUTE = 60_000;
+
+export default Sentry.withSentry<ExportedHandler<Env>>(
+  (env) => ({ dsn: env.SENTRY_DSN, environment: env.NEXT_PUBLIC_APP_ENV }),
+  {
+    /**
+     * 毎分起動（wrangler.toml の `[triggers] crons`）。朝・夜・週次の通知時刻が
+     * 現地時刻と一致するユーザーを抽出し、Web Push で送る（docs/02・docs/05「通知配信の設計」）。
+     *
+     * 「いま」には実行時刻ではなく Cron の予定時刻（`scheduledTime`）を使う。
+     * 起動が遅れても、本来の分のユーザーに送れるようにするため。
+     */
+    async scheduled(controller, env) {
+      const instant = new Date(
+        Math.floor(controller.scheduledTime / MS_PER_MINUTE) * MS_PER_MINUTE,
+      );
+      await runNotificationTick(
+        {
+          store: createD1Store(env.DB),
+          send: await createSender(env, instant),
+          log: (event, data) => console.log(JSON.stringify({ event, ...data })),
+          captureException: (error, context) => Sentry.captureException(error, { extra: context }),
+          logMessageText: env.LOG_NOTIFICATION_TEXT === "true",
+        },
+        instant,
+      );
+    },
   },
-};
+);
+
+/** VAPID 鍵が未設定なら null（送信せず、文面の生成とログまで行う） */
+async function createSender(env: Env, now: Date): Promise<PushSender | null> {
+  if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) {
+    console.warn("zumi-notify: VAPID 鍵が未設定のため送信しません");
+    return null;
+  }
+  const signer = await createVapidSigner({
+    publicKey: env.VAPID_PUBLIC_KEY,
+    privateKey: env.VAPID_PRIVATE_KEY,
+    subject: env.VAPID_SUBJECT,
+  });
+  return (subscription, payload, options) => sendPush(subscription, payload, signer, options, now);
+}
