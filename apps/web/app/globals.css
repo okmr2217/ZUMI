@@ -51,3 +51,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ノッチ・ホームインジケーターを避ける余白（viewport-fit=cover 前提。layout.tsx の viewport 参照）。
+   ホーム画面アプリの下部タブバーなど、画面端に固定する要素に付ける */
+@layer utilities {
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
