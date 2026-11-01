@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { Clock, Minus, Plus } from "lucide-react";
 import { PRESET_ICONS, getNextDue, type MonthlyNth } from "@zumi/types";
 import { cn } from "@/lib/utils";
@@ -30,8 +30,18 @@ export function DutyFormFields({
   context: DutyFormContext;
 }) {
   const nameId = useId();
+  const iconRowRef = useRef<HTMLDivElement>(null);
   const set = <K extends keyof DutyDraft>(key: K, next: DutyDraft[K]) =>
     onChange({ ...value, [key]: next });
+
+  // 開いたときだけ、選択中のアイコンが見えるよう横スクロールを合わせる（縦はスクロールさせない）
+  useEffect(() => {
+    const row = iconRowRef.current;
+    const selected = row?.querySelector<HTMLElement>('[aria-checked="true"]');
+    if (row && selected) {
+      row.scrollLeft = selected.offsetLeft - (row.clientWidth - selected.offsetWidth) / 2;
+    }
+  }, []);
 
   return (
     <>
@@ -50,6 +60,7 @@ export function DutyFormFields({
       <div>
         <FieldLabel>アイコン</FieldLabel>
         <div
+          ref={iconRowRef}
           role="radiogroup"
           aria-label="アイコン"
           className="-mx-[22px] flex gap-[9px] overflow-x-auto px-[22px] pb-1 [scrollbar-width:none]"
@@ -169,7 +180,6 @@ function ScheduleFields({
                 id={anchorId}
                 type="date"
                 value={value.anchor}
-                min={context.today}
                 onChange={(event) => {
                   if (event.target.value) {
                     onChange({ ...value, anchor: event.target.value, anchorTouched: true });
@@ -203,14 +213,26 @@ function ScheduleFields({
           </div>
           {value.monthlyMode === "DAY" ? (
             <div>
-              <Stepper
-                prefix="毎月"
-                suffix="日"
-                value={value.dayOfMonth}
-                min={1}
-                max={31}
-                onChange={(dayOfMonth) => onChange({ ...value, dayOfMonth })}
-              />
+              <label className="border-zumi-line bg-zumi-card flex items-center justify-between rounded-[14px] border px-[15px] py-2.5 text-[13.5px] font-semibold">
+                日付
+                <span className="flex items-center gap-1.5">
+                  毎月
+                  <select
+                    value={value.dayOfMonth}
+                    onChange={(event) =>
+                      onChange({ ...value, dayOfMonth: Number(event.target.value) })
+                    }
+                    className="border-zumi-line bg-zumi-bg rounded-[10px] border-[1.6px] px-2 py-1.5 text-[15px] font-bold tabular-nums"
+                  >
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                  日
+                </span>
+              </label>
               {value.dayOfMonth >= 29 && (
                 <p className="text-zumi-soft mt-1.5 text-[11px]">
                   その日がない月は、月末になります

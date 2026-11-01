@@ -2,17 +2,21 @@ import { redirect } from "next/navigation";
 import { toLocalDate } from "@zumi/types";
 import { getServerSession } from "./auth";
 import { getDb } from "./db";
-import { getSchedulePreviewData, getUserCalendar, listDuties } from "./duties";
+import { countLimitedDuties, getSchedulePreviewData, getUserCalendar, listDuties } from "./duties";
 import { DUTY_LIMIT } from "./duty-input";
 
-/**
- * Duty タブ・テンプレート画面の Server Component が使うデータ。
- * 編集シートの「次の期日」のプレビュー用に、アーカイブしていない Duty の一時停止期間と最近のログも添える。
- */
-export async function getDutyPageData() {
+async function requireUserId() {
   const session = await getServerSession();
   if (!session) redirect("/login");
-  const userId = session.user.id;
+  return session.user.id;
+}
+
+/**
+ * Duty タブのデータ。編集シートの「次の期日」のプレビュー用に、
+ * アーカイブしていない Duty の一時停止期間と最近のログも添える。
+ */
+export async function getDutyPageData() {
+  const userId = await requireUserId();
 
   const db = getDb();
   const [{ timeZone, weekStart }, rows] = await Promise.all([
@@ -50,5 +54,19 @@ export async function getDutyPageData() {
     duties: current.map(toItem),
     archived: rows.filter((duty) => duty.status === "ARCHIVED").map(toItem),
     limitReached: current.length >= DUTY_LIMIT,
+  };
+}
+
+/** テンプレート画面のデータ。暦と上限に達しているかだけを返す（プレビュー用のログは読まない） */
+export async function getTemplatePageData() {
+  const userId = await requireUserId();
+  const db = getDb();
+  const [{ timeZone, weekStart }, count] = await Promise.all([
+    getUserCalendar(db, userId),
+    countLimitedDuties(db, userId),
+  ]);
+  return {
+    calendar: { today: toLocalDate(new Date(), timeZone), timeZone, weekStart },
+    limitReached: count >= DUTY_LIMIT,
   };
 }
