@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "generate": "drizzle-kit generate",
-    "migrate:local": "wrangler d1 migrations apply zumi-db --local",
+    "migrate:local": "wrangler d1 migrations apply zumi-db --local --persist-to ../../apps/web/.wrangler/state",
     "migrate:remote": "wrangler d1 migrations apply zumi-db --remote",
     "seed": "tsx scripts/seed.ts",
     "studio": "drizzle-kit studio"

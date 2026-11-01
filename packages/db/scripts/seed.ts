@@ -5,7 +5,7 @@
  * 使い方:
  *   npm run db:seed --workspace=@zumi/db
  *
- * 実体は `wrangler d1 execute zumi-db --local --file=./scripts/seed.sql` を
+ * 実体は `wrangler d1 execute zumi-db --local --persist-to ../../apps/web/.wrangler/state --file=...` を
  * 呼び出すラッパー。TypeScript 側で ID 生成や日付計算を行ってから SQL を
  * 組み立てたいケースに備えて tsx スクリプトとして用意している。
  */
@@ -45,8 +45,17 @@ const dir = mkdtempSync(join(tmpdir(), "zumi-seed-"));
 const file = join(dir, "seed.sql");
 writeFileSync(file, sql, "utf8");
 
+// next dev（apps/web）が読むローカル D1 に投入する（migrate:local と同じ置き場所）。
 execFileSync(
   "wrangler",
-  ["d1", "execute", "zumi-db", "--local", `--file=${file}`],
+  [
+    "d1",
+    "execute",
+    "zumi-db",
+    "--local",
+    "--persist-to",
+    "../../apps/web/.wrangler/state",
+    `--file=${file}`,
+  ],
   { stdio: "inherit", cwd: new URL("..", import.meta.url).pathname },
 );

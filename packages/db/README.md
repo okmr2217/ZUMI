@@ -9,7 +9,7 @@ Drizzle スキーマ・マイグレーション置き場。`apps/web` と `apps/
 # マイグレーション SQL を生成（schema.ts 変更後に実行）
 npm run db:generate
 
-# ローカル D1（Miniflare, .wrangler/state 配下）にマイグレーションを適用
+# ローカル D1（Miniflare, apps/web/.wrangler/state 配下）にマイグレーションを適用
 npm run db:migrate:local
 
 # better-auth のテーブルは別途 better-auth CLI で生成 or 上記マイグレーションに含める
@@ -17,6 +17,19 @@ npm run db:migrate:local
 
 # 開発用シードデータを投入
 npm run db:seed
+```
+
+ローカル D1 の実体は `apps/web/.wrangler/state` に1つだけ置く。`next dev`（apps/web）は
+`initOpenNextCloudflareForDev()` 経由でここを読むため、`migrate:local` と `seed` は
+`--persist-to ../../apps/web/.wrangler/state` でここに書き込み、`apps/notify` の
+`wrangler dev` も `--persist-to ../web/.wrangler/state` で同じ場所を読む。
+`packages/db` で wrangler の `--local` コマンドを手で打つときも `--persist-to` を付けること
+（付けないと `packages/db/.wrangler` に別の D1 ができ、dev サーバーには反映されない）。
+
+```bash
+# 例: ローカル D1 にクエリを投げる（packages/db で実行）
+npx wrangler d1 execute zumi-db --local --persist-to ../../apps/web/.wrangler/state \
+  --command "SELECT name FROM sqlite_master WHERE type = 'table'"
 ```
 
 ## リモート D1 への反映

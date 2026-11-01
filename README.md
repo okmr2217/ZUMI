@@ -82,7 +82,8 @@ npm run build
 # マイグレーション SQL 生成（packages/db/src/schema.ts を変更したら実行）
 npm run db:generate
 
-# ローカル D1（Miniflare）にマイグレーション適用
+# ローカル D1（Miniflare, apps/web/.wrangler/state）にマイグレーション適用。
+# next dev と apps/notify の wrangler dev はどちらもここを読む
 npm run db:migrate:local
 
 # 開発用シードデータ投入
