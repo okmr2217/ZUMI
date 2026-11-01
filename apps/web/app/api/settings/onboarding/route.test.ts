@@ -156,6 +156,7 @@ describe("POST /api/settings/onboarding", () => {
     ["不正な時刻", { morningNotifyAt: "7:30" }],
     ["月・日以外の週の始まり", { weekStart: 3 }],
     ["タイムゾーン（ブラウザから自動で取る）", { timezone: "Asia/Tokyo" }],
+    ["タイムゾーンの自動/手動（設定画面だけの項目）", { timezoneAuto: false }],
     ["完了日時の直接指定", { onboardedAt: 0 }],
   ])("%s なら 400 で何も変えない", async (_label, body) => {
     const before = await settings();

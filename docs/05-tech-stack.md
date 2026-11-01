@@ -44,6 +44,7 @@ Cloudflare に寄せる判断をした理由と、それに伴う制約。
 `packages/db/schema.ts` に定義し、`apps/web` と `apps/notify` の双方から参照する。
 
 ```ts
+import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
 import { user } from "./auth-schema"; // better-auth が管理
 
@@ -51,6 +52,7 @@ export const userSettings = sqliteTable("user_settings", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().unique().references(() => user.id, { onDelete: "cascade" }),
   timezone: text("timezone").notNull().default("Asia/Tokyo"),
+  timezoneAuto: integer("timezone_auto", { mode: "boolean" }).notNull().default(true), // false = 設定画面で手で選んだ
   morningNotifyEnabled: integer("morning_notify_enabled", { mode: "boolean" }).notNull().default(false),
   morningNotifyAt: text("morning_notify_at"),            // "08:00"
   eveningNotifyEnabled: integer("evening_notify_enabled", { mode: "boolean" }).notNull().default(false),
@@ -61,7 +63,12 @@ export const userSettings = sqliteTable("user_settings", {
   onboardedAt: integer("onboarded_at", { mode: "timestamp" }), // null = オンボーディング未完了
   channel: text("channel").$type<"WEB_PUSH" | "EMAIL" | "LINE">().notNull().default("WEB_PUSH"),
   lineUserId: text("line_user_id"),                      // Pro のみ
-});
+}, (t) => ({
+  // notify の毎分の抽出用。OFF の行は入れない部分インデックス
+  morningNotify: index("user_settings_morning_notify_idx").on(t.morningNotifyAt).where(sql`${t.morningNotifyEnabled} = 1`),
+  eveningNotify: index("user_settings_evening_notify_idx").on(t.eveningNotifyAt).where(sql`${t.eveningNotifyEnabled} = 1`),
+  weeklySummary: index("user_settings_weekly_summary_idx").on(t.weeklySummaryAt).where(sql`${t.weeklySummaryEnabled} = 1`),
+}));
 
 export const pushSubscriptions = sqliteTable("push_subscriptions", {
   id: text("id").primaryKey(),
@@ -70,7 +77,9 @@ export const pushSubscriptions = sqliteTable("push_subscriptions", {
   p256dh: text("p256dh").notNull(),
   auth: text("auth").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-});
+}, (t) => ({
+  byUser: index("push_subscriptions_user_idx").on(t.userId),
+}));
 
 export type ScheduleConfig =
   | { type: "DAILY" }
@@ -124,6 +133,8 @@ export const logs = sqliteTable("logs", {
 ```
 
 **2026/11 のスキーマ変更（フェーズ2でマイグレーション）**: `user_settings` に `weekStart`・`onboardedAt` を追加し、`weeklySummaryWeekday` を削除する（送る曜日は週の最終日に固定したため）。`duties` に `archivedAt` を追加し、`duty_pauses` テーブルを新設する。理由は [Duty 管理](./03-duty-log-review-account.md#3-2-duty-管理) を参照。`user_settings` の行は、サインアップ時に better-auth の `databaseHooks` で作成する。
+
+**2026/11 の追加（通知とタイムゾーン）**: `user_settings` に `timezoneAuto` を追加した。アプリを開くとブラウザのタイムゾーンで `timezone` を更新するが、設定画面で手で選んだら `false` にして、以後の同期では上書きしない（「自動」に戻すと `true` にし、その場でブラウザの値を入れる）。判定をサーバー側の列で持つのは、端末の localStorage に印を置くと、別の端末で開いたときにその端末の値で上書きされてしまうため。あわせて、notify が毎分読む `user_settings` の3つの時刻（`*_enabled = 1` の部分インデックス）と `push_subscriptions.user_id` にインデックスを張った。D1 は読んだ行数で課金されるため、毎分の抽出が全件を読むと数千人で無料枠を超える。部分インデックスにしたのは、週次サマリーは全員が既定の `20:00` を持ち、OFF の人まで索引から読まないようにするため。
 
 `SINCE_LAST` の判定に「前回完了日」が要るが、専用カラムは持たず `logs` から `MAX(target_date) WHERE status = 'DONE'` で取る。非正規化キャッシュを持つと、遡り記録・取り消しのたびに整合を取る必要が出て割に合わない。ここが遅くなったら `logs_user_date_idx` の効きを確認する。
 

@@ -33,15 +33,23 @@ export const notificationSettingsFields = z
   })
   .partial();
 
-/** 設定画面から送る部分更新。送った項目だけを書き換える。 */
+/**
+ * 設定画面から送る部分更新。送った項目だけを書き換える。
+ * `timezone` だけを送ると手で選んだ扱い（`timezoneAuto: false`）になる。「自動」に戻すときは
+ * `timezoneAuto: true` とその端末のブラウザの値を一緒に送る。`timezoneAuto` だけは送れない。
+ * （`timezoneAuto` は設定画面だけの項目なので、オンボーディングと共有する `notificationSettingsFields` には入れない）
+ */
 export const notificationSettingsPatchSchema = notificationSettingsFields
+  .extend({ timezoneAuto: z.boolean().optional() })
   .strict()
-  .refine((patch) => Object.keys(patch).length > 0);
+  .refine((patch) => Object.keys(patch).length > 0)
+  .refine((patch) => patch.timezoneAuto === undefined || patch.timezone !== undefined);
 
 export type NotificationSettingsPatch = z.infer<typeof notificationSettingsPatchSchema>;
 
 export type NotificationSettings = {
   timezone: string;
+  timezoneAuto: boolean;
   morningNotifyEnabled: boolean;
   morningNotifyAt: string | null;
   eveningNotifyEnabled: boolean;
@@ -53,6 +61,7 @@ export type NotificationSettings = {
 
 const columns = {
   timezone: userSettings.timezone,
+  timezoneAuto: userSettings.timezoneAuto,
   morningNotifyEnabled: userSettings.morningNotifyEnabled,
   morningNotifyAt: userSettings.morningNotifyAt,
   eveningNotifyEnabled: userSettings.eveningNotifyEnabled,
@@ -82,6 +91,7 @@ export async function updateNotificationSettings(
   patch: NotificationSettingsPatch,
 ): Promise<NotificationSettings> {
   const set: NotificationSettingsPatch = { ...patch };
+  if (patch.timezone !== undefined) set.timezoneAuto = patch.timezoneAuto ?? false;
 
   // 時刻が未設定のまま ON にされたら初期値で埋める。notify は時刻が null の行を送れない。
   // 今の値を読むのは、時刻を送らずに ON にしたときだけ（行がなければここで作られる）。

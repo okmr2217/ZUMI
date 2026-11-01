@@ -221,6 +221,72 @@ describe("loadDuties", () => {
   });
 });
 
+/**
+ * `createD1Store` が実際に投げたクエリを記録する D1。drizzle は `prepare(sql).bind(...params)` で
+ * 投げるため、その2つを横取りして控える
+ */
+function recordQueries(target: D1Database) {
+  const queries: { sql: string; params: unknown[] }[] = [];
+  const db = new Proxy(target, {
+    get(d1, prop) {
+      if (prop !== "prepare") return Reflect.get(d1, prop, d1);
+      return (query: string) => {
+        const statement = d1.prepare(query);
+        return new Proxy(statement, {
+          get(stmt, key) {
+            if (key === "bind") {
+              return (...params: unknown[]) => {
+                queries.push({ sql: query, params });
+                return stmt.bind(...params);
+              };
+            }
+            const value = Reflect.get(stmt, key, stmt);
+            return typeof value === "function" ? value.bind(stmt) : value;
+          },
+        });
+      };
+    },
+  });
+  return { db, queries };
+}
+
+/** 記録したクエリ1本の実行計画（`detail` の列だけ） */
+async function queryPlan(query: { sql: string; params: unknown[] }) {
+  const { results } = await db
+    .prepare(`explain query plan ${query.sql}`)
+    .bind(...query.params)
+    .all<{ detail: string }>();
+  return results.map((row) => row.detail);
+}
+
+// 毎分走るクエリが全件を読まないこと（D1 は読んだ行数で課金される）
+describe("インデックス", () => {
+  it("findSettingsAt は朝・夜・週次をそれぞれ部分インデックスで引く", async () => {
+    const { db: recording, queries } = recordQueries(db);
+    await createD1Store(recording).findSettingsAt(["08:00", "09:00"]);
+    expect(queries).toHaveLength(1);
+    const plan = await queryPlan(queries[0]!);
+    expect(plan).toContain("MULTI-INDEX OR");
+    for (const index of [
+      "user_settings_morning_notify_idx (morning_notify_at=?)",
+      "user_settings_evening_notify_idx (evening_notify_at=?)",
+      "user_settings_weekly_summary_idx (weekly_summary_at=?)",
+    ]) {
+      expect(plan).toContain(`SEARCH user_settings USING INDEX ${index}`);
+    }
+    expect(plan.filter((detail) => detail.startsWith("SCAN user_settings"))).toEqual([]);
+  });
+
+  it("listSubscriptions は user_id のインデックスで引く", async () => {
+    const { db: recording, queries } = recordQueries(db);
+    await createD1Store(recording).listSubscriptions("u1");
+    expect(queries).toHaveLength(1);
+    expect(await queryPlan(queries[0]!)).toEqual([
+      "SEARCH push_subscriptions USING INDEX push_subscriptions_user_idx (user_id=?)",
+    ]);
+  });
+});
+
 describe("購読", () => {
   it("ユーザーの購読を返し、削除できる", async () => {
     expect((await store.listSubscriptions("u1")).map((sub) => sub.id).sort()).toEqual([

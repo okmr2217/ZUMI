@@ -1,4 +1,4 @@
-import { and, eq, getTableName, gte, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, getTableName, gte, isNull, lte, or, sql, type AnyColumn } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "@zumi/db/schema";
 import { dutyPauses, duties, logs, pushSubscriptions, userSettings } from "@zumi/db/schema";
@@ -48,6 +48,9 @@ export function createD1Store(d1: D1Database): NotifyStore {
       if (localTimes.length === 0) return [];
       // D1 のバインド変数の上限（100）を避けるため、候補の時刻は JSON 1つで渡す
       const candidates = sql`(select value from json_each(${JSON.stringify(localTimes)}))`;
+      // 3本の OR をそれぞれ `user_settings_*_idx`（`*_enabled = 1` の部分インデックス）で引かせる。
+      // 部分インデックスの条件と突き合わせられるよう、`= 1` はバインド変数でなくリテラルで書く
+      const enabled = (column: AnyColumn) => sql`${column} = 1`;
       return db
         .select({
           userId: userSettings.userId,
@@ -64,15 +67,15 @@ export function createD1Store(d1: D1Database): NotifyStore {
         .where(
           or(
             and(
-              eq(userSettings.morningNotifyEnabled, true),
+              enabled(userSettings.morningNotifyEnabled),
               sql`${userSettings.morningNotifyAt} in ${candidates}`,
             ),
             and(
-              eq(userSettings.eveningNotifyEnabled, true),
+              enabled(userSettings.eveningNotifyEnabled),
               sql`${userSettings.eveningNotifyAt} in ${candidates}`,
             ),
             and(
-              eq(userSettings.weeklySummaryEnabled, true),
+              enabled(userSettings.weeklySummaryEnabled),
               sql`${userSettings.weeklySummaryAt} in ${candidates}`,
             ),
           ),

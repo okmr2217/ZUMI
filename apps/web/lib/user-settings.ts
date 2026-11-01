@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sql } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import type { WeekStart } from "@zumi/types";
 import { userSettings } from "@zumi/db/schema";
 import { getDb } from "./db";
@@ -18,7 +18,9 @@ export async function createUserSettings(userId: string) {
 
 /**
  * ブラウザのタイムゾーンで `user_settings.timezone` を更新する。
- * 値が変わっていなければ書き込まない。行がない場合（作成フックの失敗など）は
+ * 設定画面で手で選んでいる（`timezone_auto` が false）か、値が変わっていなければ書き込まない。
+ * 手動の判定をサーバー側で持つのは、別の端末で開いたときにもその端末の値で上書きしないため。
+ * 行がない場合（作成フックの失敗など）は
  * ここで作り直し、「今日」の判定の前提になる行を必ず揃える。
  */
 export async function syncUserTimezone(userId: string, timezone: string) {
@@ -28,7 +30,7 @@ export async function syncUserTimezone(userId: string, timezone: string) {
     .onConflictDoUpdate({
       target: userSettings.userId,
       set: { timezone },
-      setWhere: sql`${userSettings.timezone} <> ${timezone}`,
+      setWhere: and(eq(userSettings.timezoneAuto, true), ne(userSettings.timezone, timezone)),
     });
 }
 

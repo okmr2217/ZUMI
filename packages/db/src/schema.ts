@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
 import type {
   ScheduleConfig,
@@ -9,41 +10,65 @@ import type {
 } from "@zumi/types";
 import { user } from "./auth-schema";
 
-export const userSettings = sqliteTable("user_settings", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .unique()
-    .references(() => user.id, { onDelete: "cascade" }),
-  timezone: text("timezone").notNull().default("Asia/Tokyo"),
-  morningNotifyEnabled: integer("morning_notify_enabled", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  morningNotifyAt: text("morning_notify_at"), // "08:00"
-  eveningNotifyEnabled: integer("evening_notify_enabled", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  eveningNotifyAt: text("evening_notify_at"), // "21:00"
-  weeklySummaryEnabled: integer("weekly_summary_enabled", { mode: "boolean" })
-    .notNull()
-    .default(true),
-  weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"), // 送るのは週の最終日固定
-  weekStart: integer("week_start").$type<WeekStart>().notNull().default(1), // 1=月 / 0=日
-  onboardedAt: integer("onboarded_at", { mode: "timestamp" }), // null = オンボーディング未完了
-  channel: text("channel").$type<NotifyChannel>().notNull().default("WEB_PUSH"),
-  lineUserId: text("line_user_id"), // Pro のみ
-});
+export const userSettings = sqliteTable(
+  "user_settings",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
+    timezone: text("timezone").notNull().default("Asia/Tokyo"),
+    // true = アプリを開いた端末のブラウザの値で更新する / false = 設定画面で手で選んだ値を保つ
+    timezoneAuto: integer("timezone_auto", { mode: "boolean" }).notNull().default(true),
+    morningNotifyEnabled: integer("morning_notify_enabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    morningNotifyAt: text("morning_notify_at"), // "08:00"
+    eveningNotifyEnabled: integer("evening_notify_enabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    eveningNotifyAt: text("evening_notify_at"), // "21:00"
+    weeklySummaryEnabled: integer("weekly_summary_enabled", { mode: "boolean" })
+      .notNull()
+      .default(true),
+    weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"), // 送るのは週の最終日固定
+    weekStart: integer("week_start").$type<WeekStart>().notNull().default(1), // 1=月 / 0=日
+    onboardedAt: integer("onboarded_at", { mode: "timestamp" }), // null = オンボーディング未完了
+    channel: text("channel").$type<NotifyChannel>().notNull().default("WEB_PUSH"),
+    lineUserId: text("line_user_id"), // Pro のみ
+  },
+  // notify が毎分「この時刻に送る人」を引く（apps/notify の findSettingsAt）。OFF の行は
+  // 索引に入れない（週次は全員が既定の 20:00 を持つため、OFF の人まで読まないように）
+  (t) => ({
+    morningNotify: index("user_settings_morning_notify_idx")
+      .on(t.morningNotifyAt)
+      .where(sql`${t.morningNotifyEnabled} = 1`),
+    eveningNotify: index("user_settings_evening_notify_idx")
+      .on(t.eveningNotifyAt)
+      .where(sql`${t.eveningNotifyEnabled} = 1`),
+    weeklySummary: index("user_settings_weekly_summary_idx")
+      .on(t.weeklySummaryAt)
+      .where(sql`${t.weeklySummaryEnabled} = 1`),
+  }),
+);
 
-export const pushSubscriptions = sqliteTable("push_subscriptions", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  endpoint: text("endpoint").notNull().unique(),
-  p256dh: text("p256dh").notNull(),
-  auth: text("auth").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-});
+export const pushSubscriptions = sqliteTable(
+  "push_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (t) => ({
+    byUser: index("push_subscriptions_user_idx").on(t.userId),
+  }),
+);
 
 export const duties = sqliteTable(
   "duties",
