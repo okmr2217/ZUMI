@@ -20,12 +20,8 @@ const timezone = z
     return canonical;
   });
 
-/**
- * 設定画面から送る部分更新。送った項目だけを書き換える。
- * `timezone` だけを送ると手で選んだ扱い（`timezoneAuto: false`）になる。「自動」に戻すときは
- * `timezoneAuto: true` とその端末のブラウザの値を一緒に送る。`timezoneAuto` だけは送れない。
- */
-export const notificationSettingsPatchSchema = z
+/** 通知設定の各項目（すべて任意）。オンボーディングの保存（`lib/onboarding.ts`）でも使う。 */
+export const notificationSettingsFields = z
   .object({
     morningNotifyEnabled: z.boolean(),
     morningNotifyAt: time,
@@ -34,9 +30,17 @@ export const notificationSettingsPatchSchema = z
     weeklySummaryEnabled: z.boolean(),
     weeklySummaryAt: time,
     timezone,
-    timezoneAuto: z.boolean(),
   })
-  .partial()
+  .partial();
+
+/**
+ * 設定画面から送る部分更新。送った項目だけを書き換える。
+ * `timezone` だけを送ると手で選んだ扱い（`timezoneAuto: false`）になる。「自動」に戻すときは
+ * `timezoneAuto: true` とその端末のブラウザの値を一緒に送る。`timezoneAuto` だけは送れない。
+ * （`timezoneAuto` は設定画面だけの項目なので、オンボーディングと共有する `notificationSettingsFields` には入れない）
+ */
+export const notificationSettingsPatchSchema = notificationSettingsFields
+  .extend({ timezoneAuto: z.boolean().optional() })
   .strict()
   .refine((patch) => Object.keys(patch).length > 0)
   .refine((patch) => patch.timezoneAuto === undefined || patch.timezone !== undefined);

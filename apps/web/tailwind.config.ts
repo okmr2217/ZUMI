@@ -23,6 +23,9 @@ export default {
           base: "#F4EEE0",
           tint: "#FDF3EF",
           pill: "#F0ECE0",
+          // 今日タブの「そろそろ」（モックの --warn / --warn-bg）
+          warn: "#B07A2E",
+          "warn-bg": "#F3E6CE",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,6 +59,17 @@ export default {
       },
       fontFamily: {
         zumi: ['"Zen Kaku Gothic New"', '"Noto Sans JP"', "sans-serif"],
+      },
+      keyframes: {
+        // 今日タブの押印（モックにはアニメーションがないため、朱印が上から押される程度に留める）
+        stamp: {
+          "0%": { opacity: "0", transform: "scale(1.6) rotate(-8deg)" },
+          "60%": { opacity: "1", transform: "scale(0.94) rotate(-8deg)" },
+          "100%": { opacity: "1", transform: "scale(1) rotate(-8deg)" },
+        },
+      },
+      animation: {
+        stamp: "stamp 260ms cubic-bezier(.2,.8,.3,1) both",
       },
       borderRadius: {
         lg: "var(--radius)",

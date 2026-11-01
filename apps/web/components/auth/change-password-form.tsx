@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
+const INPUT =
+  "border-zumi-line bg-zumi-card focus:border-zumi-shu w-full rounded-[14px] border px-3.5 py-[11px] text-[14.5px] outline-none";
+const LABEL = "text-zumi-soft mb-2 block text-[11.5px] font-bold tracking-[.06em]";
+
+/** 設定モーダルの「パスワード変更」シートの中身。変更すると他の端末のセッションは切れる */
 export function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -40,24 +42,27 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <h2 className="text-sm font-semibold">パスワード変更</h2>
-
-      <div className="space-y-1">
-        <Label htmlFor="currentPassword">現在のパスワード</Label>
-        <Input
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div>
+        <label htmlFor="currentPassword" className={LABEL}>
+          現在のパスワード
+        </label>
+        <input
           id="currentPassword"
           type="password"
           required
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
           autoComplete="current-password"
+          className={INPUT}
         />
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="newPassword">新しいパスワード</Label>
-        <Input
+      <div>
+        <label htmlFor="newPassword" className={LABEL}>
+          新しいパスワード（8文字以上）
+        </label>
+        <input
           id="newPassword"
           type="password"
           required
@@ -65,12 +70,15 @@ export function ChangePasswordForm() {
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           autoComplete="new-password"
+          className={INPUT}
         />
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="confirmNewPassword">新しいパスワード（確認）</Label>
-        <Input
+      <div>
+        <label htmlFor="confirmNewPassword" className={LABEL}>
+          新しいパスワード（確認）
+        </label>
+        <input
           id="confirmNewPassword"
           type="password"
           required
@@ -78,15 +86,31 @@ export function ChangePasswordForm() {
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           autoComplete="new-password"
+          className={INPUT}
         />
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {success && <p className="text-sm text-muted-foreground">パスワードを変更しました。</p>}
+      {error && (
+        <p
+          role="alert"
+          className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+        >
+          {error}
+        </p>
+      )}
+      {success && (
+        <p role="status" className="text-zumi-soft text-[12.5px]">
+          パスワードを変更しました。他の端末ではログインし直してください。
+        </p>
+      )}
 
-      <Button type="submit" disabled={pending}>
-        {pending ? "変更中..." : "パスワードを変更"}
-      </Button>
+      <button
+        type="submit"
+        disabled={pending}
+        className="bg-zumi-shu w-full rounded-2xl p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
+      >
+        {pending ? "変更しています…" : "パスワードを変更する"}
+      </button>
     </form>
   );
 }

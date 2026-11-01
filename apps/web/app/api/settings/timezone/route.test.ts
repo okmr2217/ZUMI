@@ -10,6 +10,7 @@ vi.mock("@/lib/auth", () => ({
 
 const { POST } = await import("./route");
 const { PATCH } = await import("../notifications/route");
+const { POST: completeOnboarding } = await import("../onboarding/route");
 
 /** アプリを開いたときのブラウザの値での同期（`TimezoneSync`）。 */
 function sync(timezone: unknown) {
@@ -86,6 +87,19 @@ describe("POST /api/settings/timezone", () => {
     expect(await settings()).toEqual({ timezone: "Asia/Tokyo", timezone_auto: 1 });
     expect((await sync("europe/london")).status).toBe(204);
     expect(await settings()).toEqual({ timezone: "Europe/London", timezone_auto: 1 });
+  });
+
+  it("オンボーディングを通ったあとも自動のまま同期される", async () => {
+    const res = await completeOnboarding(
+      new Request("http://localhost/api/settings/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ morningNotifyEnabled: true, weekStart: 0 }),
+      }),
+    );
+    expect(res.status).toBe(204);
+    await sync("America/New_York");
+    expect(await settings()).toEqual({ timezone: "America/New_York", timezone_auto: 1 });
   });
 
   it("行がなければ自動として作る", async () => {
