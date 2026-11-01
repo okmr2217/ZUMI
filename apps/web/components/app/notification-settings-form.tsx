@@ -251,7 +251,8 @@ function ScheduleRow({
   );
 }
 
-function Toggle({
+/** ON/OFF のスイッチ（モックのトグル 36×21）。オンボーディングの通知の時刻でも使う */
+export function Toggle({
   checked,
   onChange,
   label,

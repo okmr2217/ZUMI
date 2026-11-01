@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { userSettings } from "@zumi/db/schema";
 import { getDb } from "./db";
 import { notificationSettingsFields } from "./notification-settings";
+import { weekStartSchema } from "./user-settings";
 import { DEFAULT_EVENING_AT, DEFAULT_MORNING_AT } from "./notification-defaults";
 
 /**
@@ -11,7 +12,7 @@ import { DEFAULT_EVENING_AT, DEFAULT_MORNING_AT } from "./notification-defaults"
  */
 export const onboardingInputSchema = notificationSettingsFields
   .omit({ timezone: true })
-  .extend({ weekStart: z.union([z.literal(0), z.literal(1)]) })
+  .extend({ weekStart: weekStartSchema })
   .partial()
   .strict();
 

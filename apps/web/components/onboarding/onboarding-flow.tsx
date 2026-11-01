@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { DutyTemplate, WeekStart } from "@zumi/types";
+import { toLocalDate, type DutyTemplate, type WeekStart } from "@zumi/types";
 import type { OnboardingInput } from "@/lib/onboarding";
 import { isIos, isStandalone } from "@/lib/push-client";
 import { usePushSubscription } from "@/lib/use-push-subscription";
@@ -12,6 +12,7 @@ import { dutyDraftFromTemplate } from "@/components/duty/duty-draft";
 import { TemplateGrid } from "@/components/duty/template-grid";
 import { IosInstallGuide } from "@/components/app/ios-install-guide";
 import { getBrowserTimezone } from "@/components/app/timezone-sync";
+import { Toggle } from "@/components/app/notification-settings-form";
 
 type Step = "duties" | "notify" | "install" | "permission";
 
@@ -110,8 +111,17 @@ const SECONDARY = "text-zumi-soft text-[12.5px] underline underline-offset-2 dis
 
 // ステップ1: やることを選ぶ ---------------------------------------------------------------
 
-/** 追加シートで開いている中身。`template: null` は「自由に追加する」 */
-type Selection = { template: DutyTemplate | null };
+/**
+ * 追加シートで開いている中身。`template: null` は「自由に追加する」。
+ * サーバーのタイムゾーンはまだ初期値（`TimezoneSync` が保存する前）のことがあるため、
+ * 開いた時点のブラウザのタイムゾーンで「今日」を決め直す。
+ */
+type Selection = { template: DutyTemplate | null; calendar: DutyCalendar };
+
+function browserCalendar(calendar: DutyCalendar): DutyCalendar {
+  const timeZone = getBrowserTimezone() || calendar.timeZone;
+  return { ...calendar, timeZone, today: toLocalDate(new Date(), timeZone) };
+}
 
 function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () => void }) {
   const [selection, setSelection] = useState<Selection | null>(null);
@@ -144,7 +154,7 @@ function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () =
 
       <div className="px-5 pt-[18px]">
         <TemplateGrid
-          onSelect={(template) => setSelection({ template })}
+          onSelect={(template) => setSelection({ template, calendar: browserCalendar(calendar) })}
           weekStart={calendar.weekStart}
           markedIds={addedIds}
         />
@@ -156,7 +166,7 @@ function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () =
         </button>
         <button
           type="button"
-          onClick={() => setSelection({ template: null })}
+          onClick={() => setSelection({ template: null, calendar: browserCalendar(calendar) })}
           className={SECONDARY}
         >
           自由に追加する
@@ -167,10 +177,10 @@ function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () =
         open={selection !== null}
         onClose={() => setSelection(null)}
         onCreated={handleCreated}
-        calendar={calendar}
+        calendar={selection?.calendar ?? calendar}
         initialDraft={
           selection?.template
-            ? dutyDraftFromTemplate(selection.template, calendar.today)
+            ? dutyDraftFromTemplate(selection.template, selection.calendar.today)
             : undefined
         }
       />
@@ -278,7 +288,7 @@ function NotifyStep({
                   }}
                   className="bg-zumi-base rounded-[20px] px-2.5 py-1 text-[13px] font-bold tabular-nums outline-none disabled:opacity-40"
                 />
-                <Switch
+                <Toggle
                   checked={enabled[row.key]}
                   label={row.label}
                   onChange={(on) => setEnabled((e) => ({ ...e, [row.key]: on }))}
@@ -350,37 +360,6 @@ function NotifyStep({
   );
 }
 
-function Switch({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      className={cn(
-        "relative h-[21px] w-9 shrink-0 rounded-[20px] transition-colors",
-        checked ? "bg-zumi-shu" : "bg-zumi-line",
-      )}
-    >
-      <span
-        className={cn(
-          "absolute top-0.5 h-[17px] w-[17px] rounded-full bg-white transition-[left]",
-          checked ? "left-[17px]" : "left-0.5",
-        )}
-      />
-    </button>
-  );
-}
-
 // ステップ3: ホーム画面に追加（iOS の Safari だけ） -------------------------------------
 
 function InstallStep({ onFinish }: { onFinish: () => void }) {
@@ -429,7 +408,7 @@ function PermissionStep({
         ? "ブラウザの設定で通知がブロックされています。アドレスバーのサイト設定から「許可」に変えると届くようになります。"
         : status === "unsupported" || status === "ios-install"
           ? "このブラウザは通知に対応していません。今日タブを開いて確かめてください。"
-          : "朝にその日のやること、夜にまだ済んでいないものをお知らせします。";
+          : "設定した時刻に、その日のやることや済んでいないものをお知らせします。";
 
   return (
     <>

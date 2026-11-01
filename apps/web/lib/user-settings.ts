@@ -46,10 +46,11 @@ export function canonicalizeTimeZone(timezone: string): string | null {
   }
 }
 
-/** 設定モーダルの「表示」から送る週の始まり（1=月曜 / 0=日曜）。 */
-export const displaySettingsPatchSchema = z
-  .object({ weekStart: z.union([z.literal(0), z.literal(1)]) })
-  .strict();
+/** 週の始まり（1=月曜 / 0=日曜） */
+export const weekStartSchema = z.union([z.literal(0), z.literal(1)]);
+
+/** 設定モーダルの「表示」から送る値 */
+export const displaySettingsPatchSchema = z.object({ weekStart: weekStartSchema }).strict();
 
 /**
  * 週の始まりを更新する。週N回・達成率・週次サマリーはこの区切りで集計し、
