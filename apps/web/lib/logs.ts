@@ -1,4 +1,5 @@
-import { and, asc, eq, getTableName, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { lastDoneBefore } from "@zumi/db/queries";
 import { duties, dutyPauses, logs } from "@zumi/db/schema";
 import {
   getWeekRange,
@@ -172,12 +173,6 @@ export async function deleteLog(
   return { ok: true };
 }
 
-/**
- * 相関サブクエリから外側の `duties.id` を指す参照。drizzle は単一テーブルの select 句で
- * 列名からテーブル名を省くため、`${duties.id}` のままだと内側の `logs.id` と解決されてしまう
- */
-const OUTER_DUTY_ID = sql`${sql.identifier(getTableName(duties))}.${sql.identifier(duties.id.name)}`;
-
 export interface DayDuty {
   duty: DutyRow;
   /** 期日計算の入力。`logs` は `date` を含む週の初日〜`date` と、`SINCE_LAST` の前回 DONE */
@@ -220,19 +215,9 @@ export async function loadDayDuties(
       .where(
         and(eq(logs.userId, userId), gte(logs.targetDate, rangeStart), lte(logs.targetDate, date)),
       ),
-    // SINCE_LAST の前回 DONE。Duty ごとに (duty_id, target_date) のインデックスを新しい順にたどる
+    // SINCE_LAST の前回 DONE（週より前の最新の DONE）
     db
-      .select({
-        dutyId: duties.id,
-        targetDate: sql<string | null>`(
-          select ${logs.targetDate} from ${logs}
-          where ${logs.dutyId} = ${OUTER_DUTY_ID}
-            and ${logs.status} = 'DONE'
-            and ${logs.targetDate} < ${rangeStart}
-          order by ${logs.targetDate} desc
-          limit 1
-        )`,
-      })
+      .select({ dutyId: duties.id, targetDate: lastDoneBefore(rangeStart) })
       .from(duties)
       .where(and(current, eq(duties.scheduleType, "SINCE_LAST"))),
   ]);
