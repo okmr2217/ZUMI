@@ -32,7 +32,7 @@ better-auth の実設定（メール+パスワード、メール認証必須、�
 
 - [x] `packages/db/schema.ts`: `userSettings` / `pushSubscriptions` / `duties` / `logs` テーブル定義
 - [x] better-auth 導入、Drizzle アダプタ設定（`user`/`session`/`account`/`verification`）
-- [x] `drizzle-kit generate` → `wrangler d1 migrations apply` のマイグレーションフロー確立（本番適用はオーナータスク、[OWNER-TASKS.md](./OWNER-TASKS.md) 参照）
+- [x] `drizzle-kit generate` → `wrangler d1 migrations apply` のマイグレーションフロー確立（フェーズ2以降の本番適用は指揮役セッションが行う。CLAUDE.md の「セッション運用」参照）
 - [x] メール+パスワードのサインアップ/ログイン/ログアウト API・画面
 - [x] メール認証（サインアップ時の確認メール送信・未認証時の利用制限）
 - [x] パスワードリセット（リセットメール送信 → トークン検証 → 再設定画面）

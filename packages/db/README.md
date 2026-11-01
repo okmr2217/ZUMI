@@ -28,5 +28,8 @@ README の「オーナーが手動で行う必要があるタスク」を参照�
 ```bash
 # 例（オーナーが手元で実行）
 wrangler d1 create zumi-db
-wrangler d1 migrations apply zumi-db --remote
 ```
+
+本番 D1 への migration 適用（`npm run migrate:remote`）は、フェーズ2以降は指揮役
+セッションが `main` へのマージ前に行う。手順はリポジトリルートの `CLAUDE.md` の
+「セッション運用」を参照。
