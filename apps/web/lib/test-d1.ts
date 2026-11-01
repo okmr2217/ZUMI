@@ -32,6 +32,8 @@ export async function createTestDb() {
 
   return {
     db,
+    /** D1 のバインディングそのもの（apps/notify の `createD1Store` に渡して突き合わせるため） */
+    d1: proxy.env.DB,
     async createUser(id: string) {
       await db.insert(user).values({ id, name: id, email: `${id}@example.com` });
       return id;

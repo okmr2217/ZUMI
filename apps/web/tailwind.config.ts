@@ -26,6 +26,10 @@ export default {
           // 今日タブの「そろそろ」（モックの --warn / --warn-bg）
           warn: "#B07A2E",
           "warn-bg": "#F3E6CE",
+          // 振り返りタブ（モックの朱の淡色・前週差分のチップ）
+          "shu-bg": "#F7DFD8",
+          success: "#5D7A49",
+          "success-bg": "#E4ECDD",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
