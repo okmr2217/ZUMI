@@ -45,11 +45,11 @@ better-auth の実設定（メール+パスワード、メール認証必須、�
 
 2026/11 に確定した仕様（テンプレート・アイコン・境界ルール・スキーマ変更）は [03](./03-duty-log-review-account.md) と [05](./05-tech-stack.md) を参照。
 
-- [ ] スキーマ変更のマイグレーション: `user_settings` に `weekStart`・`onboardedAt` を追加、`weeklySummaryWeekday` を削除、`duties.archivedAt` を追加、`duty_pauses` を新設
-- [ ] サインアップ時に `user_settings` の行を作成（better-auth `databaseHooks`）。アプリを開いたときにブラウザのタイムゾーンで更新
-- [ ] `ScheduleConfig` 型（`packages/types`）と6種のバリデーション（zod等）。`NTH_WEEK` は `every` = 2 固定、`MONTHLY` の `nth` は 1〜4 と -1（最終）
+- [x] スキーマ変更のマイグレーション: `user_settings` に `weekStart`・`onboardedAt` を追加、`weeklySummaryWeekday` を削除、`duties.archivedAt` を追加、`duty_pauses` を新設
+- [x] サインアップ時に `user_settings` の行を作成（better-auth `databaseHooks`）。アプリを開いたときにブラウザのタイムゾーンで更新
+- [x] `ScheduleConfig` 型（`packages/types`）と6種のバリデーション（zod等）。`NTH_WEEK` は `every` = 2 固定、`MONTHLY` の `nth` は 1〜4 と -1（最終）
 - [ ] Duty 作成/編集/一時停止/アーカイブ API（一時停止・再開で `duty_pauses` を開閉、アーカイブで `archivedAt` を記録）
-- [ ] プリセットアイコン（lucide から16〜24個）とテンプレート10件の定数定義（`packages/types`）
+- [x] プリセットアイコン（lucide から16〜24個）とテンプレート10件の定数定義（`packages/types`）
 - [ ] Duty 一覧画面（カード表示、作成順、`sortOrder` は保持するがDnD UIはv1.1へ）
 - [ ] Duty 追加シート（Duty タブ・テンプレート画面・オンボーディングで共通の部品）。上部に「テンプレートから作成する」リンク
 - [ ] テンプレート画面（通常の作成用。オンボーディングと同じレイアウト。カードをタップすると内容が入った追加シートが開く）

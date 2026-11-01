@@ -32,7 +32,7 @@ VALUES (
   '${dutyId}',
   '${userId}',
   '燃えるゴミ',
-  'trash',
+  'trash-2',
   'WEEKDAYS',
   '{"type":"WEEKDAYS","weekdays":[1,4]}',
   0,

@@ -1,5 +1,12 @@
 import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
-import type { ScheduleConfig, ScheduleType, DutyStatus, LogStatus, NotifyChannel } from "@zumi/types";
+import type {
+  ScheduleConfig,
+  ScheduleType,
+  DutyStatus,
+  LogStatus,
+  NotifyChannel,
+  WeekStart,
+} from "@zumi/types";
 import { user } from "./auth-schema";
 
 export const userSettings = sqliteTable("user_settings", {
@@ -20,8 +27,9 @@ export const userSettings = sqliteTable("user_settings", {
   weeklySummaryEnabled: integer("weekly_summary_enabled", { mode: "boolean" })
     .notNull()
     .default(true),
-  weeklySummaryWeekday: integer("weekly_summary_weekday").notNull().default(0), // 0=日
-  weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"),
+  weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"), // 送るのは週の最終日固定
+  weekStart: integer("week_start").$type<WeekStart>().notNull().default(1), // 1=月 / 0=日
+  onboardedAt: integer("onboarded_at", { mode: "timestamp" }), // null = オンボーディング未完了
   channel: text("channel").$type<NotifyChannel>().notNull().default("WEB_PUSH"),
   lineUserId: text("line_user_id"), // Pro のみ
 });
@@ -53,9 +61,26 @@ export const duties = sqliteTable(
     sortOrder: integer("sort_order").notNull().default(0),
     status: text("status").$type<DutyStatus>().notNull().default("ACTIVE"),
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    archivedAt: integer("archived_at", { mode: "timestamp" }),
   },
   (t) => ({
     byUserStatus: index("duties_user_status_idx").on(t.userId, t.status),
+  }),
+);
+
+// 一時停止の期間。過去の週の分母から PAUSED 期間を外すために使う
+export const dutyPauses = sqliteTable(
+  "duty_pauses",
+  {
+    id: text("id").primaryKey(),
+    dutyId: text("duty_id")
+      .notNull()
+      .references(() => duties.id, { onDelete: "cascade" }),
+    startDate: text("start_date").notNull(), // "2026-08-24"
+    endDate: text("end_date"), // null = 一時停止中
+  },
+  (t) => ({
+    byDuty: index("duty_pauses_duty_idx").on(t.dutyId),
   }),
 );
 

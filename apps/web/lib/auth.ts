@@ -7,6 +7,7 @@ import * as schema from "@zumi/db/schema";
 import { getDb } from "./db";
 import { sendEmail } from "./email";
 import { verificationEmail, resetPasswordEmail, deleteAccountEmail } from "./email-templates";
+import { createUserSettings } from "./user-settings";
 
 /**
  * better-auth 設定（メール＋パスワード、Drizzle アダプタ経由で D1 に保存）。
@@ -65,6 +66,15 @@ export function getAuth() {
     session: {
       expiresIn: 60 * 60 * 24 * 7,
       updateAge: 60 * 60 * 24,
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          after: async (user) => {
+            await createUserSettings(user.id);
+          },
+        },
+      },
     },
     plugins: [nextCookies()],
   });
