@@ -6,7 +6,7 @@ import type { NotificationSettings, NotificationSettingsPatch } from "@/lib/noti
 import { usePushSubscription, type PushStatus } from "@/lib/use-push-subscription";
 import { DEFAULT_EVENING_AT, DEFAULT_MORNING_AT } from "@/lib/notification-defaults";
 import { cn } from "@/lib/utils";
-import { getBrowserTimezone, isTimezoneManual, setTimezoneManual } from "./timezone-sync";
+import { getBrowserTimezone } from "./timezone-sync";
 
 // 寸法は画面モック（Settings.dc.html）の通知グループに合わせている。
 const INK = "text-zumi-ink";
@@ -23,6 +23,7 @@ function touchedKeys(patch: NotificationSettingsPatch): SettingsKey[] {
   const keys = Object.keys(patch) as SettingsKey[];
   if ("morningNotifyEnabled" in patch) keys.push("morningNotifyAt");
   if ("eveningNotifyEnabled" in patch) keys.push("eveningNotifyAt");
+  if ("timezone" in patch) keys.push("timezoneAuto");
   return keys;
 }
 
@@ -113,7 +114,11 @@ export function NotificationSettingsForm({
           onTimeChange={(value) => setDraft((d) => ({ ...d, weeklySummaryAt: value }))}
           onTimeCommit={() => commitTime("weeklySummaryAt")}
         />
-        <TimezoneRow timezone={draft.timezone} onSave={(timezone) => save({ timezone })} />
+        <TimezoneRow
+          timezone={draft.timezone}
+          auto={draft.timezoneAuto}
+          onSave={(timezone, timezoneAuto) => save({ timezone, timezoneAuto })}
+        />
       </div>
       {error && (
         <p role="alert" className="text-zumi-shu text-[11px]">
@@ -296,17 +301,17 @@ function Toggle({
 
 function TimezoneRow({
   timezone,
+  auto,
   onSave,
 }: {
   timezone: string;
-  onSave: (timezone: string) => Promise<boolean>;
+  auto: boolean;
+  onSave: (timezone: string, timezoneAuto: boolean) => Promise<boolean>;
 }) {
-  // 手で選んだかどうかは端末の localStorage にあるため、マウント後に読む。
-  const [manual, setManual] = useState(false);
+  // ブラウザの値はサーバーで描画した HTML と食い違わないよう、マウント後に読む。
   const [browserTimezone, setBrowserTimezone] = useState(timezone);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setManual(isTimezoneManual());
     setBrowserTimezone(getBrowserTimezone());
   }, []);
 
@@ -315,21 +320,19 @@ function TimezoneRow({
     return zones.includes(timezone) ? zones : [timezone, ...zones];
   }, [timezone]);
 
-  async function handleChange(value: string) {
-    const auto = value === AUTO_TIMEZONE;
-    const previous = manual;
-    // 保存中に選択が「自動」へ戻って見えないよう、先に切り替えて失敗したら戻す。
-    setManual(!auto);
-    if (await onSave(auto ? getBrowserTimezone() : value)) setTimezoneManual(!auto);
-    else setManual(previous);
+  // 自動に戻すときは、その場でこの端末のブラウザの値を入れる（次にアプリを開くまで待たない）。
+  // 保存中の見た目は `save` が draft を先に書き換え、失敗したら戻す。
+  function handleChange(value: string) {
+    if (value === AUTO_TIMEZONE) void onSave(getBrowserTimezone(), true);
+    else void onSave(value, false);
   }
 
   return (
-    <Row label="タイムゾーン" sub={manual ? "手動で設定しています" : "通知の時刻の基準"}>
+    <Row label="タイムゾーン" sub={auto ? "通知の時刻の基準" : "手動で設定しています"}>
       <label className={cn(PILL, "inline-flex items-center gap-[3px]")}>
         <select
-          value={manual ? timezone : AUTO_TIMEZONE}
-          onChange={(event) => void handleChange(event.target.value)}
+          value={auto ? AUTO_TIMEZONE : timezone}
+          onChange={(event) => handleChange(event.target.value)}
           aria-label="タイムゾーン"
           className="max-w-[150px] cursor-pointer appearance-none truncate bg-transparent font-[inherit] outline-none"
         >

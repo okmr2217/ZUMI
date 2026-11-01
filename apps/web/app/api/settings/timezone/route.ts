@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 
 /**
  * アプリを開いたときにブラウザのタイムゾーンを保存する（`TimezoneSync` から呼ぶ）。
- * 「今日」の判定と通知の配信時刻がこの値を前提にする。
+ * 「今日」の判定と通知の配信時刻がこの値を前提にする。設定画面で手で選んでいれば
+ * （`timezone_auto` が false）書き込まない。
  */
 export async function POST(request: Request) {
   const session = await getServerSession();
