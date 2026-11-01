@@ -5,6 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import * as schema from "@zumi/db/schema";
 import { getDb } from "./db";
+import { signupGate } from "./signup";
 import { sendEmail } from "./email";
 import { verificationEmail, resetPasswordEmail, deleteAccountEmail } from "./email-templates";
 
@@ -22,6 +23,7 @@ export function getAuth() {
   return betterAuth({
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
+    hooks: { before: signupGate },
     database: drizzleAdapter(getDb(), {
       provider: "sqlite",
       schema,

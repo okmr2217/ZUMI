@@ -208,6 +208,13 @@
 .zumi-lp .btn-primary:active { transform: translateY(0); }
 .zumi-lp .btn-primary:focus-visible { outline: 3px solid var(--vermillion); outline-offset: 3px; }
 .zumi-lp .btn-small { padding: 9px 18px; font-size: 0.82rem; }
+/* サインアップを閉じている間の CTA。押印前の朱枠のイメージで、押せないことが分かる見た目にする。 */
+.zumi-lp .btn-soon {
+  background: transparent;
+  color: var(--vermillion);
+  border: 1.5px dashed var(--vermillion);
+  cursor: default;
+}
 
 /* ============ hero ============ */
 .zumi-lp .hero {
