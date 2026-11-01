@@ -19,6 +19,8 @@
   --shadow: 0 1px 2px rgba(43, 38, 32, 0.06), 0 8px 24px -12px rgba(43, 38, 32, 0.22);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 
+  /* LP はライトモードのみ。OS がダークでもフォーム部品・スクロールバーをライトで描画させる */
+  color-scheme: light;
   background: var(--paper);
   color: var(--ink);
   font-family: "Noto Sans JP", "Zen Kaku Gothic New", sans-serif;
@@ -28,28 +30,6 @@
   overflow-x: hidden;
   word-break: keep-all;
   overflow-wrap: break-word;
-}
-
-@media (prefers-color-scheme: dark) {
-  .zumi-lp {
-    /* 背景は茶色に寄せすぎず、ほぼ無彩色のウォームグレーに抑える（紙の温かみはごく僅かに残す） */
-    --paper: #1c1a17;
-    --paper-raised: #252320;
-    --paper-sunken: #161412;
-    --ink: #ece7df;
-    --ink-soft: #aaa397;
-    --ink-faint: #767067;
-    --vermillion: #e2664a;
-    --vermillion-deep: #f08a6e;
-    --vermillion-soft: rgba(226, 102, 74, 0.16);
-    --warn: #d9a855;
-    --warn-bg: rgba(217, 168, 85, 0.14);
-    --success-bg: rgba(139, 179, 110, 0.16);
-    --success-text: #9cc27f;
-    --line: rgba(236, 231, 223, 0.12);
-    --line-strong: rgba(236, 231, 223, 0.22);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 28px -12px rgba(0, 0, 0, 0.6);
-  }
 }
 
 .zumi-lp * { box-sizing: border-box; }
@@ -66,9 +46,6 @@
   pointer-events: none;
   z-index: 500;
   mix-blend-mode: multiply;
-}
-@media (prefers-color-scheme: dark) {
-  .zumi-lp .grain { mix-blend-mode: overlay; }
 }
 
 .zumi-lp a { color: inherit; }
