@@ -50,9 +50,11 @@ async function getRegistration() {
 function waitForActive(registration: ServiceWorkerRegistration) {
   if (registration.active) return Promise.resolve();
   const worker = registration.installing ?? registration.waiting;
-  return new Promise<void>((resolve) => {
-    worker?.addEventListener("statechange", () => {
+  if (!worker) return Promise.reject(new Error("Service Worker が見つかりません"));
+  return new Promise<void>((resolve, reject) => {
+    worker.addEventListener("statechange", () => {
       if (worker.state === "activated") resolve();
+      if (worker.state === "redundant") reject(new Error("Service Worker の登録に失敗しました"));
     });
   });
 }

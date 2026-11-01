@@ -96,6 +96,13 @@ describe("PATCH /api/settings/notifications", () => {
     });
   });
 
+  it("user_settings の行がなければ作ってから保存する", async () => {
+    await ctx.env.DB!.prepare("DELETE FROM user_settings WHERE user_id = 'alice'").run();
+    const res = await patch({ eveningNotifyAt: "23:00" });
+    expect(res.status).toBe(200);
+    expect(await settings()).toMatchObject({ evening_notify_at: "23:00", timezone: "Asia/Tokyo" });
+  });
+
   it("タイムゾーンを正規の表記にそろえて保存する", async () => {
     const res = await patch({ timezone: "america/new_york" });
     expect(res.status).toBe(200);

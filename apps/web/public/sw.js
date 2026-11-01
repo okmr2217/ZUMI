@@ -69,11 +69,11 @@ self.addEventListener("notificationclick", (event) => {
       const same = windows.find((client) => client.url === target);
       if (same) return same.focus();
 
-      const appWindow = windows.find((client) => new URL(client.url).pathname.startsWith("/app"));
-      if (appWindow) {
-        const navigated = await appWindow.navigate(target).catch(() => null);
-        return (navigated ?? appWindow).focus();
-      }
+      const appWindow = windows.find((client) => /^\/app(\/|$)/.test(new URL(client.url).pathname));
+      // navigate() はこの worker が制御していないタブ（登録前から開いていたタブ）では
+      // 失敗するので、そのときは新しいウィンドウで開く。
+      const navigated = await appWindow?.navigate(target).catch(() => null);
+      if (navigated) return navigated.focus();
       return self.clients.openWindow(target);
     })(),
   );

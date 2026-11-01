@@ -18,6 +18,19 @@ const PILL =
 
 const AUTO_TIMEZONE = "auto";
 
+type SettingsKey = keyof NotificationSettings;
+
+function touchedKeys(patch: NotificationSettingsPatch): SettingsKey[] {
+  const keys = Object.keys(patch) as SettingsKey[];
+  if ("morningNotifyEnabled" in patch) keys.push("morningNotifyAt");
+  if ("eveningNotifyEnabled" in patch) keys.push("eveningNotifyAt");
+  return keys;
+}
+
+function pick(source: NotificationSettings, keys: SettingsKey[]): Partial<NotificationSettings> {
+  return Object.fromEntries(keys.map((key) => [key, source[key]]));
+}
+
 /**
  * 通知設定フォーム（この端末の許可・朝/夜/週次の ON/OFF と時刻・タイムゾーン）。
  * 変更はその場で保存する。設定モーダル（フェーズ7）にもこのまま載せられるよう、
@@ -35,6 +48,9 @@ export function NotificationSettingsForm({
   const [error, setError] = useState<string | null>(null);
 
   async function save(patch: NotificationSettingsPatch) {
+    // 保存の結果で書き換えるのは、送った項目（と ON にしたときに埋まる時刻）だけ。
+    // 他の行で編集中の時刻や、並行して保存中の項目を巻き戻さないため。
+    const keys = touchedKeys(patch);
     setDraft((current) => ({ ...current, ...patch }));
     setError(null);
     try {
@@ -45,12 +61,12 @@ export function NotificationSettingsForm({
       });
       if (!response.ok) throw new Error(`status ${response.status}`);
       const next: NotificationSettings = await response.json();
-      setSaved(next);
-      setDraft(next);
+      setSaved((current) => ({ ...current, ...pick(next, keys) }));
+      setDraft((current) => ({ ...current, ...pick(next, keys) }));
       return true;
     } catch (e) {
       console.error(e);
-      setDraft(saved);
+      setDraft((current) => ({ ...current, ...pick(saved, keys) }));
       setError("保存できませんでした。時間をおいて試してください。");
       return false;
     }
@@ -302,10 +318,11 @@ function TimezoneRow({
 
   async function handleChange(value: string) {
     const auto = value === AUTO_TIMEZONE;
-    if (await onSave(auto ? getBrowserTimezone() : value)) {
-      setTimezoneManual(!auto);
-      setManual(!auto);
-    }
+    const previous = manual;
+    // 保存中に選択が「自動」へ戻って見えないよう、先に切り替えて失敗したら戻す。
+    setManual(!auto);
+    if (await onSave(auto ? getBrowserTimezone() : value)) setTimezoneManual(!auto);
+    else setManual(previous);
   }
 
   return (

@@ -78,22 +78,32 @@ export async function updateNotificationSettings(
   userId: string,
   patch: NotificationSettingsPatch,
 ): Promise<NotificationSettings> {
-  const current = await getNotificationSettings(userId);
   const set: NotificationSettingsPatch = { ...patch };
 
   // 時刻が未設定のまま ON にされたら初期値で埋める。notify は時刻が null の行を送れない。
-  if (patch.morningNotifyEnabled && !(patch.morningNotifyAt ?? current.morningNotifyAt)) {
-    set.morningNotifyAt = DEFAULT_MORNING_AT;
-  }
-  if (patch.eveningNotifyEnabled && !(patch.eveningNotifyAt ?? current.eveningNotifyAt)) {
-    set.eveningNotifyAt = DEFAULT_EVENING_AT;
+  // 今の値を読むのは、時刻を送らずに ON にしたときだけ（行がなければここで作られる）。
+  if (
+    (patch.morningNotifyEnabled && !patch.morningNotifyAt) ||
+    (patch.eveningNotifyEnabled && !patch.eveningNotifyAt)
+  ) {
+    const current = await getNotificationSettings(userId);
+    if (patch.morningNotifyEnabled && !(patch.morningNotifyAt ?? current.morningNotifyAt)) {
+      set.morningNotifyAt = DEFAULT_MORNING_AT;
+    }
+    if (patch.eveningNotifyEnabled && !(patch.eveningNotifyAt ?? current.eveningNotifyAt)) {
+      set.eveningNotifyAt = DEFAULT_EVENING_AT;
+    }
   }
 
-  const [updated] = await getDb()
-    .update(userSettings)
-    .set(set)
-    .where(eq(userSettings.userId, userId))
-    .returning(columns);
+  const update = () =>
+    getDb().update(userSettings).set(set).where(eq(userSettings.userId, userId)).returning(columns);
+
+  let [updated] = await update();
+  if (!updated) {
+    // 行がない（作成フックの失敗など）ときは作ってから書き直す。
+    await getNotificationSettings(userId);
+    [updated] = await update();
+  }
   if (!updated) throw new Error("user_settings の行がありません");
   return updated;
 }
