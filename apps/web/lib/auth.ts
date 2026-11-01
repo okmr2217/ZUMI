@@ -7,6 +7,7 @@ import * as schema from "@zumi/db/schema";
 import { getDb } from "./db";
 import { sendEmail } from "./email";
 import { verificationEmail, resetPasswordEmail, deleteAccountEmail } from "./email-templates";
+import { createUserSettings } from "./user-settings";
 
 /**
  * better-auth 設定（メール＋パスワード、Drizzle アダプタ経由で D1 に保存）。
@@ -65,6 +66,19 @@ export function getAuth() {
     session: {
       expiresIn: 60 * 60 * 24 * 7,
       updateAge: 60 * 60 * 24,
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          // 失敗してもサインアップ（確認メール送信）は止めない。行がなければ
+          // アプリを開いたときのタイムゾーン同期（syncUserTimezone）で作り直される。
+          after: async (user) => {
+            await createUserSettings(user.id).catch((error) => {
+              console.error("user_settings の作成に失敗しました", error);
+            });
+          },
+        },
+      },
     },
     plugins: [nextCookies()],
   });
