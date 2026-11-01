@@ -30,12 +30,16 @@ export async function syncUserTimezone(userId: string, timezone: string) {
     });
 }
 
-/** IANA のタイムゾーン名として解釈できるか（`Intl` が知らない名前は RangeError になる） */
-export function isValidTimeZone(timezone: string): boolean {
+/**
+ * IANA のタイムゾーン名を正規の表記（例: `asia/tokyo` → `Asia/Tokyo`）にそろえる。
+ * `Intl` が解釈できない名前、および `+09:00` のようなオフセット表記は null を返す。
+ */
+export function canonicalizeTimeZone(timezone: string): string | null {
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: timezone });
-    return true;
+    const resolved = new Intl.DateTimeFormat("en-US", { timeZone: timezone }).resolvedOptions()
+      .timeZone;
+    return /^[+-]/.test(resolved) ? null : resolved;
   } catch {
-    return false;
+    return null;
   }
 }

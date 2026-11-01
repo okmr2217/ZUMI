@@ -70,8 +70,12 @@ export function getAuth() {
     databaseHooks: {
       user: {
         create: {
+          // 失敗してもサインアップ（確認メール送信）は止めない。行がなければ
+          // アプリを開いたときのタイムゾーン同期（syncUserTimezone）で作り直される。
           after: async (user) => {
-            await createUserSettings(user.id);
+            await createUserSettings(user.id).catch((error) => {
+              console.error("user_settings の作成に失敗しました", error);
+            });
           },
         },
       },

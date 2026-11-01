@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth";
-import { isValidTimeZone, syncUserTimezone } from "@/lib/user-settings";
+import { canonicalizeTimeZone, syncUserTimezone } from "@/lib/user-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +15,9 @@ export async function POST(request: Request) {
   }
 
   const body: unknown = await request.json().catch(() => null);
-  const timezone =
-    body && typeof body === "object" && "timezone" in body ? body.timezone : undefined;
-  if (typeof timezone !== "string" || timezone.length > 64 || !isValidTimeZone(timezone)) {
+  const raw = body && typeof body === "object" && "timezone" in body ? body.timezone : undefined;
+  const timezone = typeof raw === "string" && raw.length <= 64 ? canonicalizeTimeZone(raw) : null;
+  if (!timezone) {
     return NextResponse.json({ error: "invalid timezone" }, { status: 400 });
   }
 

@@ -94,15 +94,6 @@ export type ScheduleConfig = z.infer<typeof scheduleConfigSchema>;
 export type ScheduleType = ScheduleConfig["type"];
 export type MonthlyNth = z.infer<typeof monthlyByNthSchema>["nth"];
 
-export const SCHEDULE_TYPES = [
-  "DAILY",
-  "WEEKDAYS",
-  "NTH_WEEK",
-  "MONTHLY",
-  "WEEKLY_COUNT",
-  "SINCE_LAST",
-] as const satisfies readonly ScheduleType[];
-
 /** 期日確定型（今日が対象かが一意に決まる）かどうか */
 export const FIXED_DUE_SCHEDULE_TYPES: ReadonlySet<ScheduleType> = new Set([
   "DAILY",
