@@ -36,18 +36,18 @@
 | 認証 | better-auth（メール＋パスワード） |
 | スタイリング | Tailwind CSS + shadcn/ui |
 | 通知 | Web Push（VAPID）/ メール（Resend）/ LINE Messaging API（Pro） |
-| シェア画像生成 | `workers-og`（Satori） |
+| シェア画像生成 | `next/og`（Satori） |
 | モノレポ管理 | Turborepo |
 
 詳細は [docs/05-tech-stack.md](./docs/05-tech-stack.md) を参照。
 
 ## 現在の状況
 
-フェーズ0（プロジェクト基盤構築）・フェーズ1（認証+DBスキーマ）完了。better-auth に
-よるメール+パスワード認証（メール認証必須・パスワードリセット・退会）を実装済み。
+フェーズ0（プロジェクト基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）完了。
+better-auth によるメール+パスワード認証（メール認証必須・パスワードリセット・退会）を実装済み。
 実装は [docs/07-roadmap.md](./docs/07-roadmap.md) のフェーズ順
 （認証・DB → Duty CRUD → 今日タブ → 通知 → 振り返り → シェア画像 → 設定/オンボーディング → LP）
-に進める。次はフェーズ2（Duty タブ CRUD）。
+に進める。次はフェーズ2（Duty タブ CRUD）。再開前の未決事項は 2026/11 に確定し、各 docs に反映済み。
 
 ## リポジトリ構成
 
