@@ -3,6 +3,8 @@
 # `getCloudflareContext().env` 経由で読むため、.env ではなくこちらを使うこと。
 
 BETTER_AUTH_SECRET=
+# `next dev` では localhost のまま。`opennextjs-cloudflare preview`（wrangler dev）でログインを試すときは、
+# wrangler がカスタムドメインの設定に合わせて Origin を書き換えるため http://zumi.paritto.dev にする。
 BETTER_AUTH_URL=http://localhost:3000
 RESEND_API_KEY=
 # ローカルではサインアップを開いておく（未設定だと閉じる。wrangler.toml の [vars] より優先される）。

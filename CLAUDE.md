@@ -8,7 +8,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 
 前身は Habito（Vercel + Supabase + Prisma 構成）で、ZUMI では Cloudflare（Workers + D1 + Drizzle）に全面移行する。
 
-**現在の進捗: フェーズ0（基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）が完了し、`zumi.paritto.dev` に本番デプロイ済み。フェーズ2に着手済みで、S1（土台: スキーマ変更・`ScheduleConfig`/zod・アイコン/テンプレート・vitest）と S4（公開前のサインアップ制限）を `development` にマージ済み（`main` へは未リリース。本番 D1 への migration `0002_nebulous_rattler.sql` も未適用）。次は S2・S3・S5・S7。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
+**現在の進捗: フェーズ0（基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）が完了し、`zumi.paritto.dev` に本番デプロイ済み。フェーズ2・3に着手済みで、`development` には S1（土台: スキーマ変更・`ScheduleConfig`/zod・アイコン/テンプレート・vitest）、S3（期日計算の純粋関数とテスト）、S4（公開前のサインアップ制限）、Next.js 16 への更新、開発環境の小修正（ローカル D1 を `apps/web/.wrangler/state` に一本化・prettier）がマージ済み（`main` へは未リリース。本番 D1 への migration `0002_nebulous_rattler.sql` も未適用）。次は S2・S5・S7・S8。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
 
 ## ドキュメント構成
 
