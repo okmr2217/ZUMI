@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
 
+/** 設定モーダルの「退会」シートの中身。確認メールのリンクを開くと退会が完了する */
 export function DeleteAccountForm() {
-  const [confirming, setConfirming] = useState(false);
   const [sent, setSent] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,38 +25,37 @@ export function DeleteAccountForm() {
 
   if (sent) {
     return (
-      <p className="text-sm text-muted-foreground">
-        確認メールを送信しました。メール内のリンクを開くと退会が完了します。
+      <p role="status" className="text-[13px] leading-relaxed">
+        確認メールを送りました。メール内のリンクを開くと退会が完了します。
       </p>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-sm font-semibold text-destructive">退会</h2>
-      <p className="text-sm text-muted-foreground">
-        退会すると、登録した Duty・記録などすべてのデータが完全に削除されます。この操作は取り消せません。
+    <div className="flex flex-col gap-4">
+      <p className="text-[13px] leading-relaxed">
+        退会すると、登録した
+        Duty・記録などすべてのデータが完全に削除されます。この操作は取り消せません。
       </p>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {confirming ? (
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setConfirming(false)}>
-            キャンセル
-          </Button>
-          <Button
-            size="sm"
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={handleDelete}
-            disabled={pending}
-          >
-            {pending ? "送信中..." : "本当に退会する"}
-          </Button>
-        </div>
-      ) : (
-        <Button variant="outline" size="sm" onClick={() => setConfirming(true)}>
-          退会する
-        </Button>
+      <p className="text-zumi-soft text-[12px] leading-relaxed">
+        登録しているメールアドレスに確認メールを送ります。メール内のリンクを開くと退会が完了します。
+      </p>
+      {error && (
+        <p
+          role="alert"
+          className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+        >
+          {error}
+        </p>
       )}
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={pending}
+        className="border-zumi-shu-deep text-zumi-shu-deep w-full rounded-2xl border-[1.6px] p-[13px] text-[14px] font-bold disabled:opacity-40"
+      >
+        {pending ? "送信しています…" : "確認メールを送って退会する"}
+      </button>
     </div>
   );
 }

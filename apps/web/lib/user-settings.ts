@@ -1,4 +1,6 @@
+import { z } from "zod";
 import { sql } from "drizzle-orm";
+import type { WeekStart } from "@zumi/types";
 import { userSettings } from "@zumi/db/schema";
 import { getDb } from "./db";
 
@@ -42,4 +44,20 @@ export function canonicalizeTimeZone(timezone: string): string | null {
   } catch {
     return null;
   }
+}
+
+/** 設定モーダルの「表示」から送る週の始まり（1=月曜 / 0=日曜）。 */
+export const displaySettingsPatchSchema = z
+  .object({ weekStart: z.union([z.literal(0), z.literal(1)]) })
+  .strict();
+
+/**
+ * 週の始まりを更新する。週N回・達成率・週次サマリーはこの区切りで集計し、
+ * 過去の週も新しい区切りで再計算する（docs/03 の境界ルール）ので、ここでは値を書き換えるだけ。
+ */
+export async function updateWeekStart(userId: string, weekStart: WeekStart) {
+  await getDb()
+    .insert(userSettings)
+    .values({ id: crypto.randomUUID(), userId, weekStart })
+    .onConflictDoUpdate({ target: userSettings.userId, set: { weekStart } });
 }

@@ -20,8 +20,8 @@ const timezone = z
     return canonical;
   });
 
-/** 設定画面から送る部分更新。送った項目だけを書き換える。 */
-export const notificationSettingsPatchSchema = z
+/** 通知設定の各項目（すべて任意）。オンボーディングの保存（`lib/onboarding.ts`）でも使う。 */
+export const notificationSettingsFields = z
   .object({
     morningNotifyEnabled: z.boolean(),
     morningNotifyAt: time,
@@ -31,7 +31,10 @@ export const notificationSettingsPatchSchema = z
     weeklySummaryAt: time,
     timezone,
   })
-  .partial()
+  .partial();
+
+/** 設定画面から送る部分更新。送った項目だけを書き換える。 */
+export const notificationSettingsPatchSchema = notificationSettingsFields
   .strict()
   .refine((patch) => Object.keys(patch).length > 0);
 
