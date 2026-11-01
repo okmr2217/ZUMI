@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -86,7 +87,10 @@ export function getAuth() {
   });
 }
 
-/** Server Component / Route Handler からログイン中ユーザーのセッションを取得する。 */
-export async function getServerSession() {
+/**
+ * Server Component / Route Handler からログイン中ユーザーのセッションを取得する。
+ * レイアウトとページの両方から呼ばれるため、同じリクエスト内では `cache` で1回にまとめる。
+ */
+export const getServerSession = cache(async () => {
   return getAuth().api.getSession({ headers: await headers() });
-}
+});

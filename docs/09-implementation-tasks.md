@@ -48,13 +48,13 @@ better-auth の実設定（メール+パスワード、メール認証必須、�
 - [x] スキーマ変更のマイグレーション: `user_settings` に `weekStart`・`onboardedAt` を追加、`weeklySummaryWeekday` を削除、`duties.archivedAt` を追加、`duty_pauses` を新設
 - [x] サインアップ時に `user_settings` の行を作成（better-auth `databaseHooks`）。アプリを開いたときにブラウザのタイムゾーンで更新
 - [x] `ScheduleConfig` 型（`packages/types`）と6種のバリデーション（zod等）。`NTH_WEEK` は `every` = 2 固定、`MONTHLY` の `nth` は 1〜4 と -1（最終）
-- [ ] Duty 作成/編集/一時停止/アーカイブ API（一時停止・再開で `duty_pauses` を開閉、アーカイブで `archivedAt` を記録）
+- [x] Duty 作成/編集/一時停止/アーカイブ API（一時停止・再開で `duty_pauses` を開閉、アーカイブで `archivedAt` を記録）
 - [x] プリセットアイコン（lucide から16〜24個）とテンプレート10件の定数定義（`packages/types`）
-- [ ] Duty 一覧画面（カード表示、作成順、`sortOrder` は保持するがDnD UIはv1.1へ）
-- [ ] Duty 追加シート（Duty タブ・テンプレート画面・オンボーディングで共通の部品）。上部に「テンプレートから作成する」リンク
-- [ ] テンプレート画面（通常の作成用。オンボーディングと同じレイアウト。カードをタップすると内容が入った追加シートが開く）
-- [ ] 編集フォーム: 名前・アイコン・繰り返しタイプ6種の設定UI・前夜通知トグル・メモ欄有無
-- [ ] Duty 上限のチェックロジック（MVP中は10件。ACTIVE と PAUSED を数える。上限に達したら「アーカイブすると枠が空きます」と案内し、決済への誘導は行わない）
+- [x] Duty 一覧画面（カード表示、作成順、`sortOrder` は保持するがDnD UIはv1.1へ）
+- [x] Duty 追加シート（Duty タブ・テンプレート画面・オンボーディングで共通の部品）。上部に「テンプレートから作成する」リンク
+- [x] テンプレート画面（通常の作成用。オンボーディングと同じレイアウト。カードをタップすると内容が入った追加シートが開く）
+- [x] 編集フォーム: 名前・アイコン・繰り返しタイプ6種の設定UI・前夜通知トグル・メモ欄有無
+- [x] Duty 上限のチェックロジック（MVP中は10件。ACTIVE と PAUSED を数える。上限に達したら「アーカイブすると枠が空きます」と案内し、決済への誘導は行わない）
 
 ### フェーズ3: 今日タブ（期日計算ロジック）※実装上の山場
 
@@ -71,11 +71,11 @@ better-auth の実設定（メール+パスワード、メール認証必須、�
 
 - [x] Service Worker（`apps/web/public/sw.js`）: push イベント受信・通知表示
 - [x] Web Push 購読フロー（VAPID鍵生成、許可ボタン、`pushSubscriptions`保存）
-- [ ] `apps/notify` Cron Trigger（毎分実行）: タイムゾーン+通知時刻でユーザー抽出
-- [ ] 朝の日次まとめ通知（対象ゼロなら送らない。文面は [通知の文面](./02-notifications.md#通知の文面)）
-- [ ] 締め切りアラート（夜・未完了Duty）
-- [ ] 週次サマリー通知（週の最終日に、設定した時刻で送る）
-- [ ] 期日不確定型の通知組み込み判定をフェーズ3の共有ロジックで実装（web/notify不整合防止。`WEEKLY_COUNT` は残回数 ≥ 残り日数）
+- [x] `apps/notify` Cron Trigger（毎分実行）: タイムゾーン+通知時刻でユーザー抽出
+- [x] 朝の日次まとめ通知（対象ゼロなら送らない。文面は [通知の文面](./02-notifications.md#通知の文面)）
+- [x] 締め切りアラート（夜・未完了Duty）
+- [x] 週次サマリー通知（週の最終日に、設定した時刻で送る）
+- [x] 期日不確定型の通知組み込み判定をフェーズ3の共有ロジックで実装（web/notify不整合防止。`WEEKLY_COUNT` は残回数 ≥ 残り日数）
 - [x] 通知設定UI（許可ボタン、朝/夜/週次のON/OFF・時刻、タイムゾーン）
 
 **LINE Messaging API連携はこのフェーズ・MVPには含めない。** Pro プランの目玉機能として
@@ -117,10 +117,10 @@ Web Push のみで通知を成立させる。
 
 ### 横断: PWA対応
 
-- [ ] `manifest.json`（アイコン、テーマカラー、`display: standalone`）
+- [x] `manifest.json`（アイコン、テーマカラー、`display: standalone`）
 - [ ] Service Worker のキャッシュ戦略（最小限のオフライン対応）
 - [ ] iOS「ホーム画面に追加」導線UI（iOS Web Push制約の案内。オンボーディングのステップ3と共通）
-- [ ] iOS のスタンドアロン起動用 meta（`appleWebApp` と `apple-mobile-web-app-capable`。clipnote の `apps/web/src/app/layout.tsx` と同じ対応）、manifest のアイコン
+- [x] iOS のスタンドアロン起動用 meta（`appleWebApp` と `apple-mobile-web-app-capable`。clipnote の `apps/web/src/app/layout.tsx` と同じ対応）、manifest のアイコン
 - [ ] Lighthouse PWA監査・インストール可能性の確認
 
 ### 横断: 公開前のサインアップ制限（早めに対応）

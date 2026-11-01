@@ -1,14 +1,13 @@
-import { fileURLToPath } from "node:url";
+import path from "node:path";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
-    alias: { "@": fileURLToPath(new URL(".", import.meta.url)) },
+    alias: { "@": path.resolve(import.meta.dirname) },
   },
   test: {
-    include: ["**/*.test.ts"],
-    exclude: ["node_modules/**", ".next/**", ".open-next/**"],
-    // wrangler のローカル D1 の起動に数秒かかる。
+    include: ["{app,components,lib}/**/*.test.{ts,tsx}"],
+    // Miniflare（D1）の起動に数秒かかるため
     hookTimeout: 30_000,
   },
 });

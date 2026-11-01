@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestD1, insertTestUser } from "@/test/d1";
+import { createTestDb } from "@/lib/test-d1";
 
 const ctx = vi.hoisted(() => ({ env: {} as { DB?: D1Database }, userId: null as string | null }));
 
@@ -35,11 +35,11 @@ async function rows() {
 let dispose: () => Promise<void>;
 
 beforeAll(async () => {
-  const d1 = await createTestD1();
-  ctx.env.DB = d1.db;
-  dispose = d1.dispose;
-  await insertTestUser(d1.db, "alice");
-  await insertTestUser(d1.db, "bob");
+  const testDb = await createTestDb();
+  ctx.env.DB = testDb.db.$client;
+  dispose = testDb.dispose;
+  await testDb.createUser("alice");
+  await testDb.createUser("bob");
 });
 
 afterAll(() => dispose());

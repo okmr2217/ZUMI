@@ -40,7 +40,7 @@ try {
     title: "今日の Duty 3件",
     body: "ゴミ出し（可燃）・プロテイン・お風呂（そろそろ）",
     url,
-    tag: "test",
+    tag: "zumi-test",
   });
 
   for (const row of results) {

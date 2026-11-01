@@ -8,7 +8,13 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://zumi.paritto.dev"),
   title,
   description,
-  manifest: "/manifest.webmanifest",
+  // manifest は app/manifest.ts、アイコンは app/favicon.ico・app/apple-icon.png から自動で <head> に入る
+  appleWebApp: {
+    capable: true,
+    title: "ZUMI",
+    // black-translucent だと本文がステータスバーの下に潜るため、既定の不透明なバーにする
+    statusBarStyle: "default",
+  },
   openGraph: {
     title,
     description,
@@ -22,10 +28,19 @@ export const metadata: Metadata = {
     title,
     description,
   },
+  other: {
+    // Next は mobile-web-app-capable しか出力しない。iOS の古いバージョンは
+    // apple- 付きの名前でしかスタンドアロン起動と判定しないため、併記する
+    "apple-mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1917",
+  // manifest の theme_color と同じ生成り地
+  themeColor: "#faf6ef",
+  // ホーム画面アプリでホームインジケーター等の safe-area を env() で取れるようにする。
+  // 余白は globals.css の pt-safe / pb-safe / px-safe で各画面が付ける
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

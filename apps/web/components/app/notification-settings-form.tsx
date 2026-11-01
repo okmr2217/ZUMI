@@ -8,13 +8,12 @@ import { DEFAULT_EVENING_AT, DEFAULT_MORNING_AT } from "@/lib/notification-defau
 import { cn } from "@/lib/utils";
 import { getBrowserTimezone, isTimezoneManual, setTimezoneManual } from "./timezone-sync";
 
-// 色・寸法は画面モック（Settings.dc.html）の通知グループに合わせている。
-// アプリ共通のトークンができたら置き換える。
-const INK = "text-[#2B2620]";
-const INK_SOFT = "text-[#8A8072]";
-const LINE = "border-[#E7DFCE]";
+// 寸法は画面モック（Settings.dc.html）の通知グループに合わせている。
+const INK = "text-zumi-ink";
+const INK_SOFT = "text-zumi-soft";
+const LINE = "border-zumi-line";
 const PILL =
-  "rounded-[20px] bg-[#F4EEE0] py-1 pl-2.5 pr-[9px] text-[11.5px] font-bold text-[#2B2620]";
+  "rounded-[20px] bg-zumi-base py-1 pl-2.5 pr-[9px] text-[11.5px] font-bold text-zumi-ink";
 
 const AUTO_TIMEZONE = "auto";
 
@@ -84,7 +83,7 @@ export function NotificationSettingsForm({
   return (
     <section className="flex flex-col gap-2">
       <h2 className={cn("text-[11.5px] font-bold tracking-[.06em]", INK_SOFT)}>通知</h2>
-      <div className={cn("overflow-hidden rounded-2xl border bg-white", LINE)}>
+      <div className={cn("bg-zumi-card overflow-hidden rounded-2xl border", LINE)}>
         <DevicePushRow vapidPublicKey={vapidPublicKey} />
         <ScheduleRow
           label="朝の通知"
@@ -117,7 +116,7 @@ export function NotificationSettingsForm({
         <TimezoneRow timezone={draft.timezone} onSave={(timezone) => save({ timezone })} />
       </div>
       {error && (
-        <p role="alert" className="text-[11px] text-[#C8402A]">
+        <p role="alert" className="text-zumi-shu text-[11px]">
           {error}
         </p>
       )}
@@ -170,7 +169,7 @@ function DevicePushRow({ vapidPublicKey }: { vapidPublicKey: string | null }) {
         アドレスバーのサイト設定から、通知を「許可」に変えてください。
       </p>
     ) : error ? (
-      <p role="alert" className="mt-2 text-[11px] text-[#C8402A]">
+      <p role="alert" className="text-zumi-shu mt-2 text-[11px]">
         {error}
       </p>
     ) : null;
@@ -182,7 +181,7 @@ function DevicePushRow({ vapidPublicKey }: { vapidPublicKey: string | null }) {
           type="button"
           onClick={subscribe}
           disabled={busy}
-          className="rounded-[20px] bg-[#C8402A] px-3 py-1.5 text-[11.5px] font-bold text-white disabled:opacity-50"
+          className="bg-zumi-shu rounded-[20px] px-3 py-1.5 text-[11.5px] font-bold text-white disabled:opacity-50"
         >
           許可する
         </button>
@@ -206,7 +205,7 @@ function IosInstallGuide() {
   return (
     <ol
       className={cn(
-        "mt-2 list-decimal space-y-0.5 rounded-xl bg-[#FAF6EF] py-2 pl-7 pr-3 text-[11px] leading-relaxed",
+        "bg-zumi-bg mt-2 list-decimal space-y-0.5 rounded-xl py-2 pl-7 pr-3 text-[11px] leading-relaxed",
         INK,
       )}
     >
@@ -282,7 +281,7 @@ function Toggle({
       onClick={() => onChange(!checked)}
       className={cn(
         "relative h-[21px] w-9 rounded-[20px] transition-colors",
-        checked ? "bg-[#C8402A]" : "bg-[#E7DFCE]",
+        checked ? "bg-zumi-shu" : "bg-zumi-line",
       )}
     >
       <span

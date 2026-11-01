@@ -7,10 +7,10 @@
 // push のペイロード（apps/notify が web-push で送る JSON）:
 //   { "title": string, "body"?: string, "url"?: string, "tag"?: string }
 //   - url: タップで開く同一オリジンのパス（例: "/app"、振り返りタブ）。省略時は "/app"
-//   - tag: 同じ tag の通知は上書きされる（例: "morning" / "evening" / "weekly"）
+//   - tag: 同じ tag の通知は上書きされる（apps/notify は "zumi-morning" / "zumi-evening" / "zumi-weekly"）
 
 const DEFAULT_URL = "/app";
-const NOTIFICATION_ICON = "/icon-192.png";
+const NOTIFICATION_ICON = "/icons/icon-192.png";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

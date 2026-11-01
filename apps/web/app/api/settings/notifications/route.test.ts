@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestD1, insertTestUser } from "@/test/d1";
+import { createTestDb } from "@/lib/test-d1";
 
 const ctx = vi.hoisted(() => ({ env: {} as { DB?: D1Database }, userId: null as string | null }));
 
@@ -33,10 +33,23 @@ async function settings(userId = "alice") {
 
 let dispose: () => Promise<void>;
 
+/** サインアップ直後と同じ状態（user と初期値の user_settings）を作る。 */
+async function insertUser(id: string) {
+  const db = ctx.env.DB!;
+  await db
+    .prepare("INSERT INTO user (id, name, email) VALUES (?, ?, ?)")
+    .bind(id, id, `${id}@example.com`)
+    .run();
+  await db
+    .prepare("INSERT INTO user_settings (id, user_id) VALUES (?, ?)")
+    .bind(`settings-${id}`, id)
+    .run();
+}
+
 beforeAll(async () => {
-  const d1 = await createTestD1();
-  ctx.env.DB = d1.db;
-  dispose = d1.dispose;
+  const testDb = await createTestDb();
+  ctx.env.DB = testDb.db.$client;
+  dispose = testDb.dispose;
 });
 
 afterAll(() => dispose());
@@ -44,8 +57,8 @@ afterAll(() => dispose());
 beforeEach(async () => {
   ctx.userId = "alice";
   await ctx.env.DB!.prepare("DELETE FROM user").run();
-  await insertTestUser(ctx.env.DB!, "alice");
-  await insertTestUser(ctx.env.DB!, "bob");
+  await insertUser("alice");
+  await insertUser("bob");
 });
 
 describe("PATCH /api/settings/notifications", () => {
