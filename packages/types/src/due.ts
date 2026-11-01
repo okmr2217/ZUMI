@@ -168,15 +168,21 @@ export interface SinceLastStatus {
 
 /** `SINCE_LAST` の `date` 時点の状態。他のタイプなら null */
 export function getSinceLastStatus(input: DutyScheduleInput, date: string): SinceLastStatus | null {
+  return computeSinceLastStatus(input, date, createActivityChecker(input));
+}
+
+function computeSinceLastStatus(
+  input: DutyScheduleInput,
+  date: string,
+  isActive: ActivityChecker,
+): SinceLastStatus | null {
   const config = input.duty.scheduleConfig;
   if (config.type !== "SINCE_LAST") return null;
   // SKIP は起点にしない（「前回完了から N 日」のため）。一時停止中に付いた DONE も起点には使う
   const lastDone = findLastDone(getDoneDates(input.logs), date, false);
   const daysSinceLastDone = lastDone === null ? null : diffInDays(lastDone, date);
   return {
-    overdue:
-      isDutyActiveOn(input, date) &&
-      (daysSinceLastDone === null || daysSinceLastDone >= config.days),
+    overdue: isActive(date) && (daysSinceLastDone === null || daysSinceLastDone >= config.days),
     daysSinceLastDone,
   };
 }
@@ -227,9 +233,16 @@ export function getWeeklyCountStatus(
   input: DutyScheduleInput,
   date: string,
 ): WeeklyCountStatus | null {
+  return computeWeeklyCountStatus(input, date, createActivityChecker(input));
+}
+
+function computeWeeklyCountStatus(
+  input: DutyScheduleInput,
+  date: string,
+  isActive: ActivityChecker,
+): WeeklyCountStatus | null {
   const config = input.duty.scheduleConfig;
   if (config.type !== "WEEKLY_COUNT") return null;
-  const isActive = createActivityChecker(input);
   const week = getWeekRange(date, input.weekStart);
   const target = getWeeklyTarget(config.timesPerWeek, eachDate(week.start, week.end), isActive);
   const doneCount = countDoneBetween(
@@ -272,18 +285,21 @@ export type DutyDayEvaluation =
 /** Duty が `date` に今日タブのどのセクションに出るかと、その日のログ */
 export function evaluateDutyOn(input: DutyScheduleInput, date: string): DutyDayEvaluation {
   const log = getLogOn(input.logs, date);
+  const isActive = createActivityChecker(input);
   const config = input.duty.scheduleConfig;
   if (config.type === "SINCE_LAST") {
-    const status = getSinceLastStatus(input, date)!;
+    const status = computeSinceLastStatus(input, date, isActive)!;
     return status.overdue ? { section: "SOON", log, ...status } : { section: null, log };
   }
   if (config.type === "WEEKLY_COUNT") {
-    const status = getWeeklyCountStatus(input, date)!;
-    return isDutyActiveOn(input, date) && status.remaining >= 1
+    const status = computeWeeklyCountStatus(input, date, isActive)!;
+    return isActive(date) && status.remaining >= 1
       ? { section: "THIS_WEEK", log, ...status }
       : { section: null, log };
   }
-  return isDueOn(input, date) ? { section: "TODAY", log } : { section: null, log };
+  return matchesFixedSchedule(config, date, input.weekStart) && isActive(date)
+    ? { section: "TODAY", log }
+    : { section: null, log };
 }
 
 /**
@@ -320,6 +336,9 @@ export interface Achievement {
  *
  * 一時停止期間・アーカイブした日以降・作成日より前は分母にも分子にも含めない。
  * 週がまるごと `asOf` より後なら `{ done: 0, total: 0 }`。
+ *
+ * `logs` はその週の分に加え、`SINCE_LAST` では週より前の最新の DONE も含めること
+ * （週末時点の催促を判定するため。欠けると「DONE が1件もない」とみなされ +1 される）。
  */
 export function getWeeklyAchievement(
   input: DutyScheduleInput,
@@ -342,7 +361,8 @@ export function getWeeklyAchievement(
     case "SINCE_LAST": {
       const done = countDoneBetween(doneDates, week.start, last, isActive);
       // 催促の回数はログから導出する: 週内の完了数 + 週末時点で催促が続いていれば 1
-      const stillOverdue = getSinceLastStatus(input, last)!.overdue && !doneDates.has(last);
+      const stillOverdue =
+        computeSinceLastStatus(input, last, isActive)!.overdue && !doneDates.has(last);
       return { done, total: done + (stillOverdue ? 1 : 0) };
     }
     default: {
@@ -387,7 +407,7 @@ export function getNextDue(input: DutyScheduleInput, from: string): NextDue | nu
   switch (config.type) {
     case "WEEKLY_COUNT": {
       if (!isActive(from)) return null;
-      const status = getWeeklyCountStatus(input, from)!;
+      const status = computeWeeklyCountStatus(input, from, isActive)!;
       const doneToday = getDoneDates(input.logs).has(from) ? 1 : 0;
       return {
         type: "WEEKLY_COUNT",
