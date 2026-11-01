@@ -6,6 +6,8 @@ import type { NotificationSettings, NotificationSettingsPatch } from "@/lib/noti
 import { usePushSubscription, type PushStatus } from "@/lib/use-push-subscription";
 import { DEFAULT_EVENING_AT, DEFAULT_MORNING_AT } from "@/lib/notification-defaults";
 import { cn } from "@/lib/utils";
+import type { WeekStart } from "@zumi/types";
+import { IosInstallGuide } from "./ios-install-guide";
 import { getBrowserTimezone, isTimezoneManual, setTimezoneManual } from "./timezone-sync";
 
 // 寸法は画面モック（Settings.dc.html）の通知グループに合わせている。
@@ -38,9 +40,12 @@ function pick(source: NotificationSettings, keys: SettingsKey[]): Partial<Notifi
 export function NotificationSettingsForm({
   initial,
   vapidPublicKey,
+  weekStart,
 }: {
   initial: NotificationSettings;
   vapidPublicKey: string | null;
+  /** 設定モーダルの「表示」で変えた週の始まり。省略すると `initial` の値を使う */
+  weekStart?: WeekStart;
 }) {
   const [saved, setSaved] = useState(initial);
   const [draft, setDraft] = useState(initial);
@@ -78,7 +83,7 @@ export function NotificationSettingsForm({
   }
 
   // 週次サマリーは週の最終日に送る（週の始まりが月曜なら日曜）。曜日は選ばせない。
-  const weeklyDay = draft.weekStart === 1 ? "日曜" : "土曜";
+  const weeklyDay = (weekStart ?? draft.weekStart) === 1 ? "日曜" : "土曜";
 
   return (
     <section className="flex flex-col gap-2">
@@ -163,7 +168,7 @@ function DevicePushRow({ vapidPublicKey }: { vapidPublicKey: string | null }) {
 
   const footer =
     status === "ios-install" ? (
-      <IosInstallGuide />
+      <IosInstallGuide variant="compact" className="mt-2" />
     ) : status === "denied" ? (
       <p className={cn("mt-2 text-[11px] leading-relaxed", INK_SOFT)}>
         アドレスバーのサイト設定から、通知を「許可」に変えてください。
@@ -197,23 +202,6 @@ function DevicePushRow({ vapidPublicKey }: { vapidPublicKey: string | null }) {
         </button>
       )}
     </Row>
-  );
-}
-
-/** iOS の Safari ではホーム画面に追加しないと Web Push を受け取れない（docs/02）。 */
-function IosInstallGuide() {
-  return (
-    <ol
-      className={cn(
-        "bg-zumi-bg mt-2 list-decimal space-y-0.5 rounded-xl py-2 pl-7 pr-3 text-[11px] leading-relaxed",
-        INK,
-      )}
-    >
-      <li>Safari の共有ボタンをタップ</li>
-      <li>「ホーム画面に追加」を選ぶ</li>
-      <li>「Webアプリとして開く」をオンのまま「追加」</li>
-      <li>ホーム画面のアプリを開き、ログインし直してから通知を許可</li>
-    </ol>
   );
 }
 
@@ -263,7 +251,8 @@ function ScheduleRow({
   );
 }
 
-function Toggle({
+/** ON/OFF のスイッチ（モックのトグル 36×21）。オンボーディングの通知の時刻でも使う */
+export function Toggle({
   checked,
   onChange,
   label,

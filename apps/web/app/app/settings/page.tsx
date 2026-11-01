@@ -1,42 +1,33 @@
-import { getServerSession } from "@/lib/auth";
-import { ChangePasswordForm } from "@/components/auth/change-password-form";
-import { DeleteAccountForm } from "@/components/auth/delete-account-form";
-import { SignOutButton } from "@/components/auth/sign-out-button";
-import { NotificationSettingsForm } from "@/components/app/notification-settings-form";
-import { getNotificationSettings } from "@/lib/notification-settings";
-import { getVapidPublicKey } from "@/lib/vapid";
+import Link from "next/link";
+import { X } from "lucide-react";
+import { PageHeader } from "@/components/app/page-header";
+import { SettingsPanel } from "@/components/settings/settings-panel";
+import { getSettingsPanelData } from "@/lib/settings-page-data";
 
+/**
+ * `/app/settings` を直接開いた（再読み込みした）ときの設定。ふだんは今日タブの歯車から
+ * モーダル（`@modal/(.)settings`）で開くので、同じ中身をページとして出す。
+ */
 export default async function SettingsPage() {
-  const session = await getServerSession();
-  const notificationSettings = session ? await getNotificationSettings(session.user.id) : null;
+  const data = await getSettingsPanelData();
 
   return (
-    <main className="mx-auto max-w-sm space-y-8 p-6">
-      <h1 className="text-xl font-semibold">設定</h1>
-
-      {notificationSettings && (
-        <NotificationSettingsForm
-          initial={notificationSettings}
-          vapidPublicKey={getVapidPublicKey()}
-        />
-      )}
-
-      <section className="space-y-1">
-        <h2 className="text-sm font-semibold">アカウント</h2>
-        <p className="text-sm text-muted-foreground">{session?.user.email}</p>
-        {/* ヘッダーをタブごとの見出しに置き換えたため、ログアウトはここに置く */}
-        <div className="pt-2">
-          <SignOutButton />
-        </div>
-      </section>
-
-      <section className="border-border border-t pt-6">
-        <ChangePasswordForm />
-      </section>
-
-      <section className="border-border border-t pt-6">
-        <DeleteAccountForm />
-      </section>
+    <main>
+      <PageHeader
+        title="設定"
+        action={
+          <Link
+            href="/app"
+            aria-label="閉じる"
+            className="bg-zumi-card text-zumi-soft flex size-[30px] items-center justify-center rounded-full"
+          >
+            <X className="size-3.5" strokeWidth={1.8} aria-hidden />
+          </Link>
+        }
+      />
+      <div className="px-[22px] pt-4">
+        <SettingsPanel {...data} />
+      </div>
     </main>
   );
 }

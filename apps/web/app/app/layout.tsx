@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@/lib/auth";
+import { needsOnboarding } from "@/lib/onboarding";
 import { TimezoneSync } from "@/components/app/timezone-sync";
 import { ServiceWorkerRegister } from "@/components/app/service-worker-register";
 import { TabBar } from "@/components/app/tab-bar";
@@ -8,11 +9,22 @@ import { TabBar } from "@/components/app/tab-bar";
 // `/app` 配下は静的プリレンダリング対象から外す。
 export const dynamic = "force-dynamic";
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}) {
   const session = await getServerSession();
 
   if (!session) {
     redirect("/login");
+  }
+
+  // オンボーディング（ステップ2）を終えるか飛ばすまでは、`/app` を開くたびにオンボーディングへ送る（docs/03）
+  if (await needsOnboarding(session.user.id)) {
+    redirect("/onboarding");
   }
 
   // 各タブの見出しはページ側で持つ。下端はタブバー（66px + セーフエリア）に覆われるため余白を空ける
@@ -24,6 +36,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {children}
       </div>
       <TabBar />
+      {/* 今日タブの歯車から開く設定モーダル（`@modal/(.)settings`） */}
+      {modal}
     </div>
   );
 }

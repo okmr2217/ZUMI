@@ -31,7 +31,10 @@ export function BottomSheet({
     <dialog
       ref={ref}
       aria-label={title}
-      onClose={onClose}
+      onClose={(event) => {
+        // React は close を親の要素へも伝えるため、中に重ねたシートが閉じたときは無視する
+        if (event.target === event.currentTarget) onClose();
+      }}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
