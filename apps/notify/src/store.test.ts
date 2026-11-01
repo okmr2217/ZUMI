@@ -1,5 +1,4 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getPlatformProxy, type PlatformProxy } from "wrangler";
 import { createD1Store, type NotifyStore } from "./store";
@@ -9,7 +8,7 @@ import { createD1Store, type NotifyStore } from "./store";
  * packages/db の migration を流し、`createD1Store` を本物のクエリで動かす。
  */
 
-const MIGRATIONS_DIR = join(import.meta.dirname, "../../../packages/db/migrations");
+const MIGRATIONS_DIR = new URL("../../../packages/db/migrations/", import.meta.url);
 
 let proxy: PlatformProxy<{ DB: D1Database }>;
 let db: D1Database;
@@ -20,7 +19,7 @@ async function migrate() {
     .filter((file) => file.endsWith(".sql"))
     .sort();
   for (const file of files) {
-    const statements = readFileSync(join(MIGRATIONS_DIR, file), "utf8")
+    const statements = readFileSync(new URL(file, MIGRATIONS_DIR), "utf8")
       .split("--> statement-breakpoint")
       .map((statement) => statement.trim())
       .filter(Boolean);

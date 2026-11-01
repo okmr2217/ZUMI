@@ -146,8 +146,14 @@ async function notifyUser(deps: NotifyDeps, settings: NotifySettings, instant: D
           break;
         case "GONE":
           gone.add(subscription.id);
-          await deps.store.deleteSubscription(subscription.id);
-          deps.log("notify.subscription_removed", { ...context, status: result.status });
+          try {
+            await deps.store.deleteSubscription(subscription.id);
+            deps.log("notify.subscription_removed", { ...context, status: result.status });
+          } catch (error) {
+            // 削除に失敗しても次の Cron でまた 404/410 が返って消せるため、他の端末への送信を続ける
+            deps.log("notify.subscription_remove_failed", { ...context, error: String(error) });
+            deps.captureException(error, context);
+          }
           break;
         case "FAILED":
           deps.log("notify.send_failed", {

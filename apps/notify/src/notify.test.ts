@@ -186,6 +186,21 @@ describe("runNotificationTick", () => {
     expect(deps.captureException).not.toHaveBeenCalled();
   });
 
+  it("購読の削除に失敗しても、他の端末への送信は続ける", async () => {
+    const { deps, store, send } = setup({
+      settings: [settings("u1")],
+      subscriptions: { u1: [subscription("gone"), subscription("ok")] },
+    });
+    send.mockImplementation(async (target) =>
+      target.endpoint.endsWith("/gone") ? { type: "GONE", status: 410 } : { type: "SENT" },
+    );
+    store.deleteSubscription.mockRejectedValue(new Error("D1 error"));
+    const result = await runNotificationTick(deps, SUNDAY_2000_JST);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(result.failedUsers).toBe(0);
+    expect(deps.captureException).toHaveBeenCalledTimes(1);
+  });
+
   it("鍵の設定ミスなど 4xx の失敗と通信エラーは Sentry に送り、他の端末への送信は続ける", async () => {
     const { deps, send } = setup({
       settings: [settings("u1")],

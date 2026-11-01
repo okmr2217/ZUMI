@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/cloudflare";
 import { runNotificationTick, type PushSender } from "./notify";
 import { createD1Store } from "./store";
-import { createVapidSigner, sendPush } from "./webpush";
+import { createVapidSigner, sendPush, type VapidSigner } from "./webpush";
 
 export interface Env {
   DB: D1Database;
@@ -45,16 +45,26 @@ export default Sentry.withSentry<ExportedHandler<Env>>(
   },
 );
 
-/** VAPID 鍵が未設定なら null（送信せず、文面の生成とログまで行う） */
+/**
+ * VAPID 鍵が未設定・不正なら null（送信せず、文面の生成とログまで行う）。
+ * 鍵の形式ミスで抽出まで止まると、何が送られるはずだったかも分からなくなるため
+ */
 async function createSender(env: Env, now: Date): Promise<PushSender | null> {
   if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) {
     console.warn("zumi-notify: VAPID 鍵が未設定のため送信しません");
     return null;
   }
-  const signer = await createVapidSigner({
-    publicKey: env.VAPID_PUBLIC_KEY,
-    privateKey: env.VAPID_PRIVATE_KEY,
-    subject: env.VAPID_SUBJECT,
-  });
+  let signer: VapidSigner;
+  try {
+    signer = await createVapidSigner({
+      publicKey: env.VAPID_PUBLIC_KEY,
+      privateKey: env.VAPID_PRIVATE_KEY,
+      subject: env.VAPID_SUBJECT,
+    });
+  } catch (error) {
+    console.error("zumi-notify: VAPID 鍵が不正なため送信しません", error);
+    Sentry.captureException(error);
+    return null;
+  }
   return (subscription, payload, options) => sendPush(subscription, payload, signer, options, now);
 }
