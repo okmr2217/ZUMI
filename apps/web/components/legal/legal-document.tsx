@@ -10,8 +10,8 @@ import Link from "next/link";
  * 規約・ポリシーの両方がここを参照するので、差し替えはこの1か所で済む。
  */
 const OPERATOR: { name: string | null; email: string | null } = {
-  name: null,
-  email: null,
+  name: "ZUMI運営",
+  email: "daichi@paritto.dev",
 };
 
 /** 制定日。改定したら「改定日」を足す */

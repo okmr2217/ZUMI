@@ -30,4 +30,4 @@ BETTER_AUTH_URL = "https://zumi.paritto.dev"
 # 公開前のサインアップ制限（docs/05-tech-stack.md「ドメイン構成」）。"true" のときだけ
 # サインアップを受け付ける。`wrangler deploy` は [vars] でダッシュボードの値を上書き
 # するため、公開時はここを "true" に変えてデプロイする。
-SIGNUP_ENABLED = "false"
+SIGNUP_ENABLED = "true"
