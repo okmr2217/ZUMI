@@ -22,8 +22,11 @@ import {
 test.describe.configure({ mode: "serial" });
 
 let page: Page;
+let email: string;
 
 test.beforeAll(async ({ browser }) => {
+  // 失敗して直列のテストを最初からやり直すとき（CI の retries）も、別のユーザーで始める
+  email = uniqueEmail("main");
   // 直列のテストで使い回すコンテキストは fixture の外で作るため、送信元 IP をここで決める
   const context = await browser.newContext({ extraHTTPHeaders: clientIpHeaders() });
   // シェアで実際の共有シートを開かないよう、Web Share API を差し替えて渡されたファイルを控える
@@ -49,8 +52,6 @@ test.beforeAll(async ({ browser }) => {
 test.afterAll(async () => {
   await page.context().close();
 });
-
-const email = uniqueEmail("main");
 
 test("サインアップし、メールを確認してログインする", async ({ request }) => {
   await signUp(page, email);

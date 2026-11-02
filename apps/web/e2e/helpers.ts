@@ -1,4 +1,5 @@
-import { createHmac, randomInt, randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
+import { signJWT } from "better-auth/crypto";
 import { expect, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { E2E_AUTH_SECRET, E2E_PORT } from "./config.mjs";
 
@@ -28,15 +29,11 @@ export function uniqueEmail(label: string) {
 
 /**
  * 確認メールのリンクのトークン。better-auth の `createEmailVerificationToken` と同じく、
- * `{ email }` を BETTER_AUTH_SECRET で HS256 署名した JWT にする。E2E では確認メールを送れないため
+ * `{ email }` を BETTER_AUTH_SECRET で署名した JWT にする。E2E では確認メールを送れないため
  * （RESEND_API_KEY が空）、メールを受け取る代わりにここで作ったリンクを開く。
  */
 export function emailVerificationToken(email: string) {
-  const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString("base64url");
-  const now = Math.floor(Date.now() / 1000);
-  const body = `${encode({ alg: "HS256" })}.${encode({ email: email.toLowerCase(), iat: now, exp: now + 3600 })}`;
-  const signature = createHmac("sha256", E2E_AUTH_SECRET).update(body).digest("base64url");
-  return `${body}.${signature}`;
+  return signJWT({ email: email.toLowerCase() }, E2E_AUTH_SECRET, 3600);
 }
 
 /**
@@ -44,7 +41,7 @@ export function emailVerificationToken(email: string) {
  * ブラウザ側は未ログインのまま（このあとログイン画面からログインする）。
  */
 export async function verifyEmail(request: APIRequestContext, email: string) {
-  const token = emailVerificationToken(email);
+  const token = await emailVerificationToken(email);
   const response = await request.get(
     `${DIRECT_URL}/api/auth/verify-email?token=${token}&callbackURL=%2Flogin`,
     { maxRedirects: 0 },

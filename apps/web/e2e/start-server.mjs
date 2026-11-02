@@ -63,6 +63,9 @@ const server = spawn(
     "--var",
     `BETTER_AUTH_SECRET:${E2E_AUTH_SECRET}`,
     "--show-interactive-dev-session=false",
+    // リクエストごとのログでテストの出力が埋もれないよう、警告以上だけを出す
+    "--log-level",
+    "warn",
   ],
   { cwd: webDir, stdio: "inherit" },
 );
