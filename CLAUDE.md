@@ -8,7 +8,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 
 前身は Habito（Vercel + Supabase + Prisma 構成）で、ZUMI では Cloudflare（Workers + D1 + Drizzle）に全面移行する。
 
-**現在の進捗: フェーズ0（基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）が完了し、`zumi.paritto.dev` に本番デプロイ済み。`development` には S1（土台）・S2（Duty CRUD）・S3（期日計算）・S4（サインアップ制限）・S5（PWA 基盤）・S6（今日タブ）・S7（Web Push）・S8（notify Cron）・S9（振り返り）・S10（シェア画像）・S11（設定モーダル・オンボーディング）、Next.js 16 への更新、開発環境の小修正、スキーマ小改修（通知のインデックス・`timezone_auto`）もマージ済み（`main` へは未リリース。本番 D1 への migration `0002_nebulous_rattler.sql`・`0003_harsh_ben_parker.sql`・`0004_furry_prodigy.sql` も未適用。リリース前に VAPID 鍵の作り直しが必要: `docs/OWNER-TASKS.md`）。作業セッション S1〜S11 はすべて完了。次は残りの横断タスク（QA・法務など）の切り出しと `main` へのリリース。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
+**現在の進捗: フェーズ0（基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）が完了し、`zumi.paritto.dev` に本番デプロイ済み。`development` には S1（土台）・S2（Duty CRUD）・S3（期日計算）・S4（サインアップ制限）・S5（PWA 基盤）・S6（今日タブ）・S7（Web Push）・S8（notify Cron）・S9（振り返り）・S10（シェア画像）・S11（設定モーダル・オンボーディング）、横断の Q1（仕上げ）・Q2（法務）・Q3（PWA 仕上げ）・Q5（期日計算の入力の共通化）、Next.js 16 への更新、開発環境の小修正、スキーマ小改修（通知のインデックス・`timezone_auto`）もマージ済み（`main` へは未リリース。本番 D1 への migration `0002_nebulous_rattler.sql`・`0003_harsh_ben_parker.sql`・`0004_furry_prodigy.sql` も未適用。リリース前に VAPID 鍵の作り直しが必要: `docs/OWNER-TASKS.md`）。作業セッション S1〜S11 はすべて完了。次は Q4（E2E テスト）、最後に Q6（prettier の一括整形）、その後 `main` へのリリース。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
 
 ## ドキュメント構成
 
@@ -117,7 +117,7 @@ QA・法務などの残りの横断タスクは S1〜S11 の完了後に指揮�
 
 - **スキーマ**: `packages/db/src/schema.ts` と `migrations/` を変更するのは一度に1セッションだけ（`drizzle-kit generate` の番号衝突を避けるため）。S1 以外でスキーマ変更が必要になったら、指揮役に報告して直列の小さな PR にする
 - **進捗の記録**: 作業セッションは `docs/09-implementation-tasks.md` のうち**自分の担当範囲のチェックボックスだけ**を更新する。CLAUDE.md の「現在の進捗」は指揮役がマージ時に更新する（並行セッションが同じ行を書き換えて衝突するのを避けるため）
-- **ローカルの dev サーバー**: better-auth の Cookie はポートで分かれないため、複数の worktree が同じホスト名（`localhost` でも `127.0.0.1` でも）で dev サーバーを動かすと、互いの Cookie を上書きしてログインが外れる。画面を確認するときは worktree ごとに別のホスト名を使う: `next dev -p <ポート>` で起動し、Chrome で `http://<セッション名>.localhost:<ポート>` を開く（Chrome は `*.localhost` を 127.0.0.1 に解決する。`next.config.ts` の `allowedDevOrigins` で `*.localhost` を許可済み）。`.dev.vars` の `BETTER_AUTH_URL` も同じ URL にする
+- **ローカルの dev サーバー**: better-auth の Cookie はポートで分かれないため、複数の worktree が同じホスト名（`localhost` でも `127.0.0.1` でも）で dev サーバーを動かすと、互いの Cookie を上書きしてログインが外れる。画面を確認するときは worktree ごとに別のホスト名を使う: `next dev -p <ポート>` で起動し、Chrome で `http://<セッション名>.localhost:<ポート>` を開く（Chrome は `*.localhost` を 127.0.0.1 に解決する。`next.config.ts` の `allowedDevOrigins` で `*.localhost` を許可済み）。`.dev.vars` の `BETTER_AUTH_URL` も同じ URL にする。本番相当のビルドを `wrangler dev` で確かめるときは `--local-upstream <ホスト>:<ポート>` を付けないとログインが `INVALID_ORIGIN` で失敗する。`public/` の `.html` は本番の Workers Assets で拡張子なしの URL へ 307 リダイレクトされる（`html_handling` の既定値）
 - **完了条件**: lint・typecheck・test・build が通る。UI の変更はモック Artifact と照らし合わせ、実際の画面で確認する（`/run` や Chrome）。PR 前に `/code-review` を実行する
 - **サブエージェント**: モック Artifact の読み取りはサブエージェントに任せ、必要なアートボードの寸法・配色・構成だけを受け取る。S3 のテストケースは、実装を見ていないサブエージェントに docs/03 の境界ルールだけを渡して書かせる（実装と同じ思い込みがテストに入るのを防ぐため）。コンポーネントを共有する UI 実装は複数のエージェントに分けない
 - **リリース**: `main` への push は本番（`zumi.paritto.dev`）に自動デプロイされる。`main` へのマージは指揮役が区切りのよいところで行う

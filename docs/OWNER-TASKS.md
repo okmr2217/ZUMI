@@ -34,6 +34,13 @@
 
 ### 公開時にサインアップを開く → **アプリ本体と利用規約・プライバシーポリシーの完成後**
 
+サインアップを開く前に、規約・ポリシーについて次を済ませる（PR #32 の「オーナーに確認してほしい点」）:
+
+- `apps/web/components/legal/legal-document.tsx` の `OPERATOR.name`・`OPERATOR.email` を埋める（空のあいだは本文に【運営者名】【連絡先メールアドレス】が出る）
+- PR #32 の確認事項10項目を見る（住所の扱い、専属的合意管轄、免責の範囲、外国の事業者の扱い、外部送信規律など）。本文は専門家のレビューを経ていない下書き
+- Sentry の `zumi-web`・`zumi-notify` で「Prevent Storing of IP Addresses」を有効にし、Sentry・Resend の保存期間を確認する（ポリシーは「IP をエラー情報に含めない」「各事業者の定める期間」と書いている）
+- シェア URL を個別に無効にする機能はない。ポリシーでは「運営者に連絡」としたので、依頼が来たら本番 D1 の `share_tokens` の該当行を手で消す
+
 本番のサインアップは `apps/web/wrangler.toml` の `[vars]` の `SIGNUP_ENABLED = "false"` で
 閉じている（"true" 以外は閉じる側に倒す）。`wrangler deploy` は `[vars]` でダッシュボードの値を
 上書きするため、ダッシュボードやシークレットではなく、`wrangler.toml` を `"true"` に変えて
