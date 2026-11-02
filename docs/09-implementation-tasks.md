@@ -148,9 +148,9 @@ Web Push のみで通知を成立させる。
 - [x] シェア画像の仕上げ（[03](./03-duty-log-review-account.md#シェア画像の設計方針) の「シェア画像の運用」）: `/og/w/:token` を `caches.default` でキャッシュする。`share_tokens.card` を読み込み時に zod で検証し、合わない行は 404 にする
 - [ ] 実機（iOS Safari・ホーム画面アプリ・Android Chrome）での確認: シェアの共有シートとダウンロードへの切り替え、Web Push の受信と通知タップからの遷移、ログアウト時の購読解除
 - [x] LP の safe-area 対応: `viewport-fit=cover` により、横向きのノッチ付き iPhone で LP の左右の余白がノッチにわずかに重なる。`lp.css` の `.wrap` に `env(safe-area-inset-*)` の余白を足す
-- [ ] アクセシビリティ: `zumi-soft`（#8a8072）が小さい文字で AA に届かない（生成り地で 3.6:1、白地で 3.88:1。下部タブのラベル・補足文など）。デザイントークンを見直す（Q3 の Lighthouse 監査より）
-- [ ] パフォーマンス: Lighthouse 72点。Google Fonts の CSS（約238KB）が描画を約2.1秒遅らせている。`next/font` 化やサブセット化を検討する（TBT 960ms、未使用の CSS 232KB・JS 108KB の指摘もあり）
-- [ ] テストの安定化: turbo で並列にテストを回すと、web の DB テストの `beforeAll`（ローカル D1 の起動）がタイムアウトで落ちることがある（単独なら通る）。`hookTimeout` を延ばすか、DB を使うテストの並列数を絞る
+- [x] アクセシビリティ: `zumi-soft`（#8a8072）が小さい文字で AA に届かない（生成り地で 3.6:1、白地で 3.88:1。下部タブのラベル・補足文など）。デザイントークンを見直す（Q3 の Lighthouse 監査より）→ 明度だけ下げた #70685C にした（生成り地 5.10:1・白地 5.49:1・pill 地 4.65:1）。LP の `--ink-soft` も同じ値
+- [x] パフォーマンス: Lighthouse 72点。Google Fonts の CSS（約238KB）が描画を約2.1秒遅らせている。`next/font` 化やサブセット化を検討する（TBT 960ms、未使用の CSS 232KB・JS 108KB の指摘もあり）→ `next/font` で自前配信にし、朱印の Yuji Syuku は「済」だけのサブセット、Noto Sans JP は LP だけで可変フォント1つにした（`app/fonts.ts`）。TBT・未使用の JS は未対応
+- [x] テストの安定化: turbo で並列にテストを回すと、web の DB テストの `beforeAll`（ローカル D1 の起動）がタイムアウトで落ちることがある（単独なら通る）。`hookTimeout` を延ばすか、DB を使うテストの並列数を絞る → migration をファイル単位の batch にし、web の vitest を `maxWorkers: "50%"`・`hookTimeout` 60秒・`testTimeout` 20秒にした
 
 ## 課金（MVP対象外・v1.1以降）
 

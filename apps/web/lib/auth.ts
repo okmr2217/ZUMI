@@ -70,6 +70,13 @@ export function getAuth() {
       expiresIn: 60 * 60 * 24 * 7,
       updateAge: 60 * 60 * 24,
     },
+    advanced: {
+      // better-auth の既定は x-forwarded-for だけを見るが、Workers では Cloudflare が
+      // 付ける cf-connecting-ip にクライアントの IP が入る。これがないと session.ip_address が
+      // 空になり、IP ごとに数える rate limit も全員で1つの枠を共有してしまう。
+      // cf-connecting-ip は Cloudflare が上書きするので、クライアントが偽装しても届かない
+      ipAddress: { ipAddressHeaders: ["cf-connecting-ip"] },
+    },
     databaseHooks: {
       user: {
         create: {
