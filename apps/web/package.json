@@ -13,6 +13,7 @@
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "push:test": "node scripts/send-test-push.mjs"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
     "@cloudflare/workers-types": "^5.20261101.1",
     "@eslint/js": "^9.18.0",
     "@opennextjs/cloudflare": "^1.20.15",
+    "@playwright/test": "^1.64.1",
     "@types/node": "^22.10.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
