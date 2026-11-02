@@ -17,6 +17,16 @@ export async function sendEmail({
 }) {
   const { env } = getCloudflareContext();
 
+  if (!env.RESEND_API_KEY) {
+    // 本番でシークレットが抜けたら、登録できない人が出ていることに気づけるよう失敗させる
+    if (env.NEXT_PUBLIC_APP_ENV === "production") {
+      throw new Error("RESEND_API_KEY が未設定のためメールを送れません");
+    }
+    // ローカルと E2E ではキーを空にしておき、外部に出さない（本文は確認リンクを含むため出さない）
+    console.warn(`RESEND_API_KEY が未設定のためメールを送りません: to=${to} subject=${subject}`);
+    return;
+  }
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {

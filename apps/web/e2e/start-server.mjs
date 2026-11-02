@@ -37,7 +37,12 @@ if (process.env.E2E_SKIP_BUILD !== "1") {
   await run("npm", ["run", "cf:build"], {
     cwd: webDir,
     // Sentry のシークレットが無くてもビルドできるよう空にする（CI の build と同じ）
-    env: { ...process.env, NEXT_PUBLIC_SENTRY_DSN: "", SENTRY_DSN: "" },
+    env: {
+      ...process.env,
+      NEXT_PUBLIC_SENTRY_DSN: "",
+      SENTRY_DSN: "",
+      NEXT_PUBLIC_APP_ENV: "development",
+    },
   });
 }
 

@@ -42,6 +42,7 @@ jobs:
           # プレースホルダーを渡す。実配信に関わる値は Secrets 経由で別途注入する。
           NEXT_PUBLIC_SENTRY_DSN: ""
           SENTRY_DSN: ""
+          NEXT_PUBLIC_APP_ENV: development
 
   # 主要フローの E2E（apps/web/e2e）。ローカル D1 を作り直し、本番と同じビルドを wrangler dev で動かす。
   # ビルドを含むため上のジョブとは分け、並行で走らせる。

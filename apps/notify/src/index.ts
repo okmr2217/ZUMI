@@ -17,6 +17,20 @@ export interface Env {
 
 const MS_PER_MINUTE = 60_000;
 
+/** Sentry の Cron Monitor。初回のチェックインで MONITOR_CONFIG の内容で作られる（upsert） */
+const MONITOR_SLUG = "zumi-notify-tick";
+const MONITOR_CONFIG = {
+  // wrangler.toml の `[triggers] crons` と同じ（Cron Trigger は UTC）
+  schedule: { type: "crontab", value: "* * * * *" },
+  timezone: "Etc/UTC",
+  // 予定の分から1分以内にチェックインがなければ「取りこぼし」
+  checkinMargin: 1,
+  maxRuntime: 5,
+  // Cron がまれに1回飛ぶ程度ではアラートを出さず、3分続いたら Issue にする
+  failureIssueThreshold: 3,
+  recoveryThreshold: 1,
+} satisfies NonNullable<Parameters<typeof Sentry.withMonitor>[2]>;
+
 export default Sentry.withSentry<ExportedHandler<Env>>(
   (env) => ({ dsn: env.SENTRY_DSN, environment: env.NEXT_PUBLIC_APP_ENV }),
   {
@@ -26,20 +40,29 @@ export default Sentry.withSentry<ExportedHandler<Env>>(
      *
      * 「いま」には実行時刻ではなく Cron の予定時刻（`scheduledTime`）を使う。
      * 起動が遅れても、本来の分のユーザーに送れるようにするため。
+     *
+     * Sentry の Cron Monitors でチェックインし、Cron が止まった・失敗し続けたときに気づけるようにする。
+     * ユーザー単位の送信の失敗は runNotificationTick の中で拾うため、失敗になるのは抽出（D1）など全体が落ちたとき。
      */
     async scheduled(controller, env) {
       const instant = new Date(
         Math.floor(controller.scheduledTime / MS_PER_MINUTE) * MS_PER_MINUTE,
       );
-      await runNotificationTick(
-        {
-          store: createD1Store(env.DB),
-          send: await createSender(env, instant),
-          log: (event, data) => console.log(JSON.stringify({ event, ...data })),
-          captureException: (error, context) => Sentry.captureException(error, { extra: context }),
-          logMessageText: env.LOG_NOTIFICATION_TEXT === "true",
-        },
-        instant,
+      await Sentry.withMonitor(
+        MONITOR_SLUG,
+        async () =>
+          runNotificationTick(
+            {
+              store: createD1Store(env.DB),
+              send: await createSender(env, instant),
+              log: (event, data) => console.log(JSON.stringify({ event, ...data })),
+              captureException: (error, context) =>
+                Sentry.captureException(error, { extra: context }),
+              logMessageText: env.LOG_NOTIFICATION_TEXT === "true",
+            },
+            instant,
+          ),
+        MONITOR_CONFIG,
       );
     },
   },

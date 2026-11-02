@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --persist-to ../web/.wrangler/state --test-scheduled --var LOG_NOTIFICATION_TEXT:true",
+    "dev": "wrangler dev --persist-to ../web/.wrangler/state --test-scheduled --var LOG_NOTIFICATION_TEXT:true --var NEXT_PUBLIC_APP_ENV:development",
     "build": "tsc --noEmit",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
