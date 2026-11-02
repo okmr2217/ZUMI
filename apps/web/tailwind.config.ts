@@ -11,6 +11,28 @@ export default {
     },
     extend: {
       colors: {
+        // アプリ本体（/app）の配色。画面モック（docs/04-screens.md 冒頭の Design canvas）のトークン
+        zumi: {
+          bg: "#FAF6EF",
+          card: "#FFFFFF",
+          ink: "#2B2620",
+          // 小さい文字でも WCAG AA（4.5:1）に届くよう、モックの #8A8072 から明度だけ下げている。
+          // 生成り地（bg）5.1:1・白地（card）5.5:1・pill 地 4.6:1
+          soft: "#70685C",
+          line: "#E7DFCE",
+          shu: "#C8402A",
+          "shu-deep": "#9C2E1C",
+          base: "#F4EEE0",
+          tint: "#FDF3EF",
+          pill: "#F0ECE0",
+          // 今日タブの「そろそろ」（モックの --warn / --warn-bg）
+          warn: "#B07A2E",
+          "warn-bg": "#F3E6CE",
+          // 振り返りタブ（モックの朱の淡色・前週差分のチップ）
+          "shu-bg": "#F7DFD8",
+          success: "#5D7A49",
+          "success-bg": "#E4ECDD",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -40,6 +62,23 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      fontFamily: {
+        // 書体は app/fonts.ts の next/font が CSS 変数で渡す
+        zumi: ["var(--font-zen-kaku)", "sans-serif"],
+        // 「済」の朱印
+        seal: ["var(--font-yuji-syuku)", "serif"],
+      },
+      keyframes: {
+        // 今日タブの押印（モックにはアニメーションがないため、朱印が上から押される程度に留める）
+        stamp: {
+          "0%": { opacity: "0", transform: "scale(1.6) rotate(-8deg)" },
+          "60%": { opacity: "1", transform: "scale(0.94) rotate(-8deg)" },
+          "100%": { opacity: "1", transform: "scale(1) rotate(-8deg)" },
+        },
+      },
+      animation: {
+        stamp: "stamp 260ms cubic-bezier(.2,.8,.3,1) both",
       },
       borderRadius: {
         lg: "var(--radius)",

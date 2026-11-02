@@ -8,7 +8,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 
 前身は Habito（Vercel + Supabase + Prisma 構成）で、ZUMI では Cloudflare（Workers + D1 + Drizzle）に全面移行する。
 
-**現時点でこのリポジトリには `docs/` 配下の要件定義ドキュメントのみが存在し、実装コードは未着手。** 実装を始める際は、まず該当する `docs/` ファイルを読んでから着手すること。
+**現在の進捗: フェーズ0（基盤構築）・フェーズ1（認証+DBスキーマ）・フェーズ8（LP・OGP画像）が完了し、`zumi.paritto.dev` に本番デプロイ済み。`development` には S1（土台）・S2（Duty CRUD）・S3（期日計算）・S4（サインアップ制限）・S5（PWA 基盤）・S6（今日タブ）・S7（Web Push）・S8（notify Cron）・S9（振り返り）・S10（シェア画像）・S11（設定モーダル・オンボーディング）、横断の Q1（仕上げ）・Q2（法務）・Q3（PWA 仕上げ）・Q5（期日計算の入力の共通化）・Q4（E2E テスト）・Q7（IP 取得・テスト安定化・コントラスト・フォント）・Q6（prettier の一括整形）、Next.js 16 への更新、開発環境の小修正、スキーマ小改修（通知のインデックス・`timezone_auto`）もマージ済み（`main` へは未リリース。本番 D1 への migration `0002_nebulous_rattler.sql`・`0003_harsh_ben_parker.sql`・`0004_furry_prodigy.sql` も未適用。リリース前に VAPID 鍵の作り直しが必要: `docs/OWNER-TASKS.md`）。作業セッション S1〜S11 はすべて完了。次は `main` へのリリース。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
 
 ## ドキュメント構成
 
@@ -40,7 +40,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 - **スタイリング**: Tailwind CSS + shadcn/ui（LP はカスタム実装）
 - **DnD**: `@dnd-kit/sortable`
 - **通知**: Cloudflare Workers（Cron Trigger）+ Web Push（VAPID）/ Resend（メール）/ LINE Messaging API（Pro）
-- **シェア画像生成**: `workers-og`（Satori ベース）
+- **シェア画像生成**: `next/og`（Satori ベース。LP の OGP 画像で Workers 上の動作確認済み）
 - **エラー監視**: Sentry
 - **モノレポ管理**: Turborepo
 
@@ -76,7 +76,7 @@ D1 には enum・Date・Json 型がないため、すべて `text` で保持し 
 
 - **カスタムフィールド**（活動ごとの追加入力項目）は実装しない。「1タップで済」という主訴求と衝突するため
 - **ストリーク（連続記録日数）** は表示・保持しない。コンセプトの根幹に関わる意図的な設計
-- **絵文字アイコン**は使わない。シェア画像生成（`workers-og`/Satori）でのフォント埋め込み崩れを避けるため、プリセットアイコンに限定する
+- **絵文字アイコン**は使わない。シェア画像生成（`next/og`/Satori）での描画崩れを避け、単色の線アイコンでトーンを揃えるため、lucide のプリセットアイコンに限定する（通知本文に絵文字を出す案も 2026/11 に検討し不採用）
 - **`dueTime`（時刻指定）** は v1 では持たない
 - **年次イベント**（車検・健康診断など）はスコープ外。`YEARLY` は存在しない
 
@@ -85,3 +85,40 @@ D1 には enum・Date・Json 型がないため、すべて `text` で保持し 
 `docs/07-roadmap.md` 参照。繰り返しタイプ6種はMVPでフルスコープ実装するが、以下は v1.1 以降に後回し: Duty のDnD並び替えUI、月次カレンダーヒートマップ、通知のメールフォールバック、前夜通知（Duty単位）、データエクスポート、メールアドレス変更。
 
 フェーズ順: 1. 認証+DBスキーマ → 2. Duty CRUD → 3. 今日タブ（期日計算ロジック） → 4. 通知 → 5. 振り返りタブ → 6. シェア画像生成 → 7. 設定/オンボーディング → 8. LP
+
+## セッション運用（フェーズ2以降）
+
+フェーズ2以降の実装は、**指揮役セッション1つ**と**複数の作業セッション**で進める。自分がどちらかは、セッション開始時のプロンプトで指定される。
+
+### 役割
+
+- **指揮役**: 自分では実装しない。作業セッションを `spawn_task` で起動し、PR のレビュー、`development` へのマージ、`main` へのリリース、本番 D1 の migration 適用、この CLAUDE.md の「現在の進捗」の更新を担当する。起動プロンプトは単体で読んで分かるように書く（担当セッション名、読む docs、スコープと触らない範囲、完了条件、推奨エフォート）
+- **作業セッション**: 1セッション＝1ブランチ＝1PR。`development` から切り、PR 先も `development`。担当範囲外のファイルには手を出さず、必要になったら PR 本文に書いて指揮役に任せる
+
+### 分割と依存関係
+
+| セッション | 内容 | 着手条件 | 推奨エフォート |
+|---|---|---|---|
+| S1 土台 | フェーズ2のスキーマ変更 migration、`user_settings` 作成フック、`ScheduleConfig` 型 + zod、アイコン/テンプレート定数、vitest 導入 + turbo/CI に test タスク追加 | なし（最初に直列で） | high |
+| S2 Duty CRUD | フェーズ2の API・一覧・追加シート・テンプレート画面・編集フォーム・上限チェック | S1 | medium |
+| S3 期日計算ロジック | フェーズ3の純粋関数とユニットテスト。`packages/types` のみ触る | S1 | xhigh |
+| S4 サインアップ制限 | 横断「公開前のサインアップ制限」 | なし（すぐ並行可） | low〜medium |
+| S5 PWA 基盤 | `manifest.json`・iOS 用 meta・アイコン。Service Worker の中身は S7 で扱う | なし（すぐ並行可） | medium |
+| S6 今日タブ | フェーズ3の画面・押印 API・長押しモーダル・折りたたみ | S2・S3 | high |
+| S7 Web Push | フェーズ4の Service Worker・購読フロー・通知設定 UI | S1 | medium |
+| S8 notify Cron | フェーズ4の Cron・朝/夜/週次の通知判定（S3 の共有ロジックを使う） | S3 | high |
+| S9 振り返り | フェーズ5 | S6 | medium |
+| S10 シェア画像 | フェーズ6 | S9 | medium |
+| S11 設定・オンボーディング | フェーズ7 | S2・S7 | medium |
+
+QA・法務などの残りの横断タスクは S1〜S11 の完了後に指揮役が切り出す。
+
+### ルール
+
+- **スキーマ**: `packages/db/src/schema.ts` と `migrations/` を変更するのは一度に1セッションだけ（`drizzle-kit generate` の番号衝突を避けるため）。S1 以外でスキーマ変更が必要になったら、指揮役に報告して直列の小さな PR にする
+- **進捗の記録**: 作業セッションは `docs/09-implementation-tasks.md` のうち**自分の担当範囲のチェックボックスだけ**を更新する。CLAUDE.md の「現在の進捗」は指揮役がマージ時に更新する（並行セッションが同じ行を書き換えて衝突するのを避けるため）
+- **ローカルの dev サーバー**: better-auth の Cookie はポートで分かれないため、複数の worktree が同じホスト名（`localhost` でも `127.0.0.1` でも）で dev サーバーを動かすと、互いの Cookie を上書きしてログインが外れる。画面を確認するときは worktree ごとに別のホスト名を使う: `next dev -p <ポート>` で起動し、Chrome で `http://<セッション名>.localhost:<ポート>` を開く（Chrome は `*.localhost` を 127.0.0.1 に解決する。`next.config.ts` の `allowedDevOrigins` で `*.localhost` を許可済み）。`.dev.vars` の `BETTER_AUTH_URL` も同じ URL にする。本番相当のビルドを `wrangler dev` で確かめるときは `--local-upstream <ホスト>:<ポート>` を付けないとログインが `INVALID_ORIGIN` で失敗する。`public/` の `.html` は本番の Workers Assets で拡張子なしの URL へ 307 リダイレクトされる（`html_handling` の既定値）
+- **完了条件**: lint・typecheck・test・build が通る。UI の変更はモック Artifact と照らし合わせ、実際の画面で確認する（`/run` や Chrome）。PR 前に `/code-review` を実行する
+- **サブエージェント**: モック Artifact の読み取りはサブエージェントに任せ、必要なアートボードの寸法・配色・構成だけを受け取る。S3 のテストケースは、実装を見ていないサブエージェントに docs/03 の境界ルールだけを渡して書かせる（実装と同じ思い込みがテストに入るのを防ぐため）。コンポーネントを共有する UI 実装は複数のエージェントに分けない
+- **リリース**: `main` への push は本番（`zumi.paritto.dev`）に自動デプロイされる。`main` へのマージは指揮役が区切りのよいところで行う
+- **本番 D1 の migration**: 作業セッションはローカル D1 への適用（`npm run db:migrate:local`）と動作確認までを行う。本番への適用は指揮役が、該当 PR を `main` にマージする**前に** `npm run migrate:remote --workspace=@zumi/db` で行う（逆順だと新しいカラムを参照するコードが先にデプロイされ、本番でエラーになる）。列の削除やテーブルの作り直しを含む場合は、先に `npx wrangler d1 time-travel info zumi-db` で復元ポイントを控える。適用後は `docs/OWNER-TASKS.md` に記録する

@@ -1,21 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
+import { unsubscribePush } from "@/lib/push-client";
 
-export function SignOutButton() {
+/** ログアウト。見た目（設定モーダルのアカウント欄の行）は `className` で渡す */
+export function SignOutButton({ className }: { className?: string }) {
   const router = useRouter();
+  const [pending, setPending] = useState(false);
 
   async function handleSignOut() {
-    await authClient.signOut();
-    router.push("/login");
-    router.refresh();
+    setPending(true);
+    try {
+      // ログアウトした端末に通知が届き続けないよう、購読を外してからセッションを切る。
+      // 失敗してもログアウトは止めない（購読が残っても、次にログインしたユーザーに付け替わる）。
+      await unsubscribePush().catch(() => {});
+      await authClient.signOut();
+      router.push("/login");
+      router.refresh();
+    } catch (e) {
+      // 通信できなかったときは押し直せるようにする
+      console.error(e);
+      setPending(false);
+    }
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleSignOut}>
-      ログアウト
-    </Button>
+    <button type="button" onClick={handleSignOut} disabled={pending} className={className}>
+      {pending ? "ログアウトしています…" : "ログアウト"}
+    </button>
   );
 }

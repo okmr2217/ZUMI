@@ -2,10 +2,12 @@
  * ローカル D1（wrangler d1 execute --local）向けの開発用シードスクリプト。
  * 本番/リモート D1 に対しては実行しない想定。
  *
- * 使い方:
- *   npm run db:seed --workspace=@zumi/db
+ * 使い方（先に `npm run db:migrate:local` で migration を当てておく）:
+ *   npm run db:seed
  *
- * 実体は `wrangler d1 execute zumi-db --local --file=./scripts/seed.sql` を
+ * 何度実行してもよい。前回のシードユーザーは消してから入れ直す（関連する行は外部キーの cascade で消える）。
+ *
+ * 実体は `wrangler d1 execute zumi-db --local --persist-to ../../apps/web/.wrangler/state --file=...` を
  * 呼び出すラッパー。TypeScript 側で ID 生成や日付計算を行ってから SQL を
  * 組み立てたいケースに備えて tsx スクリプトとして用意している。
  */
@@ -21,6 +23,8 @@ const userId = randomUUID();
 const dutyId = randomUUID();
 
 const sql = `
+DELETE FROM user WHERE email = 'seed@example.com';
+
 INSERT INTO user (id, name, email, email_verified, created_at, updated_at)
 VALUES ('${userId}', 'Seed User', 'seed@example.com', 1, ${nowMs}, ${nowMs});
 
@@ -32,7 +36,7 @@ VALUES (
   '${dutyId}',
   '${userId}',
   '燃えるゴミ',
-  'trash',
+  'trash-2',
   'WEEKDAYS',
   '{"type":"WEEKDAYS","weekdays":[1,4]}',
   0,
@@ -45,8 +49,17 @@ const dir = mkdtempSync(join(tmpdir(), "zumi-seed-"));
 const file = join(dir, "seed.sql");
 writeFileSync(file, sql, "utf8");
 
+// next dev（apps/web）が読むローカル D1 に投入する（migrate:local と同じ置き場所）。
 execFileSync(
   "wrangler",
-  ["d1", "execute", "zumi-db", "--local", `--file=${file}`],
+  [
+    "d1",
+    "execute",
+    "zumi-db",
+    "--local",
+    "--persist-to",
+    "../../apps/web/.wrangler/state",
+    `--file=${file}`,
+  ],
   { stdio: "inherit", cwd: new URL("..", import.meta.url).pathname },
 );

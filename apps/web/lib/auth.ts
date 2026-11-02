@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -5,8 +6,10 @@ import { nextCookies } from "better-auth/next-js";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import * as schema from "@zumi/db/schema";
 import { getDb } from "./db";
+import { signupGate } from "./signup";
 import { sendEmail } from "./email";
 import { verificationEmail, resetPasswordEmail, deleteAccountEmail } from "./email-templates";
+import { createUserSettings } from "./user-settings";
 
 /**
  * better-auth 設定（メール＋パスワード、Drizzle アダプタ経由で D1 に保存）。
@@ -22,6 +25,7 @@ export function getAuth() {
   return betterAuth({
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
+    hooks: { before: signupGate },
     database: drizzleAdapter(getDb(), {
       provider: "sqlite",
       schema,
@@ -66,11 +70,34 @@ export function getAuth() {
       expiresIn: 60 * 60 * 24 * 7,
       updateAge: 60 * 60 * 24,
     },
+    advanced: {
+      // better-auth の既定は x-forwarded-for だけを見るが、Workers では Cloudflare が
+      // 付ける cf-connecting-ip にクライアントの IP が入る。これがないと session.ip_address が
+      // 空になり、IP ごとに数える rate limit も全員で1つの枠を共有してしまう。
+      // cf-connecting-ip は Cloudflare が上書きするので、クライアントが偽装しても届かない
+      ipAddress: { ipAddressHeaders: ["cf-connecting-ip"] },
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          // 失敗してもサインアップ（確認メール送信）は止めない。行がなければ
+          // アプリを開いたときのタイムゾーン同期（syncUserTimezone）で作り直される。
+          after: async (user) => {
+            await createUserSettings(user.id).catch((error) => {
+              console.error("user_settings の作成に失敗しました", error);
+            });
+          },
+        },
+      },
+    },
     plugins: [nextCookies()],
   });
 }
 
-/** Server Component / Route Handler からログイン中ユーザーのセッションを取得する。 */
-export async function getServerSession() {
+/**
+ * Server Component / Route Handler からログイン中ユーザーのセッションを取得する。
+ * レイアウトとページの両方から呼ばれるため、同じリクエスト内では `cache` で1回にまとめる。
+ */
+export const getServerSession = cache(async () => {
   return getAuth().api.getSession({ headers: await headers() });
-}
+});

@@ -1,0 +1,5 @@
+# git blame で飛ばす整形だけのコミット。GitHub の blame はこのファイルを自動で読む。
+# ローカルでは `git config blame.ignoreRevsFile .git-blame-ignore-revs` で有効になる。
+
+# style: prettier で全体を整形
+113c11b88c209c3e213e3db8710b3c87c2a1ea21

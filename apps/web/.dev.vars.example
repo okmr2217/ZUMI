@@ -3,5 +3,14 @@
 # `getCloudflareContext().env` 経由で読むため、.env ではなくこちらを使うこと。
 
 BETTER_AUTH_SECRET=
+# `next dev` では localhost のまま。`opennextjs-cloudflare preview`（wrangler dev）でログインを試すときは、
+# wrangler がカスタムドメインの設定に合わせて Origin を書き換えるため http://zumi.paritto.dev にする。
 BETTER_AUTH_URL=http://localhost:3000
 RESEND_API_KEY=
+# ローカルではサインアップを開いておく（未設定だと閉じる。wrangler.toml の [vars] より優先される）。
+SIGNUP_ENABLED=true
+# Web Push（VAPID）。ローカル用の鍵は `npx web-push generate-vapid-keys` で作る（本番の鍵は使わない）。
+# 公開鍵は設定画面が購読に使う。秘密鍵はローカルの送信スクリプト（`npm run push:test`）だけが使い、
+# 本番の zumi-web には要らない（本番で送るのは apps/notify）。apps/notify の .dev.vars にも同じ鍵の組を書く。
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=

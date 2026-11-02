@@ -17,7 +17,16 @@ export function IconTrash({ size = 18 }: IconProps) {
 export function IconProtein({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect x={4} y={10} width={16} height={7} rx={3.5} transform="rotate(-30 12 13)" stroke="currentColor" strokeWidth={1.6} />
+      <rect
+        x={4}
+        y={10}
+        width={16}
+        height={7}
+        rx={3.5}
+        transform="rotate(-30 12 13)"
+        stroke="currentColor"
+        strokeWidth={1.6}
+      />
       <path d="M9 8.5l6 9" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" />
     </svg>
   );
@@ -33,7 +42,12 @@ export function IconBath({ size = 18 }: IconProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M4 12V9a2 2 0 012-2M8 5.5a1.5 1.5 0 013 0V7" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" />
+      <path
+        d="M4 12V9a2 2 0 012-2M8 5.5a1.5 1.5 0 013 0V7"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinecap="round"
+      />
       <path d="M3 19h18" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" />
     </svg>
   );
@@ -42,8 +56,18 @@ export function IconBath({ size = 18 }: IconProps) {
 export function IconBook({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M4 5.5A2.5 2.5 0 016.5 3H12v17H6.5A2.5 2.5 0 004 17.5v-12z" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round" />
-      <path d="M20 5.5A2.5 2.5 0 0017.5 3H12v17h5.5A2.5 2.5 0 0020 17.5v-12z" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round" />
+      <path
+        d="M4 5.5A2.5 2.5 0 016.5 3H12v17H6.5A2.5 2.5 0 004 17.5v-12z"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M20 5.5A2.5 2.5 0 0017.5 3H12v17h5.5A2.5 2.5 0 0020 17.5v-12z"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -61,7 +85,13 @@ export function IconFan({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <circle cx={12} cy={12} r={8} stroke="currentColor" strokeWidth={1.7} />
-      <path d="M12 12l3-5M12 12l-2 5.5M12 12l5 1" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M12 12l3-5M12 12l-2 5.5M12 12l5 1"
+        stroke="currentColor"
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -117,7 +147,13 @@ export function IconGearBold({ size = 18 }: IconProps) {
 export function IconChevronLeft({ size = 13 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M15 6l-6 6 6 6"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -125,7 +161,13 @@ export function IconChevronLeft({ size = 13 }: IconProps) {
 export function IconChevronRight({ size = 13 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -133,7 +175,13 @@ export function IconChevronRight({ size = 13 }: IconProps) {
 export function IconChevronDown({ size = 14 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -159,7 +207,12 @@ export function IconLock({ size = 12 }: IconProps) {
 export function IconBell({ size = 16 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M6 10a6 6 0 1112 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z" stroke="currentColor" strokeWidth={1.6} strokeLinejoin="round" />
+      <path
+        d="M6 10a6 6 0 1112 0c0 4 1.5 5.5 1.5 5.5H4.5S6 14 6 10z"
+        stroke="currentColor"
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
       <path d="M10 19a2 2 0 004 0" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" />
     </svg>
   );
@@ -182,7 +235,12 @@ export function IconTabDaily({ size = 18 }: IconProps) {
 export function IconTabReview({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M5 19V10M12 19V5M19 19v-7" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" />
+      <path
+        d="M5 19V10M12 19V5M19 19v-7"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -190,7 +248,12 @@ export function IconTabReview({ size = 18 }: IconProps) {
 export function IconTabDuty({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" />
+      <path
+        d="M5 6h14M5 12h14M5 18h9"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

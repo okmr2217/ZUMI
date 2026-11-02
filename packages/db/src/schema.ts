@@ -1,41 +1,74 @@
+import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
-import type { ScheduleConfig, ScheduleType, DutyStatus, LogStatus, NotifyChannel } from "@zumi/types";
+import type {
+  ScheduleConfig,
+  ScheduleType,
+  DutyStatus,
+  LogStatus,
+  NotifyChannel,
+  WeekStart,
+} from "@zumi/types";
 import { user } from "./auth-schema";
 
-export const userSettings = sqliteTable("user_settings", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .unique()
-    .references(() => user.id, { onDelete: "cascade" }),
-  timezone: text("timezone").notNull().default("Asia/Tokyo"),
-  morningNotifyEnabled: integer("morning_notify_enabled", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  morningNotifyAt: text("morning_notify_at"), // "08:00"
-  eveningNotifyEnabled: integer("evening_notify_enabled", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  eveningNotifyAt: text("evening_notify_at"), // "21:00"
-  weeklySummaryEnabled: integer("weekly_summary_enabled", { mode: "boolean" })
-    .notNull()
-    .default(true),
-  weeklySummaryWeekday: integer("weekly_summary_weekday").notNull().default(0), // 0=日
-  weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"),
-  channel: text("channel").$type<NotifyChannel>().notNull().default("WEB_PUSH"),
-  lineUserId: text("line_user_id"), // Pro のみ
-});
+export const userSettings = sqliteTable(
+  "user_settings",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
+    timezone: text("timezone").notNull().default("Asia/Tokyo"),
+    // true = アプリを開いた端末のブラウザの値で更新する / false = 設定画面で手で選んだ値を保つ
+    timezoneAuto: integer("timezone_auto", { mode: "boolean" }).notNull().default(true),
+    morningNotifyEnabled: integer("morning_notify_enabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    morningNotifyAt: text("morning_notify_at"), // "08:00"
+    eveningNotifyEnabled: integer("evening_notify_enabled", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    eveningNotifyAt: text("evening_notify_at"), // "21:00"
+    weeklySummaryEnabled: integer("weekly_summary_enabled", { mode: "boolean" })
+      .notNull()
+      .default(true),
+    weeklySummaryAt: text("weekly_summary_at").notNull().default("20:00"), // 送るのは週の最終日固定
+    weekStart: integer("week_start").$type<WeekStart>().notNull().default(1), // 1=月 / 0=日
+    onboardedAt: integer("onboarded_at", { mode: "timestamp" }), // null = オンボーディング未完了
+    channel: text("channel").$type<NotifyChannel>().notNull().default("WEB_PUSH"),
+    lineUserId: text("line_user_id"), // Pro のみ
+  },
+  // notify が毎分「この時刻に送る人」を引く（apps/notify の findSettingsAt）。OFF の行は
+  // 索引に入れない（週次は全員が既定の 20:00 を持つため、OFF の人まで読まないように）
+  (t) => ({
+    morningNotify: index("user_settings_morning_notify_idx")
+      .on(t.morningNotifyAt)
+      .where(sql`${t.morningNotifyEnabled} = 1`),
+    eveningNotify: index("user_settings_evening_notify_idx")
+      .on(t.eveningNotifyAt)
+      .where(sql`${t.eveningNotifyEnabled} = 1`),
+    weeklySummary: index("user_settings_weekly_summary_idx")
+      .on(t.weeklySummaryAt)
+      .where(sql`${t.weeklySummaryEnabled} = 1`),
+  }),
+);
 
-export const pushSubscriptions = sqliteTable("push_subscriptions", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  endpoint: text("endpoint").notNull().unique(),
-  p256dh: text("p256dh").notNull(),
-  auth: text("auth").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-});
+export const pushSubscriptions = sqliteTable(
+  "push_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (t) => ({
+    byUser: index("push_subscriptions_user_idx").on(t.userId),
+  }),
+);
 
 export const duties = sqliteTable(
   "duties",
@@ -53,9 +86,26 @@ export const duties = sqliteTable(
     sortOrder: integer("sort_order").notNull().default(0),
     status: text("status").$type<DutyStatus>().notNull().default("ACTIVE"),
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    archivedAt: integer("archived_at", { mode: "timestamp" }),
   },
   (t) => ({
     byUserStatus: index("duties_user_status_idx").on(t.userId, t.status),
+  }),
+);
+
+// 一時停止の期間。過去の週の分母から PAUSED 期間を外すために使う
+export const dutyPauses = sqliteTable(
+  "duty_pauses",
+  {
+    id: text("id").primaryKey(),
+    dutyId: text("duty_id")
+      .notNull()
+      .references(() => duties.id, { onDelete: "cascade" }),
+    startDate: text("start_date").notNull(), // "2026-08-24"
+    endDate: text("end_date"), // null = 一時停止中
+  },
+  (t) => ({
+    byDuty: index("duty_pauses_duty_idx").on(t.dutyId),
   }),
 );
 
@@ -77,6 +127,26 @@ export const logs = sqliteTable(
   (t) => ({
     uniqDutyDate: uniqueIndex("logs_duty_date_uniq").on(t.dutyId, t.targetDate),
     byUserDate: index("logs_user_date_idx").on(t.userId, t.targetDate),
+  }),
+);
+
+// シェア画像（/og/w/:token）のトークン。押した時点の週次サマリーを `card` に固定して持つ
+// （リンクを知っている人に、その後の記録を見せ続けないため）。ユーザー×週で1行で、
+// シェアし直すとトークンごと作り直す（古い URL は使えなくなる）
+export const shareTokens = sqliteTable(
+  "share_tokens",
+  {
+    token: text("token").primaryKey(), // 推測されにくい乱数（128bit を base64url）
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    weekStart: text("week_start").notNull(), // "2026-11-02"（その週の初日）
+    // 画像に描く値。形は apps/web の `ShareCard`（lib/share.ts）
+    card: text("card", { mode: "json" }).$type<Record<string, unknown>>().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (t) => ({
+    uniqUserWeek: uniqueIndex("share_tokens_user_week_uniq").on(t.userId, t.weekStart),
   }),
 );
 

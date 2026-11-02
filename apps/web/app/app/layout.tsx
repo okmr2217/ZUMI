@@ -1,33 +1,43 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getServerSession } from "@/lib/auth";
-import { SignOutButton } from "@/components/auth/sign-out-button";
+import { needsOnboarding } from "@/lib/onboarding";
+import { TimezoneSync } from "@/components/app/timezone-sync";
+import { ServiceWorkerRegister } from "@/components/app/service-worker-register";
+import { TabBar } from "@/components/app/tab-bar";
 
 // `getCloudflareContext` はリクエストスコープでのみ使えるため、
 // `/app` 配下は静的プリレンダリング対象から外す。
 export const dynamic = "force-dynamic";
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}) {
   const session = await getServerSession();
 
   if (!session) {
     redirect("/login");
   }
 
+  // オンボーディング（ステップ2）を終えるか飛ばすまでは、`/app` を開くたびにオンボーディングへ送る（docs/03）
+  if (await needsOnboarding(session.user.id)) {
+    redirect("/onboarding");
+  }
+
+  // 各タブの見出しはページ側で持つ。下端はタブバー（66px + セーフエリア）に覆われるため余白を空ける
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b border-border px-4 py-3">
-        <Link href="/app" className="font-semibold">
-          ZUMI（済）
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link href="/app/settings" className="text-sm text-muted-foreground">
-            設定
-          </Link>
-          <SignOutButton />
-        </div>
-      </header>
-      {children}
+    <div className="min-h-dvh bg-zumi-bg font-zumi text-zumi-ink">
+      <TimezoneSync />
+      <ServiceWorkerRegister />
+      <div className="mx-auto max-w-[430px] pb-[calc(96px+env(safe-area-inset-bottom))]">
+        {children}
+      </div>
+      <TabBar />
+      {/* 今日タブの歯車から開く設定モーダル（`@modal/(.)settings`） */}
+      {modal}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+# 依存・ビルド成果物
 node_modules
 .next
 .turbo
@@ -5,5 +6,27 @@ node_modules
 dist
 out
 .open-next
+coverage
+*.tsbuildinfo
+
+# ロックファイル（npm が書き出す）
 pnpm-lock.yaml
 package-lock.json
+
+# drizzle-kit が生成する SQL とスナップショット。整形すると次の `drizzle-kit generate` で差分が出る
+packages/db/migrations/
+
+# Next.js が `next dev` / `next build` のたびに書き換える
+apps/web/next-env.d.ts
+
+# `wrangler types` で生成する型定義
+worker-configuration.d.ts
+
+# Playwright の出力（e2e の D1 状態 apps/web/e2e/.wrangler は上の .wrangler で除外済み）
+test-results
+playwright-report
+blob-report
+
+# Markdown（docs・CLAUDE.md など）。表の列幅揃えで 1 セルの変更が表全体の差分になり、
+# docs 内のコード例（スキーマの抜粋など）も意図した詰め方・コメント位置が崩れるため
+*.md

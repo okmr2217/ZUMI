@@ -1,0 +1,26 @@
+# E2E テスト専用の wrangler 設定（`e2e/start-server.mjs` が `wrangler dev` に渡す）。
+# apps/web/wrangler.toml と同じビルド成果物・バインディングを使い、次の点だけを変える。
+# - 開発者の `apps/web/.dev.vars`（本物の RESEND_API_KEY など）を読まないよう、別のディレクトリに置く
+#   （`.dev.vars` は設定ファイルと同じディレクトリから読まれる）
+# - カスタムドメインの routes を持たない
+# - サインアップを開く
+name = "zumi-web-e2e"
+main = "../.open-next/worker.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "../.open-next/assets"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "zumi-db"
+database_id = "3201b980-daf5-4a39-a458-54196917f777"
+
+[vars]
+NEXT_PUBLIC_APP_ENV = "development"
+SIGNUP_ENABLED = "true"
+# 確認メールは送らない（送信は失敗するが、better-auth はサインアップを止めずにログへ残すだけ）
+RESEND_API_KEY = ""
+# BETTER_AUTH_URL・BETTER_AUTH_SECRET は e2e/config.mjs の値を `--var` で渡す
