@@ -8,7 +8,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 
 前身は Habito（Vercel + Supabase + Prisma 構成）で、ZUMI では Cloudflare（Workers + D1 + Drizzle）に全面移行する。
 
-**現在の進捗: MVP（フェーズ0〜8）と横断タスク（S1〜S11・Q1〜Q7）を実装し、2026-11-03 に `main` へリリースして `zumi.paritto.dev` に本番デプロイ済み（本番 D1 も migration `0004` まで適用済み）。サインアップは `SIGNUP_ENABLED = "false"` で閉じたまま。残りはオーナー作業（VAPID 鍵の作り直し、サインアップを開く前の作業: `docs/OWNER-TASKS.md`）と、`docs/09-implementation-tasks.md` の「横断: QA・リリース準備」に残ったタスク。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
+**現在の進捗: MVP（フェーズ0〜8）と横断タスク（S1〜S11・Q1〜Q7）を実装し、2026-11-03 に `main` へリリースして `zumi.paritto.dev` に本番デプロイ済み（本番 D1 も migration `0004` まで適用済み）。サインアップは `SIGNUP_ENABLED = "false"` で閉じたまま。VAPID 鍵も 2026-11-03 に作り直し済み。残りはオーナー作業（サインアップを開く前の作業: `docs/OWNER-TASKS.md`）と、`docs/09-implementation-tasks.md` の「横断: QA・リリース準備」に残ったタスク。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
 
 ## ドキュメント構成
 

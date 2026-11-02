@@ -30,6 +30,7 @@
   - https://zumi.paritto.dev （zumi-web、カスタムドメイン。`workers.dev` のプレビューURLは `routes` 設定により無効化される仕様のため使用不可）
   - https://zumi-notify.okumuradaichi2007.workers.dev （zumi-notify、毎分 Cron 動作中）
 - ✅ **GitHub Actions からの自動デプロイ**: `.github/workflows/deploy.yml` を追加し、`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` を GitHub Actions Secrets に登録済み。`main` への push（または手動実行）で `zumi-notify`・`zumi-web` が自動デプロイされることを確認済み
+- ✅ **VAPID 鍵の作り直し**（2026-11-03、オーナー）: 1-5 の鍵が web と notify で同じ組か確かめられないため、新しい組を作り、`zumi-web` の `VAPID_PUBLIC_KEY`、`zumi-notify` の `VAPID_PUBLIC_KEY`・`VAPID_PRIVATE_KEY` に入れ直した。`zumi-web` の `VAPID_PRIVATE_KEY` は削除済み。`wrangler secret list` でシークレット名がそろっていることを確認した（指揮役）。本番にはまだ購読がなかったので影響なし。実機で通知が届くかは、[09](./09-implementation-tasks.md) の「実機での確認」で見る
 
 ## 未完了（着手時期が決まっているもの）
 
@@ -58,20 +59,11 @@
 - **D1 のバックアップ**: Time Travel で戻せるのは無料プランで 7 日、有料で 30 日まで。それより前に戻す必要が出たときのために、定期的な `wrangler d1 export` が要るかを決める
 - **本番 D1 に残っているデータ**: フェーズ1のころの検証用アカウントやデータが残っていないかを見て、公開前に消すかどうか決める（`user_settings` の行がないユーザーは、アプリを開いたときに作り直される）
 
-### Web Push の VAPID 鍵の確認 → **今すぐ（通知は 2026-11-03 に `main` へリリース済み）**
+### Web Push の VAPID 鍵（参考: 作り直す場合）
 
-**状況（2026-11-03）**: リリース時に指揮役が作り直そうとしたが、シークレットの書き込みは Claude の権限判定で止められたため、まだ作り直していない。本番には以前の鍵が入ったまま。下の「作り直す手順」をオーナーが実行し、`zumi-web` の `VAPID_PRIVATE_KEY` も消す。本番にはまだ購読がない（購読の UI はこのリリースで初めて入った）ので、作り直しによる影響はない。
-
-**方針（2026/11 決定）**: 登録済みの鍵が web と notify で同じ組か確かめられないため、リリース時に下の手順で作り直して両方に入れる。`zumi-web` の `VAPID_PRIVATE_KEY` も削除する。鍵が入ると、購読している人には週次サマリーが届き始める（`weekly_summary_enabled` は既定で ON）。
-
-鍵の組は 1-5 で登録済み。購読（`zumi-web`）と送信（`zumi-notify`）で同じ組を使っていないと、
-送信がすべて失敗する。次を確認する。
-
-- `zumi-web` の `VAPID_PUBLIC_KEY` と、`zumi-notify` の `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` が
-  同じ組であること。シークレットは値を読み出せないため、確信が持てなければ下の手順で作り直す
-  （公開前で購読者がいないので、作り直しても影響はない）
-- `zumi-web` の `VAPID_PRIVATE_KEY` は使わない（送信は notify だけが行う）。消してよい:
-  `npx wrangler secret delete VAPID_PRIVATE_KEY --name zumi-web`
+2026-11-03 に作り直し済み（上の「完了済み」）。購読（`zumi-web`）と送信（`zumi-notify`）で同じ組を
+使っていないと、送信がすべて失敗する。`zumi-web` には公開鍵だけを置く（送信は notify だけが行う）。
+シークレットの書き込みは Claude の権限判定で止められるため、オーナーが実行する。
 
 作り直す手順:
 
