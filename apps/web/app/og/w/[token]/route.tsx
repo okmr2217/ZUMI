@@ -33,7 +33,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   if (!card) return new Response("Not Found", { status: 404 });
   const { image, complete } = await renderShareImage(card, token);
   if (cache && complete) {
-    getCloudflareContext().ctx.waitUntil(cache.put(cacheKey, image.clone()));
+    getCloudflareContext().ctx.waitUntil(
+      // 入れられなくても画像は返せるので、ログに残すだけにする
+      cache
+        .put(cacheKey, image.clone())
+        .catch((error) => console.error("share image cache", error)),
+    );
   }
   return image;
 }
