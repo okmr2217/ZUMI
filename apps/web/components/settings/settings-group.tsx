@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // 寸法は画面モック（Settings.dc.html）のグループ・行に合わせている（通知フォームと同じ）。
@@ -48,12 +48,16 @@ export function SettingsRow({
   );
 }
 
-/** タップで次の画面（シート）を開く行。右端にシェブロンを出す */
+/**
+ * タップで次の画面（シート）を開く行。右端にシェブロンを出す。
+ * `href` を渡すと別タブでページを開くリンクになる（ホーム画面アプリでも戻れるように、アプリの画面は置き換えない）
+ */
 export function SettingsLinkRow({
   label,
   sub,
   value,
   onClick,
+  href,
   disabled = false,
   tone = "default",
 }: {
@@ -61,9 +65,18 @@ export function SettingsLinkRow({
   sub?: string;
   value?: string;
   onClick?: () => void;
+  href?: string;
   disabled?: boolean;
   tone?: "default" | "danger";
 }) {
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener" className={ROW}>
+        <RowText label={label} sub={sub} />
+        <ExternalLink className="text-zumi-soft size-3.5 shrink-0" strokeWidth={1.8} aria-hidden />
+      </a>
+    );
+  }
   return (
     <button
       type="button"
