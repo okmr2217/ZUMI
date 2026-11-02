@@ -89,7 +89,7 @@ export function NotificationSettingsForm({
   return (
     <section className="flex flex-col gap-2">
       <h2 className={cn("text-[11.5px] font-bold tracking-[.06em]", INK_SOFT)}>通知</h2>
-      <div className={cn("bg-zumi-card overflow-hidden rounded-2xl border", LINE)}>
+      <div className={cn("overflow-hidden rounded-2xl border bg-zumi-card", LINE)}>
         <DevicePushRow vapidPublicKey={vapidPublicKey} />
         <ScheduleRow
           label="朝の通知"
@@ -126,7 +126,7 @@ export function NotificationSettingsForm({
         />
       </div>
       {error && (
-        <p role="alert" className="text-zumi-shu text-[11px]">
+        <p role="alert" className="text-[11px] text-zumi-shu">
           {error}
         </p>
       )}
@@ -179,7 +179,7 @@ function DevicePushRow({ vapidPublicKey }: { vapidPublicKey: string | null }) {
         アドレスバーのサイト設定から、通知を「許可」に変えてください。
       </p>
     ) : error ? (
-      <p role="alert" className="text-zumi-shu mt-2 text-[11px]">
+      <p role="alert" className="mt-2 text-[11px] text-zumi-shu">
         {error}
       </p>
     ) : null;
@@ -191,7 +191,7 @@ function DevicePushRow({ vapidPublicKey }: { vapidPublicKey: string | null }) {
           type="button"
           onClick={subscribe}
           disabled={busy}
-          className="bg-zumi-shu rounded-[20px] px-3 py-1.5 text-[11.5px] font-bold text-white disabled:opacity-50"
+          className="rounded-[20px] bg-zumi-shu px-3 py-1.5 text-[11.5px] font-bold text-white disabled:opacity-50"
         >
           許可する
         </button>

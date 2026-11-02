@@ -44,23 +44,23 @@ export function TodayRow({
     <div
       {...handlers}
       className={cn(
-        "border-zumi-line bg-zumi-card flex select-none items-center gap-3 rounded-2xl border p-3.5 [-webkit-touch-callout:none]",
+        "flex select-none items-center gap-3 rounded-2xl border border-zumi-line bg-zumi-card p-3.5 [-webkit-touch-callout:none]",
         mode === "future" && "opacity-60",
       )}
     >
-      <span className="bg-zumi-base text-zumi-ink flex size-[42px] shrink-0 items-center justify-center rounded-xl">
+      <span className="flex size-[42px] shrink-0 items-center justify-center rounded-xl bg-zumi-base text-zumi-ink">
         <DutyIcon name={item.icon} className="size-5" strokeWidth={1.6} />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
         <span className="truncate text-[15px] font-bold">{item.name}</span>
         {warn ? (
-          <span className="bg-zumi-warn-bg text-zumi-warn w-fit rounded-[20px] px-2 py-0.5 text-[11px] font-bold">
+          <span className="w-fit rounded-[20px] bg-zumi-warn-bg px-2 py-0.5 text-[11px] font-bold text-zumi-warn">
             {detail}
           </span>
         ) : (
-          <span className="text-zumi-soft truncate text-xs">{detail}</span>
+          <span className="truncate text-xs text-zumi-soft">{detail}</span>
         )}
-        {log?.note && <span className="text-zumi-soft truncate text-[11.5px]">{log.note}</span>}
+        {log?.note && <span className="truncate text-[11.5px] text-zumi-soft">{log.note}</span>}
       </span>
       {interactive && (
         <button type="button" onClick={onOpenDetail} className="sr-only">
@@ -69,7 +69,7 @@ export function TodayRow({
       )}
       {!interactive ? (
         <span
-          className="border-zumi-line text-zumi-soft flex size-[30px] shrink-0 items-center justify-center rounded-full border-2 border-dashed"
+          className="flex size-[30px] shrink-0 items-center justify-center rounded-full border-2 border-dashed border-zumi-line text-zumi-soft"
           aria-label="先の予定のため、まだ記録できません"
           role="img"
         >
@@ -91,7 +91,7 @@ export function TodayRow({
           aria-label={`${item.name}のスキップを取り消す`}
           className="flex h-11 shrink-0 items-center"
         >
-          <span className="bg-zumi-pill text-zumi-soft rounded-[20px] px-[9px] py-[3px] text-[10px] font-bold">
+          <span className="rounded-[20px] bg-zumi-pill px-[9px] py-[3px] text-[10px] font-bold text-zumi-soft">
             スキップ
           </span>
         </button>
@@ -102,7 +102,7 @@ export function TodayRow({
           aria-label={`${item.name}を済にする`}
           className="flex size-11 shrink-0 items-center justify-center"
         >
-          <span className="border-zumi-line size-[30px] rounded-full border-2" />
+          <span className="size-[30px] rounded-full border-2 border-zumi-line" />
         </button>
       )}
     </div>
@@ -115,7 +115,7 @@ function Hanko({ animate }: { animate: boolean }) {
     <span
       aria-hidden
       className={cn(
-        "border-zumi-shu text-zumi-shu font-seal flex size-11 rotate-[-8deg] items-center justify-center rounded-full border-[2.5px] text-[21px] shadow-[inset_0_0_0_1px_rgba(200,64,42,0.25)]",
+        "flex size-11 rotate-[-8deg] items-center justify-center rounded-full border-[2.5px] border-zumi-shu font-seal text-[21px] text-zumi-shu shadow-[inset_0_0_0_1px_rgba(200,64,42,0.25)]",
         animate && "motion-safe:animate-stamp",
       )}
     >

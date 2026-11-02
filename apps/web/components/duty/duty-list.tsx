@@ -47,7 +47,7 @@ export function DutyList({
           <button
             type="button"
             onClick={() => (limitReached ? setShowLimit(true) : setCreating(true))}
-            className="bg-zumi-shu flex items-center gap-1.5 rounded-[20px] px-3.5 py-[9px] text-xs font-bold text-white"
+            className="flex items-center gap-1.5 rounded-[20px] bg-zumi-shu px-3.5 py-[9px] text-xs font-bold text-white"
           >
             <Plus className="size-[13px]" strokeWidth={2.2} aria-hidden />
             追加
@@ -59,14 +59,14 @@ export function DutyList({
         {showLimit && (
           <p
             role="alert"
-            className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+            className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
           >
             {LIMIT_MESSAGE}
           </p>
         )}
 
         {duties.length === 0 && (
-          <div className="border-zumi-line text-zumi-soft rounded-2xl border border-dashed px-4 py-8 text-center text-[13px]">
+          <div className="rounded-2xl border border-dashed border-zumi-line px-4 py-8 text-center text-[13px] text-zumi-soft">
             まだ Duty がありません。
             <br />
             「追加」から、定期的にやることを登録しましょう。
@@ -87,7 +87,7 @@ export function DutyList({
 
         {archived.length > 0 && (
           <details className="group mt-4">
-            <summary className="text-zumi-soft flex cursor-pointer list-none items-center gap-1 text-xs font-bold tracking-[.08em] [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-1 text-xs font-bold tracking-[.08em] text-zumi-soft [&::-webkit-details-marker]:hidden">
               アーカイブ済み（{archived.length}）
               <ChevronDown
                 className="size-3.5 transition-transform group-open:rotate-180"
@@ -139,15 +139,15 @@ function DutyCard({
     duty.status === "PAUSED" ? "一時停止中" : summarizeSchedule(duty.scheduleConfig, weekStart);
   const content = (
     <>
-      <span className="bg-zumi-base text-zumi-ink flex size-10 shrink-0 items-center justify-center rounded-[11px]">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-zumi-base text-zumi-ink">
         <DutyIcon name={duty.icon} className="size-[19px]" strokeWidth={1.6} />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
         <span className="truncate text-[14.5px] font-bold">{duty.name}</span>
-        <span className="text-zumi-soft truncate text-[11.5px]">{summary}</span>
+        <span className="truncate text-[11.5px] text-zumi-soft">{summary}</span>
       </span>
       {badge && (
-        <span className="bg-zumi-pill text-zumi-soft shrink-0 rounded-[20px] px-[7px] py-0.5 text-[9.5px] font-bold">
+        <span className="shrink-0 rounded-[20px] bg-zumi-pill px-[7px] py-0.5 text-[9.5px] font-bold text-zumi-soft">
           {badge}
         </span>
       )}

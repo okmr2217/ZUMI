@@ -19,7 +19,7 @@ export default async function SettingsPage() {
           <Link
             href="/app"
             aria-label="閉じる"
-            className="bg-zumi-card text-zumi-soft flex size-[30px] items-center justify-center rounded-full"
+            className="flex size-[30px] items-center justify-center rounded-full bg-zumi-card text-zumi-soft"
           >
             <X className="size-3.5" strokeWidth={1.8} aria-hidden />
           </Link>

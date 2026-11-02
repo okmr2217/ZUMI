@@ -31,13 +31,13 @@ export function TemplatePicker({
         <Link
           href="/app/duties"
           aria-label="Duty 一覧に戻る"
-          className="text-zumi-soft flex size-9 items-center justify-center rounded-full"
+          className="flex size-9 items-center justify-center rounded-full text-zumi-soft"
         >
           <ChevronLeft className="size-5" strokeWidth={1.8} aria-hidden />
         </Link>
         <h1 className="text-[20px] font-bold">テンプレートから作成</h1>
       </header>
-      <p className="text-zumi-soft px-[22px] text-[12.5px]">
+      <p className="px-[22px] text-[12.5px] text-zumi-soft">
         選ぶと、内容が入った状態で追加画面が開きます。
       </p>
 
@@ -45,7 +45,7 @@ export function TemplatePicker({
         {limitReached && (
           <p
             role="alert"
-            className="bg-zumi-pill mb-3 rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+            className="mb-3 rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
           >
             {LIMIT_MESSAGE}
           </p>

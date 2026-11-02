@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 export function SettingsGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-zumi-soft text-[11.5px] font-bold tracking-[.06em]">{title}</h2>
-      <div className="border-zumi-line bg-zumi-card overflow-hidden rounded-2xl border">
+      <h2 className="text-[11.5px] font-bold tracking-[.06em] text-zumi-soft">{title}</h2>
+      <div className="overflow-hidden rounded-2xl border border-zumi-line bg-zumi-card">
         {children}
       </div>
     </section>
@@ -21,7 +21,7 @@ function RowText({ label, sub }: { label: string; sub?: string }) {
   return (
     <span className="min-w-0">
       <span className="block text-[13.5px] font-semibold">{label}</span>
-      {sub && <span className="text-zumi-soft mt-0.5 block text-[11px]">{sub}</span>}
+      {sub && <span className="mt-0.5 block text-[11px] text-zumi-soft">{sub}</span>}
     </span>
   );
 }
@@ -40,7 +40,7 @@ export function SettingsRow({
     <div className={ROW}>
       <RowText label={label} sub={sub} />
       {children && (
-        <span className="text-zumi-soft flex shrink-0 items-center gap-1.5 text-[12.5px]">
+        <span className="flex shrink-0 items-center gap-1.5 text-[12.5px] text-zumi-soft">
           {children}
         </span>
       )}
@@ -73,7 +73,7 @@ export function SettingsLinkRow({
     return (
       <a href={href} target="_blank" rel="noopener" className={ROW}>
         <RowText label={label} sub={sub} />
-        <ExternalLink className="text-zumi-soft size-3.5 shrink-0" strokeWidth={1.8} aria-hidden />
+        <ExternalLink className="size-3.5 shrink-0 text-zumi-soft" strokeWidth={1.8} aria-hidden />
       </a>
     );
   }
@@ -85,7 +85,7 @@ export function SettingsLinkRow({
       className={cn(ROW, tone === "danger" && "text-zumi-shu-deep", "disabled:cursor-default")}
     >
       <RowText label={label} sub={sub} />
-      <span className="text-zumi-soft flex shrink-0 items-center gap-1.5 text-[12.5px]">
+      <span className="flex shrink-0 items-center gap-1.5 text-[12.5px] text-zumi-soft">
         {value}
         {!disabled && <ChevronRight className="size-3.5" strokeWidth={1.8} aria-hidden />}
       </span>

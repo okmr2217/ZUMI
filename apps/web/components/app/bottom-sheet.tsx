@@ -38,7 +38,7 @@ export function BottomSheet({
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
-      className="bg-zumi-bg font-zumi text-zumi-ink fixed inset-x-0 bottom-0 top-auto m-0 mx-auto max-h-[94dvh] w-full max-w-[430px] overflow-y-auto rounded-t-[26px] p-0 shadow-[0_-10px_40px_rgba(30,26,20,.25)] backdrop:bg-[rgba(43,38,32,0.42)]"
+      className="fixed inset-x-0 bottom-0 top-auto m-0 mx-auto max-h-[94dvh] w-full max-w-[430px] overflow-y-auto rounded-t-[26px] bg-zumi-bg p-0 font-zumi text-zumi-ink shadow-[0_-10px_40px_rgba(30,26,20,.25)] backdrop:bg-[rgba(43,38,32,0.42)]"
     >
       {open && (
         <div className="flex flex-col gap-[18px] px-[22px] pb-[calc(26px+env(safe-area-inset-bottom))] pt-4">
@@ -48,7 +48,7 @@ export function BottomSheet({
               type="button"
               onClick={onClose}
               aria-label="閉じる"
-              className="bg-zumi-card text-zumi-soft flex size-[30px] items-center justify-center rounded-full"
+              className="flex size-[30px] items-center justify-center rounded-full bg-zumi-card text-zumi-soft"
             >
               <X className="size-3.5" strokeWidth={1.8} aria-hidden />
             </button>

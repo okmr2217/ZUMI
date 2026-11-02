@@ -59,7 +59,7 @@ export function LoginForm() {
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">パスワード</Label>
-          <Link href="/forgot-password" className="text-xs underline text-muted-foreground">
+          <Link href="/forgot-password" className="text-xs text-muted-foreground underline">
             パスワードを忘れた場合
           </Link>
         </div>

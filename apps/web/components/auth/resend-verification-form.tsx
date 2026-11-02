@@ -20,10 +20,19 @@ export function ResendVerificationForm({ email }: { email: string }) {
 
   return (
     <div className="space-y-2">
-      <Button variant="outline" className="w-full" onClick={handleResend} disabled={pending || !email}>
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={handleResend}
+        disabled={pending || !email}
+      >
         {pending ? "送信中..." : "確認メールを再送する"}
       </Button>
-      {sent && <p className="text-center text-xs text-muted-foreground">再送しました。メールをご確認ください。</p>}
+      {sent && (
+        <p className="text-center text-xs text-muted-foreground">
+          再送しました。メールをご確認ください。
+        </p>
+      )}
     </div>
   );
 }

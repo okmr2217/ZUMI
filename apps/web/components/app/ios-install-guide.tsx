@@ -28,7 +28,7 @@ export function IosInstallGuide({
     return (
       <ol
         className={cn(
-          "bg-zumi-bg text-zumi-ink list-decimal space-y-0.5 rounded-xl py-2 pl-7 pr-3 text-[11px] leading-relaxed",
+          "list-decimal space-y-0.5 rounded-xl bg-zumi-bg py-2 pl-7 pr-3 text-[11px] leading-relaxed text-zumi-ink",
           className,
         )}
       >
@@ -42,26 +42,26 @@ export function IosInstallGuide({
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      <ol className="border-zumi-line bg-zumi-card overflow-hidden rounded-2xl border">
+      <ol className="overflow-hidden rounded-2xl border border-zumi-line bg-zumi-card">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
           return (
             <li
               key={step.text}
-              className="border-zumi-line flex items-center gap-3 border-b px-[15px] py-3 last:border-b-0"
+              className="flex items-center gap-3 border-b border-zumi-line px-[15px] py-3 last:border-b-0"
             >
-              <span className="bg-zumi-base flex size-[38px] shrink-0 items-center justify-center rounded-[11px]">
+              <span className="flex size-[38px] shrink-0 items-center justify-center rounded-[11px] bg-zumi-base">
                 <Icon className="size-[18px]" strokeWidth={1.7} aria-hidden />
               </span>
               <span className="text-[13.5px] font-semibold">
-                <span className="text-zumi-soft mr-1.5 tabular-nums">{index + 1}</span>
+                <span className="mr-1.5 tabular-nums text-zumi-soft">{index + 1}</span>
                 {step.text}
               </span>
             </li>
           );
         })}
       </ol>
-      <p className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold leading-relaxed">
+      <p className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold leading-relaxed">
         {RELOGIN_NOTE}
       </p>
     </div>

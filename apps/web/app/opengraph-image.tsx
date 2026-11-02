@@ -18,7 +18,13 @@ const WARN_BG = "#f3e6ce";
 function IconChevronLeft() {
   return (
     <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-      <path d="M15 6l-6 6 6 6" stroke={INK_SOFT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M15 6l-6 6 6 6"
+        stroke={INK_SOFT}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -26,7 +32,13 @@ function IconChevronLeft() {
 function IconChevronRight() {
   return (
     <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-      <path d="M9 6l6 6-6 6" stroke={INK_SOFT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9 6l6 6-6 6"
+        stroke={INK_SOFT}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -34,7 +46,13 @@ function IconChevronRight() {
 function IconChevronDown() {
   return (
     <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
-      <path d="M6 9l6 6 6-6" stroke={INK_SOFT} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M6 9l6 6 6-6"
+        stroke={INK_SOFT}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -70,7 +88,16 @@ function IconTrash() {
 function IconProtein() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <rect x="4" y="10" width="16" height="7" rx="3.5" transform="rotate(-30 12 13)" stroke={INK} strokeWidth={1.6} />
+      <rect
+        x="4"
+        y="10"
+        width="16"
+        height="7"
+        rx="3.5"
+        transform="rotate(-30 12 13)"
+        stroke={INK}
+        strokeWidth={1.6}
+      />
       <path d="M9 8.5l6 9" stroke={INK} strokeWidth={1.6} strokeLinecap="round" />
     </svg>
   );
@@ -79,7 +106,13 @@ function IconProtein() {
 function IconBath() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-      <path d="M4 12h16v2a5 5 0 01-5 5H9a5 5 0 01-5-5v-2z" stroke={INK} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M4 12h16v2a5 5 0 01-5 5H9a5 5 0 01-5-5v-2z"
+        stroke={INK}
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
       <path d="M7 12V6a2 2 0 012-2h1" stroke={INK} strokeWidth={1.6} strokeLinecap="round" />
     </svg>
   );
@@ -88,7 +121,13 @@ function IconBath() {
 function IconArrowRight() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-      <path d="M9 6l6 6-6 6" stroke={PAPER} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M9 6l6 6-6 6"
+        stroke={PAPER}
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -210,7 +249,15 @@ function DutyRow({
 
 function TabItem({ label, active }: { label: string; active?: boolean }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, fontSize: 9 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 3,
+        fontSize: 9,
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -221,7 +268,15 @@ function TabItem({ label, active }: { label: string; active?: boolean }) {
           border: active ? "none" : "2px solid #c6bca9",
         }}
       />
-      <div style={{ display: "flex", color: active ? VERMILLION : INK_SOFT, fontWeight: active ? 700 : 400 }}>{label}</div>
+      <div
+        style={{
+          display: "flex",
+          color: active ? VERMILLION : INK_SOFT,
+          fontWeight: active ? 700 : 400,
+        }}
+      >
+        {label}
+      </div>
     </div>
   );
 }
@@ -233,71 +288,241 @@ export default async function Image() {
   const yuji = base64ToArrayBuffer(YUJI_SYUKU_B64);
 
   return new ImageResponse(
-    (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        position: "relative",
+        background: PAPER,
+        fontFamily: "Zen Kaku Gothic New",
+        color: INK,
+        overflow: "hidden",
+      }}
+    >
+      {/* left: copy */}
       <div
         style={{
-          width: "100%",
-          height: "100%",
           display: "flex",
-          position: "relative",
-          background: PAPER,
-          fontFamily: "Zen Kaku Gothic New",
-          color: INK,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "54%",
+          padding: "53px 0 53px 62px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
+          <div
+            style={{
+              display: "flex",
+              width: 43,
+              height: 43,
+              borderRadius: "50%",
+              border: `3px solid ${VERMILLION}`,
+              color: VERMILLION,
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              fontFamily: "Yuji Syuku",
+              transform: "rotate(-6deg)",
+            }}
+          >
+            済
+          </div>
+          <div
+            style={{ display: "flex", fontSize: 20, fontWeight: 900, letterSpacing: 6, color: INK }}
+          >
+            ZUMI
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 43,
+              fontWeight: 900,
+              lineHeight: 1.38,
+            }}
+          >
+            <span>定期的な「やらなきゃ」を、</span>
+            <span>可視化しよう。</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              marginTop: 18,
+              fontSize: 16,
+              color: "#5c5346",
+              lineHeight: 1.85,
+            }}
+          >
+            <span>毎日のことも、月イチのことも。</span>
+            <span>同じ場所で、押すだけ。</span>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: VERMILLION,
+            color: PAPER,
+            alignSelf: "flex-start",
+            padding: "14px 26px",
+            borderRadius: 99,
+            fontSize: 16,
+            fontWeight: 700,
+          }}
+        >
+          無料で始める
+          <IconArrowRight />
+        </div>
+      </div>
+
+      {/* right: phone mock of 今日 tab (Main.dc.html に準拠) */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          position: "absolute",
+          right: 50,
+          top: -21,
+          width: 366,
+          height: 672,
+          background: "#ede7d8",
+          borderRadius: 38,
+          border: `1px solid ${LINE}`,
+          boxShadow: "0 29px 53px rgba(30,26,20,0.28)",
+          transform: "rotate(3deg)",
           overflow: "hidden",
         }}
       >
-        {/* left: copy */}
+        {/* topbar */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "26px 23px 0",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
+            <NavCircle>
+              <IconChevronLeft />
+            </NavCircle>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", fontSize: 11, color: INK_SOFT }}>8月24日（月）</div>
+              <div style={{ display: "flex", fontSize: 20, fontWeight: 700, marginTop: 1 }}>
+                今日
+              </div>
+            </div>
+            <NavCircle>
+              <IconChevronRight />
+            </NavCircle>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              width: 34,
+              height: 34,
+              borderRadius: "50%",
+              background: "#ffffff",
+              border: `1px solid ${LINE}`,
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              marginLeft: 12,
+            }}
+          >
+            <IconGear />
+          </div>
+        </div>
+
+        {/* progress */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 7, padding: "18px 23px 0" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 11,
+              color: INK_SOFT,
+            }}
+          >
+            <span>今日の進捗</span>
+            <span>3 / 5</span>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              height: 6,
+              borderRadius: 5,
+              background: LINE,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                height: "100%",
+                width: "60%",
+                background: VERMILLION,
+                borderRadius: 5,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* scroll body */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
-            position: "absolute",
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: "54%",
-            padding: "53px 0 53px 62px",
+            flex: 1,
+            gap: 20,
+            padding: "20px 23px 0",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
             <div
               style={{
                 display: "flex",
-                width: 43,
-                height: 43,
-                borderRadius: "50%",
-                border: `3px solid ${VERMILLION}`,
-                color: VERMILLION,
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 20,
-                fontFamily: "Yuji Syuku",
-                transform: "rotate(-6deg)",
+                fontSize: 10,
+                fontWeight: 700,
+                color: INK_SOFT,
+                letterSpacing: 1,
+                marginBottom: 10,
               }}
             >
-              済
+              今日
             </div>
-            <div style={{ display: "flex", fontSize: 20, fontWeight: 900, letterSpacing: 6, color: INK }}>ZUMI</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <DutyRow icon={<IconTrash />} name="ゴミ出し（可燃）" sub="火・金" />
+              <DutyRow icon={<IconProtein />} name="プロテイン摂取" sub="毎日" stamped />
+            </div>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", flexDirection: "column", fontSize: 43, fontWeight: 900, lineHeight: 1.38 }}>
-              <span>定期的な「やらなきゃ」を、</span>
-              <span>可視化しよう。</span>
-            </div>
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
-                marginTop: 18,
-                fontSize: 16,
-                color: "#5c5346",
-                lineHeight: 1.85,
+                fontSize: 10,
+                fontWeight: 700,
+                color: WARN,
+                letterSpacing: 1,
+                marginBottom: 10,
               }}
             >
-              <span>毎日のことも、月イチのことも。</span>
-              <span>同じ場所で、押すだけ。</span>
+              そろそろ
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <DutyRow icon={<IconBath />} name="お風呂" warnBadge="最後から2日" />
             </div>
           </div>
 
@@ -305,128 +530,35 @@ export default async function Image() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 10,
-              background: VERMILLION,
-              color: PAPER,
-              alignSelf: "flex-start",
-              padding: "14px 26px",
-              borderRadius: 99,
-              fontSize: 16,
-              fontWeight: 700,
+              justifyContent: "space-between",
+              padding: "4px 1px",
+              color: INK_SOFT,
+              fontSize: 10,
             }}
           >
-            無料で始める
-            <IconArrowRight />
+            <span>済んだもの 2件</span>
+            <IconChevronDown />
           </div>
         </div>
 
-        {/* right: phone mock of 今日 tab (Main.dc.html に準拠) */}
+        {/* tabbar */}
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            position: "absolute",
-            right: 50,
-            top: -21,
-            width: 366,
-            height: 672,
-            background: "#ede7d8",
-            borderRadius: 38,
-            border: `1px solid ${LINE}`,
-            boxShadow: "0 29px 53px rgba(30,26,20,0.28)",
-            transform: "rotate(3deg)",
-            overflow: "hidden",
+            alignItems: "center",
+            justifyContent: "space-around",
+            background: "#ffffff",
+            borderTop: `1px solid ${LINE}`,
+            padding: "13px 0 18px",
+            flexShrink: 0,
           }}
         >
-          {/* topbar */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "26px 23px 0" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-              <NavCircle>
-                <IconChevronLeft />
-              </NavCircle>
-              <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", fontSize: 11, color: INK_SOFT }}>8月24日（月）</div>
-                <div style={{ display: "flex", fontSize: 20, fontWeight: 700, marginTop: 1 }}>今日</div>
-              </div>
-              <NavCircle>
-                <IconChevronRight />
-              </NavCircle>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                width: 34,
-                height: 34,
-                borderRadius: "50%",
-                background: "#ffffff",
-                border: `1px solid ${LINE}`,
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                marginLeft: 12,
-              }}
-            >
-              <IconGear />
-            </div>
-          </div>
-
-          {/* progress */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 7, padding: "18px 23px 0" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: INK_SOFT }}>
-              <span>今日の進捗</span>
-              <span>3 / 5</span>
-            </div>
-            <div style={{ display: "flex", height: 6, borderRadius: 5, background: LINE, overflow: "hidden" }}>
-              <div style={{ display: "flex", height: "100%", width: "60%", background: VERMILLION, borderRadius: 5 }} />
-            </div>
-          </div>
-
-          {/* scroll body */}
-          <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 20, padding: "20px 23px 0" }}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", fontSize: 10, fontWeight: 700, color: INK_SOFT, letterSpacing: 1, marginBottom: 10 }}>
-                今日
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <DutyRow icon={<IconTrash />} name="ゴミ出し（可燃）" sub="火・金" />
-                <DutyRow icon={<IconProtein />} name="プロテイン摂取" sub="毎日" stamped />
-              </div>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", fontSize: 10, fontWeight: 700, color: WARN, letterSpacing: 1, marginBottom: 10 }}>
-                そろそろ
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <DutyRow icon={<IconBath />} name="お風呂" warnBadge="最後から2日" />
-              </div>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 1px", color: INK_SOFT, fontSize: 10 }}>
-              <span>済んだもの 2件</span>
-              <IconChevronDown />
-            </div>
-          </div>
-
-          {/* tabbar */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-around",
-              background: "#ffffff",
-              borderTop: `1px solid ${LINE}`,
-              padding: "13px 0 18px",
-              flexShrink: 0,
-            }}
-          >
-            <TabItem label="今日" active />
-            <TabItem label="振り返り" />
-            <TabItem label="Duty" />
-          </div>
+          <TabItem label="今日" active />
+          <TabItem label="振り返り" />
+          <TabItem label="Duty" />
         </div>
       </div>
-    ),
+    </div>,
     {
       ...size,
       fonts: [

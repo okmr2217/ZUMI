@@ -103,7 +103,7 @@ function EditForm({
       {error && (
         <p
           role="alert"
-          className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+          className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
         >
           {error}
         </p>
@@ -111,15 +111,15 @@ function EditForm({
       <button
         type="submit"
         disabled={!input || pending !== null}
-        className="bg-zumi-shu w-full rounded-2xl p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
+        className="w-full rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
       >
         {pending === "save" ? "保存しています…" : "保存する"}
       </button>
 
       {confirmingArchive ? (
-        <div className="border-zumi-line bg-zumi-card rounded-[14px] border p-[15px]">
+        <div className="rounded-[14px] border border-zumi-line bg-zumi-card p-[15px]">
           <p className="text-[13.5px] font-semibold">「{duty.name}」をアーカイブしますか？</p>
-          <p className="text-zumi-soft mt-1 text-[11.5px]">
+          <p className="mt-1 text-[11.5px] text-zumi-soft">
             今日の一覧と通知から外れます。これまでの記録は残ります。
           </p>
           <div className="mt-3 flex justify-end gap-[22px] text-[12.5px] font-semibold">

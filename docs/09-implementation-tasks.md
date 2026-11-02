@@ -144,7 +144,7 @@ Web Push のみで通知を成立させる。
 - [x] E2Eテスト（主要フロー: サインアップ→Duty作成→押印→通知→シェア）
 - [ ] 本番D1・Cron Trigger・カスタムドメイン（`zumi.paritto.dev`）の疎通確認
 - [ ] Cloudflare Workers デプロイパイプライン整備
-- [ ] リポジトリ全体に prettier（tailwind プラグイン込み）を一括でかけ、CI に `format:check` を足す（並行の作業セッションが落ち着いてから。途中でかけると各ブランチと衝突するため）
+- [x] リポジトリ全体に prettier（tailwind プラグイン込み）を一括でかけ、CI に `format:check` を足す（並行の作業セッションが落ち着いてから。途中でかけると各ブランチと衝突するため）
 - [x] シェア画像の仕上げ（[03](./03-duty-log-review-account.md#シェア画像の設計方針) の「シェア画像の運用」）: `/og/w/:token` を `caches.default` でキャッシュする。`share_tokens.card` を読み込み時に zod で検証し、合わない行は 404 にする
 - [ ] 実機（iOS Safari・ホーム画面アプリ・Android Chrome）での確認: シェアの共有シートとダウンロードへの切り替え、Web Push の受信と通知タップからの遷移、ログアウト時の購読解除
 - [x] LP の safe-area 対応: `viewport-fit=cover` により、横向きのノッチ付き iPhone で LP の左右の余白がノッチにわずかに重なる。`lp.css` の `.wrap` に `env(safe-area-inset-*)` の余白を足す

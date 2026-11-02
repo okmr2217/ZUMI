@@ -96,7 +96,7 @@ function CreateForm({
       {templatesHref && (
         <Link
           href={templatesHref}
-          className="text-zumi-shu-deep -mt-1 flex items-center gap-1.5 self-start text-[12.5px] font-semibold"
+          className="-mt-1 flex items-center gap-1.5 self-start text-[12.5px] font-semibold text-zumi-shu-deep"
         >
           <LayoutGrid className="size-3.5" strokeWidth={1.8} aria-hidden />
           テンプレートから作成する
@@ -106,7 +106,7 @@ function CreateForm({
       {error && (
         <p
           role="alert"
-          className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+          className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
         >
           {error}
         </p>
@@ -114,7 +114,7 @@ function CreateForm({
       <button
         type="submit"
         disabled={!input || submitting || limitReached}
-        className="bg-zumi-shu w-full rounded-2xl p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
+        className="w-full rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
       >
         {submitting ? "追加しています…" : "追加する"}
       </button>

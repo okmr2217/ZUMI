@@ -92,7 +92,7 @@ function LogSheetForm({
 
   return (
     <>
-      <p className="text-zumi-soft -mt-2 text-xs">
+      <p className="-mt-2 text-xs text-zumi-soft">
         {formatShortDate(date)}の記録：{status}
       </p>
 
@@ -124,7 +124,7 @@ function LogSheetForm({
       )}
 
       {error && (
-        <p role="alert" className="text-zumi-shu-deep text-[12.5px] font-semibold">
+        <p role="alert" className="text-[12.5px] font-semibold text-zumi-shu-deep">
           {error}
         </p>
       )}
@@ -134,7 +134,7 @@ function LogSheetForm({
           type="button"
           disabled={busy}
           onClick={() => submit("DONE")}
-          className="bg-zumi-shu rounded-2xl p-[15px] text-[15px] font-bold text-white disabled:opacity-60"
+          className="rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-60"
         >
           済にする
         </button>
@@ -142,7 +142,7 @@ function LogSheetForm({
           type="button"
           disabled={busy}
           onClick={() => submit("SKIP")}
-          className="border-zumi-line bg-zumi-card rounded-2xl border p-[14px] text-[14px] font-bold disabled:opacity-60"
+          className="rounded-2xl border border-zumi-line bg-zumi-card p-[14px] text-[14px] font-bold disabled:opacity-60"
         >
           スキップする
         </button>
@@ -151,7 +151,7 @@ function LogSheetForm({
             type="button"
             disabled={busy}
             onClick={onUndo}
-            className="text-zumi-soft py-1.5 text-[12.5px] font-semibold disabled:opacity-60"
+            className="py-1.5 text-[12.5px] font-semibold text-zumi-soft disabled:opacity-60"
           >
             記録を取り消す
           </button>

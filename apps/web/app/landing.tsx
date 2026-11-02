@@ -34,11 +34,7 @@ const SIGNUP_HREF = "/signup";
 function SignupCta({ enabled, small = false }: { enabled: boolean; small?: boolean }) {
   const size = small ? " btn-small" : "";
   if (!enabled) {
-    return (
-      <span className={`btn btn-soon${size}`}>
-        公開準備中
-      </span>
-    );
+    return <span className={`btn btn-soon${size}`}>公開準備中</span>;
   }
   return (
     <a className={`btn btn-primary${size}`} href={SIGNUP_HREF}>
@@ -160,13 +156,17 @@ function DailyRowView({ row }: { row: DailyRow }) {
     control = <div className="tap-empty" />;
   }
   return (
-    <div className={`app-row${row.state === "lock" ? " dim" : ""}`}>
+    <div className={`app-row${row.state === "lock" ? "dim" : ""}`}>
       <div className="app-icon-badge">
         <Icon />
       </div>
       <div className="app-row-main">
         <div className="app-row-name">{row.name}</div>
-        {row.warn ? <div className="badge-warn">{row.sub}</div> : <div className="app-row-sub">{row.sub}</div>}
+        {row.warn ? (
+          <div className="badge-warn">{row.sub}</div>
+        ) : (
+          <div className="app-row-sub">{row.sub}</div>
+        )}
       </div>
       {control}
     </div>
@@ -207,7 +207,11 @@ function DailyDemo() {
         </div>
       </div>
 
-      <button className={`app-pill${s.pill ? " visible" : ""}`} type="button" onClick={() => setIndex(1)}>
+      <button
+        className={`app-pill${s.pill ? "visible" : ""}`}
+        type="button"
+        onClick={() => setIndex(1)}
+      >
         <IconHistory />
         今日へ戻る
       </button>
@@ -225,7 +229,7 @@ function DailyDemo() {
       <div className="app-scroll">
         {s.groups.map((g) => (
           <div key={g.label}>
-            <div className={`app-group-label${g.warn ? " warn" : ""}`}>{g.label}</div>
+            <div className={`app-group-label${g.warn ? "warn" : ""}`}>{g.label}</div>
             <div className="app-cardlist">
               {g.rows.map((row) => (
                 <DailyRowView key={row.name} row={row} />
@@ -303,7 +307,12 @@ function HeroCard() {
                 <div className="app-row-sub">毎日</div>
               </div>
               {proteinDone ? (
-                <button className="hanko animate" aria-pressed="true" aria-label="プロテインは済みました" disabled>
+                <button
+                  className="hanko animate"
+                  aria-pressed="true"
+                  aria-label="プロテインは済みました"
+                  disabled
+                >
                   済
                 </button>
               ) : (
@@ -439,9 +448,7 @@ const HISTORY_GROUPS = [
   },
 ];
 
-const HEAT_CELLS = [
-  null, 4, 2, 3, 4, 1, 3, 4, 4, 3, null, 4, 5, 3, 4, 4, 5, 3, 4, 5, 4,
-];
+const HEAT_CELLS = [null, 4, 2, 3, 4, 1, 3, 4, 4, 3, null, 4, 5, 3, 4, 4, 5, 3, 4, 5, 4];
 
 export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
   const rootRef = useRevealOnScroll();
@@ -565,7 +572,8 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                 その日やることが、日付ごとに並ぶ。
               </h2>
               <p className="body-text">
-                ◀ ▶ で日付を送れば、過去の記録づけも、数日先の予定確認もできます。「今日」だけを見るための画面ではありません。
+                ◀ ▶
+                で日付を送れば、過去の記録づけも、数日先の予定確認もできます。「今日」だけを見るための画面ではありません。
               </p>
               <ul className="feature-list">
                 <li>過去の日付に戻れば、その日にやったことを後から記録できる</li>
@@ -652,11 +660,14 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                     </div>
                   </div>
                 </div>
-                <p className="settings-note">時間は1分単位で自由に変更できます。オフにすることもできます。</p>
+                <p className="settings-note">
+                  時間は1分単位で自由に変更できます。オフにすることもできます。
+                </p>
               </div>
             </div>
             <p className="notify-total">
-              1日に届く通知は、朝・夜あわせて最大<strong>2通</strong>。時間は設定画面からいつでも変更できます。
+              1日に届く通知は、朝・夜あわせて最大<strong>2通</strong>
+              。時間は設定画面からいつでも変更できます。
             </p>
           </section>
         </div>
@@ -790,7 +801,11 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                     <div className="heat-grid2">
                       {HEAT_CELLS.map((v, i) =>
                         v === null ? (
-                          <div className="heat-cell2" style={{ background: "var(--paper-sunken)" }} key={i}>
+                          <div
+                            className="heat-cell2"
+                            style={{ background: "var(--paper-sunken)" }}
+                            key={i}
+                          >
                             <span style={{ opacity: 0.45 }}>–</span>
                           </div>
                         ) : (
@@ -804,7 +819,9 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                             }}
                             key={i}
                           >
-                            <span style={{ color: v >= 3 ? "#fdf6ec" : "var(--ink-soft)" }}>{v}/5</span>
+                            <span style={{ color: v >= 3 ? "#fdf6ec" : "var(--ink-soft)" }}>
+                              {v}/5
+                            </span>
                           </div>
                         ),
                       )}
@@ -813,9 +830,27 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                       <span className="lbl">未達成</span>
                       <div className="scale">
                         <div className="sw" style={{ background: "var(--paper-sunken)" }} />
-                        <div className="sw" style={{ background: "color-mix(in srgb, var(--vermillion) 20%, var(--paper-sunken))" }} />
-                        <div className="sw" style={{ background: "color-mix(in srgb, var(--vermillion) 50%, var(--paper-sunken))" }} />
-                        <div className="sw" style={{ background: "color-mix(in srgb, var(--vermillion) 85%, var(--paper-sunken))" }} />
+                        <div
+                          className="sw"
+                          style={{
+                            background:
+                              "color-mix(in srgb, var(--vermillion) 20%, var(--paper-sunken))",
+                          }}
+                        />
+                        <div
+                          className="sw"
+                          style={{
+                            background:
+                              "color-mix(in srgb, var(--vermillion) 50%, var(--paper-sunken))",
+                          }}
+                        />
+                        <div
+                          className="sw"
+                          style={{
+                            background:
+                              "color-mix(in srgb, var(--vermillion) 85%, var(--paper-sunken))",
+                          }}
+                        />
                         <div className="sw" style={{ background: "var(--vermillion)" }} />
                       </div>
                       <span className="lbl">全て済</span>
@@ -832,7 +867,9 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
               <div className="split">
                 <div>
                   <span className="sub-eyebrow">履歴</span>
-                  <h3 className="sub-heading">済ませたことも、スキップしたことも、そのままログに残す。</h3>
+                  <h3 className="sub-heading">
+                    済ませたことも、スキップしたことも、そのままログに残す。
+                  </h3>
                   <p className="body-text">
                     日付ごとに、済ませたDutyとスキップしたDutyを並べて記録します。Duty名で絞り込んで、過去に遡って確認することもできます。
                   </p>
@@ -855,7 +892,9 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                             </div>
                             <div className="hist-name2">{row.name}</div>
                             <div className="hist-time2">{row.time}</div>
-                            <div className={`hist-badge2 ${row.badge}`}>{row.badge === "done" ? "済" : "スキップ"}</div>
+                            <div className={`hist-badge2 ${row.badge}`}>
+                              {row.badge === "done" ? "済" : "スキップ"}
+                            </div>
                           </div>
                         ))}
                       </div>

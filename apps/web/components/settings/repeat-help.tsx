@@ -44,12 +44,12 @@ const NOTES: { title: string; body: string }[] = [
 export function RepeatHelp() {
   return (
     <div className="flex flex-col gap-4">
-      <ul className="border-zumi-line bg-zumi-card overflow-hidden rounded-2xl border">
+      <ul className="overflow-hidden rounded-2xl border border-zumi-line bg-zumi-card">
         {TYPES.map((type) => (
-          <li key={type.label} className="border-zumi-line border-b px-[15px] py-3 last:border-b-0">
+          <li key={type.label} className="border-b border-zumi-line px-[15px] py-3 last:border-b-0">
             <p className="text-[13.5px] font-semibold">{type.label}</p>
             <p className="mt-1 text-[12px] leading-relaxed">{type.body}</p>
-            <p className="text-zumi-soft mt-1 text-[11px]">例: {type.example}</p>
+            <p className="mt-1 text-[11px] text-zumi-soft">例: {type.example}</p>
           </li>
         ))}
       </ul>
