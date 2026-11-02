@@ -39,6 +39,7 @@
 - `apps/web/components/legal/legal-document.tsx` の `OPERATOR.name`・`OPERATOR.email` を埋める（空のあいだは本文に【運営者名】【連絡先メールアドレス】が出る）
 - PR #32 の確認事項10項目を見る（住所の扱い、専属的合意管轄、免責の範囲、外国の事業者の扱い、外部送信規律など）。本文は専門家のレビューを経ていない下書き
 - Sentry の `zumi-web`・`zumi-notify` で「Prevent Storing of IP Addresses」を有効にし、Sentry・Resend の保存期間を確認する（ポリシーは「IP をエラー情報に含めない」「各事業者の定める期間」と書いている）
+- Cloudflare ダッシュボード（`paritto.dev` → セキュリティ → WAF → レート制限ルール）で、認証の API にレート制限ルールを1本作る。対象は `/api/auth/sign-in`・`/api/auth/sign-up`・`/api/auth/request-password-reset`・`/api/auth/send-verification-email`（パスが `/api/auth/` で始まる POST にまとめてもよい）。無料プランでも1本作れる。better-auth の rate limit はメモリに置かれ、Workers の isolate ごとに分かれるのでベストエフォートにしかならないため（2026/11 確定。D1 に持たせる方法はスキーマ変更が要るので採らない）
 - シェア URL を個別に無効にする機能はない。ポリシーでは「運営者に連絡」としたので、依頼が来たら本番 D1 の `share_tokens` の該当行を手で消す
 
 本番のサインアップは `apps/web/wrangler.toml` の `[vars]` の `SIGNUP_ENABLED = "false"` で

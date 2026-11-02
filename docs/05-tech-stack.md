@@ -17,8 +17,11 @@
 | プッシュ送信 | Web Push（VAPID）/ Resend（メール）/ LINE Messaging API（Pro） |
 | 配信キュー | Cloudflare Queues（配信数が増えた段階で導入。初期は不要） |
 | シェア画像生成 | `next/og`（Satori ベース。LP の OGP 画像で Workers 上での動作を確認済み。当初の `workers-og` から変更） |
+| Web フォント | `next/font/google`（Zen Kaku Gothic New・Noto Sans JP〔LP のみ〕）+ `next/font/local`（朱印の Yuji Syuku のサブセット）。ビルド時に Google Fonts から取得して自前配信する。2026/11 確定 |
 | エラー監視 | Sentry |
 | モノレポ管理 | Turborepo |
+
+**Web フォントの取得方法（2026/11 確定）**: `next/font/google` はビルド時に fonts.googleapis.com から取得するため、CI と本番デプロイ（`main` への push）が Google Fonts に依存する。取得に失敗するとビルドが止まるが、再実行すれば済むので許容する。全フォントを同梱して `next/font/local` にすると約600ファイル・約12MB をリポジトリに抱えることになり、重すぎるため。アプリ側では Noto Sans JP の予備フォントを外し、Zen Kaku Gothic New にない字は OS のフォントで描く（CSS を軽くするため）。シェア画像と LP の OGP 画像は Satori 用に実行時に Google Fonts から取る別の仕組み（`apps/web/lib/og-fonts.ts`）。
 
 ### Habito（Vercel + Supabase + Prisma）からの移行
 
