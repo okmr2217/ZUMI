@@ -6,7 +6,7 @@
   --paper-sunken: #f4eee0;
   --ink: #2b2620;
   --ink-soft: #70685c; /* アプリの zumi-soft と同じ値。小さい文字でも AA（4.5:1）に届く濃さ */
-  --ink-faint: #b6ab99;
+  --ink-faint: #7b6e58; /* #b6ab99 から明度だけ下げた値。生成り地でも白カードでも AA（4.5:1）に届く */
   --vermillion: #c8402a;
   --vermillion-deep: #9c2e1c;
   --vermillion-soft: rgba(200, 64, 42, 0.1);

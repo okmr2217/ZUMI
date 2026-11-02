@@ -21,11 +21,9 @@ export function LoginForm() {
     setError(null);
     setNeedsVerification(false);
     setPending(true);
-    const { error: signInError } = await authClient.signIn.email({
-      email,
-      password,
-      callbackURL: "/app",
-    });
+    // callbackURL は渡さない。渡すと応答が `redirect: true` になり、better-auth のクライアントが
+    // `window.location.href` でドキュメントごと読み直すため、下の router.push と遷移が二重になる
+    const { error: signInError } = await authClient.signIn.email({ email, password });
     setPending(false);
     if (signInError) {
       if (signInError.code === "EMAIL_NOT_VERIFIED") {

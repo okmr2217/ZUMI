@@ -89,7 +89,7 @@ export function shareImagePath(token: string): string {
 /**
  * `week`（週の初日）のサマリーを今の時点で固定し、トークンを発行する。
  * 同じ週を前に発行していれば、トークンごと作り直す（古い URL は 404 になる）。
- * 画像はトークンごとに変わらないので、`/og/w/:token` を長くキャッシュできる。
+ * 画像はトークンごとに変わらないので、`/og/w/:token` をキャッシュできる（期間は lib/share-image.tsx）。
  */
 export async function issueShareToken(
   db: Db,

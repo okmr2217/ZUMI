@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Page, Request } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import {
   DIRECT_URL,
@@ -61,9 +61,30 @@ test("サインアップし、メールを確認してログインする", async
   await expect(page.getByText("メールアドレスが未確認です。")).toBeVisible();
 
   await verifyEmail(request, email);
+  // ログイン後の遷移はソフト遷移の1回だけで、ドキュメントを読み直さない
+  // （以前は better-auth の callbackURL によるハード遷移が重なり、オンボーディングが2回読み込まれていた）
+  const documents: string[] = [];
+  const timezonePosts: string[] = [];
+  const track = (req: Request) => {
+    // ログイン画面そのものの読み込みは数えない
+    if (req.resourceType() === "document" && new URL(req.url()).pathname !== "/login") {
+      documents.push(req.url());
+    }
+    if (req.method() === "POST" && req.url().endsWith("/api/settings/timezone")) {
+      timezonePosts.push(req.url());
+    }
+  };
+  page.on("request", track);
   await logIn(page, email);
   // 初回はオンボーディングへ送られる
   await expect(page).toHaveURL(/\/onboarding$/);
+  await expect(page.getByRole("heading", { name: /やることを/ })).toBeVisible();
+  await expect.poll(() => timezonePosts.length).toBe(1);
+  // 2回目の読み込みが遅れて来ないことも見る（ソフト遷移のあとは networkidle を待っても待たずに返る）
+  await page.waitForTimeout(1500);
+  page.off("request", track);
+  expect(documents).toEqual([]);
+  expect(timezonePosts).toHaveLength(1);
 });
 
 test("オンボーディングでテンプレートから Duty を1件作る", async () => {

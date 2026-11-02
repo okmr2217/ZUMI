@@ -41,7 +41,7 @@
 - PR #32 の確認事項10項目を見る（住所の扱い、専属的合意管轄、免責の範囲、外国の事業者の扱い、外部送信規律など）。本文は専門家のレビューを経ていない下書き
 - Sentry の `zumi-web`・`zumi-notify` で「Prevent Storing of IP Addresses」を有効にし、Sentry・Resend の保存期間を確認する（ポリシーは「IP をエラー情報に含めない」「各事業者の定める期間」と書いている）
 - Cloudflare ダッシュボード（`paritto.dev` → セキュリティ → WAF → レート制限ルール）で、認証の API にレート制限ルールを1本作る。対象は `/api/auth/sign-in`・`/api/auth/sign-up`・`/api/auth/request-password-reset`・`/api/auth/send-verification-email`（パスが `/api/auth/` で始まる POST にまとめてもよい）。無料プランでも1本作れる。better-auth の rate limit はメモリに置かれ、Workers の isolate ごとに分かれるのでベストエフォートにしかならないため（2026/11 確定。D1 に持たせる方法はスキーマ変更が要るので採らない）
-- シェア URL を個別に無効にする機能はない。ポリシーでは「運営者に連絡」としたので、依頼が来たら本番 D1 の `share_tokens` の該当行を手で消す。ただし今は行を消しても画像がエッジのキャッシュに残る（[09](./09-implementation-tasks.md) の「QA・リリース準備」の「シェア画像のキャッシュと削除」）
+- シェア URL を個別に無効にする機能はない。ポリシーでは「運営者に連絡」としたので、依頼が来たら本番 D1 の `share_tokens` の該当行を手で消す。行を消しても、画像はエッジとブラウザのキャッシュに最大1日残る（`/og/w/:token` のキャッシュは1日。[03](./03-duty-log-review-account.md#シェア画像の設計方針) の「シェア画像の運用」）。急ぐ依頼なら、Cloudflare ダッシュボードの「キャッシュ → 構成 → カスタム削除」でその URL（`https://zumi.paritto.dev/og/w/<トークン>`）を消す。SNS など外部のサービスが保存した画像は消せない（ポリシーにもそう書いている）
 
 本番のサインアップは `apps/web/wrangler.toml` の `[vars]` の `SIGNUP_ENABLED = "false"` で
 閉じている（"true" 以外は閉じる側に倒す）。`wrangler deploy` は `[vars]` でダッシュボードの値を
