@@ -25,6 +25,7 @@
 - ✅ **フェーズ1のマイグレーション（`0001_curly_puma.sql`）を本番 D1 に適用**: `wrangler d1
   migrations apply zumi-db --remote` で適用済み。`user`/`session`/`account`/`verification`
   のインデックス追加・タイムスタンプ列の `timestamp_ms` 化を反映
+- ✅ **フェーズ2〜6のマイグレーション（`0002_nebulous_rattler.sql`・`0003_harsh_ben_parker.sql`・`0004_furry_prodigy.sql`）を本番 D1 に適用**（2026-11-02 20:28 UTC、指揮役）: `wrangler d1 migrations apply zumi-db --remote`。適用前の復元ポイント（time-travel のブックマーク）は `00000004-00000000-00005117-1d4d5d177f08695ffd9f8e1bd24c3ded`。どれも追加だけ（0002 は Duty・ログ・通知まわりのスキーマ変更、0003 は通知のインデックスと `timezone_auto`、0004 は `share_tokens`）
 - ✅ **apps/web・apps/notify の初回デプロイ**:
   - https://zumi.paritto.dev （zumi-web、カスタムドメイン。`workers.dev` のプレビューURLは `routes` 設定により無効化される仕様のため使用不可）
   - https://zumi-notify.okumuradaichi2007.workers.dev （zumi-notify、毎分 Cron 動作中）
