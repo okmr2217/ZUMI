@@ -1,0 +1,149 @@
+<!doctype html>
+<!--
+  オフライン用ページ。public/sw.js がインストール時にキャッシュし、`/app` 配下の
+  ナビゲーションがネットワークエラーになったときだけ返す。
+  ユーザーデータは載せない（ログアウト後や別アカウントでも同じ内容になるように）。
+  オフラインで開くため、外部フォント・画像・スクリプトには頼らず 1 ファイルで完結させる。
+-->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#faf6ef" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1d1a16" media="(prefers-color-scheme: dark)" />
+    <meta name="robots" content="noindex" />
+    <title>オフラインです — ZUMI（済）</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #faf6ef;
+        --card: #ffffff;
+        --ink: #2b2620;
+        /* アプリの soft（#8a8072）は白地で 3.9:1 しかないため、本文に使うここだけ AA を満たす濃さにする */
+        --soft: #736a5d;
+        --line: #e7dfce;
+        --shu: #c8402a;
+        --shu-deep: #9c2e1c;
+        --on-shu: #ffffff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1d1a16;
+          --card: #27231e;
+          --ink: #efe8dc;
+          --soft: #a59a8a;
+          --line: #3a342c;
+          --shu: #e0634c;
+          --shu-deep: #f07d67;
+          --on-shu: #1d1a16;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+          max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Meiryo",
+          sans-serif;
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        width: 100%;
+        max-width: 360px;
+        padding: 32px 24px 28px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card);
+        text-align: center;
+      }
+      .mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        margin-bottom: 16px;
+        border: 2px solid var(--shu);
+        border-radius: 50%;
+        color: var(--shu);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 24px;
+        color: var(--soft);
+        font-size: 14px;
+      }
+      button {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 16px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--shu);
+        color: var(--on-shu);
+        font: inherit;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover {
+        background: var(--shu-deep);
+      }
+      button:focus-visible {
+        outline: 2px solid var(--shu);
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- lucide の wifi-off（アプリと同じ線アイコン） -->
+      <span class="mark" aria-hidden="true">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 20h.01" />
+          <path d="M8.5 16.429a5 5 0 0 1 7 0" />
+          <path d="M5 12.859a10 10 0 0 1 5.17-2.69" />
+          <path d="M19 12.859a10 10 0 0 0-2.007-1.523" />
+          <path d="M2 8.82a15 15 0 0 1 4.177-2.643" />
+          <path d="M22 8.82a15 15 0 0 0-11.288-3.764" />
+          <path d="m2 2 20 20" />
+        </svg>
+      </span>
+      <h1>オフラインです</h1>
+      <p>接続を確認してください。<br />つながったら、もう一度読み込んでください。</p>
+      <button type="button" id="reload">再読み込み</button>
+    </main>
+    <script>
+      document.getElementById("reload").addEventListener("click", () => location.reload());
+      // 回線が戻ったら自動で読み込み直す（ボタンを押さなくても元の画面に戻れるように）
+      addEventListener("online", () => location.reload());
+    </script>
+  </body>
+</html>
