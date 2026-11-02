@@ -24,9 +24,8 @@ export async function createTestDb() {
       .split("--> statement-breakpoint")
       .map((statement) => statement.trim())
       .filter(Boolean);
-    for (const statement of statements) {
-      await proxy.env.DB.prepare(statement).run();
-    }
+    // 1文ずつ流すと workerd との往復が文の数だけ増え、並列実行時の準備が遅くなるため、ファイル単位でまとめる
+    await proxy.env.DB.batch(statements.map((statement) => proxy.env.DB.prepare(statement)));
   }
   const db = drizzle(proxy.env.DB, { schema });
 

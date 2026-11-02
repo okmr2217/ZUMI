@@ -16,7 +16,9 @@ export default {
           bg: "#FAF6EF",
           card: "#FFFFFF",
           ink: "#2B2620",
-          soft: "#8A8072",
+          // 小さい文字でも WCAG AA（4.5:1）に届くよう、モックの #8A8072 から明度だけ下げている。
+          // 生成り地（bg）5.1:1・白地（card）5.5:1・pill 地 4.6:1
+          soft: "#70685C",
           line: "#E7DFCE",
           shu: "#C8402A",
           "shu-deep": "#9C2E1C",
@@ -62,7 +64,10 @@ export default {
         },
       },
       fontFamily: {
-        zumi: ['"Zen Kaku Gothic New"', '"Noto Sans JP"', "sans-serif"],
+        // 書体は app/fonts.ts の next/font が CSS 変数で渡す
+        zumi: ["var(--font-zen-kaku)", "sans-serif"],
+        // 「済」の朱印
+        seal: ["var(--font-yuji-syuku)", "serif"],
       },
       keyframes: {
         // 今日タブの押印（モックにはアニメーションがないため、朱印が上から押される程度に留める）

@@ -5,7 +5,7 @@
   --paper-raised: #ffffff;
   --paper-sunken: #f4eee0;
   --ink: #2b2620;
-  --ink-soft: #8a8072;
+  --ink-soft: #70685c; /* アプリの zumi-soft と同じ値。小さい文字でも AA（4.5:1）に届く濃さ */
   --ink-faint: #b6ab99;
   --vermillion: #c8402a;
   --vermillion-deep: #9c2e1c;
@@ -23,7 +23,7 @@
   color-scheme: light;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Noto Sans JP", "Zen Kaku Gothic New", sans-serif;
+  font-family: var(--font-noto-sans-jp), var(--font-zen-kaku), sans-serif;
   font-size: 16px;
   line-height: 1.85;
   -webkit-font-smoothing: antialiased;
@@ -51,7 +51,7 @@
 .zumi-lp a { color: inherit; }
 
 .zumi-lp h1, .zumi-lp h2, .zumi-lp h3, .zumi-lp h4 {
-  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-weight: 900;
   margin: 0;
   text-wrap: balance;
@@ -61,7 +61,7 @@
 .zumi-lp p, .zumi-lp li { word-break: keep-all; overflow-wrap: break-word; }
 
 .zumi-lp .stamp-glyph {
-  font-family: "Yuji Syuku", serif;
+  font-family: var(--font-yuji-syuku), serif;
   color: var(--vermillion);
 }
 
@@ -114,7 +114,7 @@
   transform: rotate(45deg);
 }
 .zumi-lp h3.sub-heading {
-  font-family: "Zen Kaku Gothic New", "Noto Sans JP", sans-serif;
+  font-family: var(--font-zen-kaku), var(--font-noto-sans-jp), sans-serif;
   font-weight: 800;
   font-size: clamp(1.25rem, 2.4vw, 1.55rem);
   line-height: 1.5;
@@ -144,7 +144,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: "Zen Kaku Gothic New", sans-serif;
+  font-family: var(--font-zen-kaku), sans-serif;
   font-weight: 900;
   font-size: 1.2rem;
   letter-spacing: 0.02em;
@@ -159,7 +159,7 @@
   align-items: center;
   justify-content: center;
   color: var(--vermillion);
-  font-family: "Yuji Syuku", serif;
+  font-family: var(--font-yuji-syuku), serif;
   font-size: 1rem;
   transform: rotate(-4deg);
 }
@@ -295,7 +295,7 @@
 .zumi-lp .hanko {
   width: 40px; height: 40px; border-radius: 50%; border: 2.3px solid var(--vermillion); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: var(--vermillion);
-  font-family: "Yuji Syuku", serif; font-size: 1.15rem; transform: rotate(-8deg);
+  font-family: var(--font-yuji-syuku), serif; font-size: 1.15rem; transform: rotate(-8deg);
   box-shadow: inset 0 0 0 1px var(--vermillion-soft);
 }
 .zumi-lp button.hanko { padding: 0; background: none; cursor: pointer; }
@@ -388,7 +388,7 @@
   width: 44px; height: 44px; border-radius: 13px; background: var(--paper-sunken); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: var(--ink);
 }
-.zumi-lp .duty-name { font-weight: 700; font-family: "Zen Kaku Gothic New", sans-serif; font-size: 0.98rem; }
+.zumi-lp .duty-name { font-weight: 700; font-family: var(--font-zen-kaku), sans-serif; font-size: 0.98rem; }
 .zumi-lp .duty-sub { font-size: 0.8rem; color: var(--ink-soft); margin-top: 2px; }
 .zumi-lp .cat-note { margin-top: 1.8rem; font-size: 0.86rem; color: var(--ink-faint); text-align: center; }
 
@@ -422,7 +422,7 @@
   padding: 13px 16px; border-top: 1px solid var(--line);
 }
 .zumi-lp .settings-item:first-of-type { border-top: none; }
-.zumi-lp .settings-item-label { font-size: 0.88rem; font-weight: 600; }
+.zumi-lp .settings-item-label { font-size: 0.88rem; font-weight: 700; }
 .zumi-lp .settings-item-sub { font-size: 0.72rem; color: var(--ink-soft); margin-top: 2px; }
 .zumi-lp .settings-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
 .zumi-lp .toggle { width: 34px; height: 20px; border-radius: 20px; background: var(--vermillion); position: relative; flex-shrink: 0; }
@@ -479,7 +479,7 @@
 .zumi-lp .summary-range { font-size: 0.8rem; color: var(--ink-soft); letter-spacing: 0.04em; }
 .zumi-lp .summary-week { font-size: 0.8rem; color: var(--ink-soft); opacity: 0.65; }
 .zumi-lp .summary-scorerow { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-.zumi-lp .summary-num { font-family: "Zen Kaku Gothic New", sans-serif; font-weight: 500; font-size: 2.7rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.zumi-lp .summary-num { font-family: var(--font-zen-kaku), sans-serif; font-weight: 500; font-size: 2.7rem; line-height: 1; font-variant-numeric: tabular-nums; }
 .zumi-lp .summary-den { font-size: 1.1rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .zumi-lp .summary-diff { margin-left: auto; font-size: 0.74rem; padding: 4px 10px; border-radius: 20px; background: var(--success-bg); color: var(--success-text); font-weight: 700; }
 .zumi-lp .summary-caption { margin: 0 0 16px; font-size: 0.85rem; color: var(--ink-soft); }
@@ -494,10 +494,10 @@
 .zumi-lp .summary-stamp {
   width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--vermillion); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-family: "Yuji Syuku", serif; font-size: 1.1rem; color: var(--vermillion);
+  font-family: var(--font-yuji-syuku), serif; font-size: 1.1rem; color: var(--vermillion);
 }
 .zumi-lp .summary-stamp.dashed {
-  border: 2px dashed var(--line-strong); font-family: "Zen Kaku Gothic New", sans-serif;
+  border: 2px dashed var(--line-strong); font-family: var(--font-zen-kaku), sans-serif;
   font-size: 0.62rem; font-weight: 700; color: var(--ink-soft);
 }
 .zumi-lp .summary-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
@@ -526,7 +526,7 @@
 .zumi-lp .hist-date2 { font-size: 0.72rem; color: var(--ink-soft); font-weight: 700; }
 .zumi-lp .hist-row2 { background: var(--paper); border: 1px solid var(--line); border-radius: 13px; padding: 10px 12px; display: flex; align-items: center; gap: 9px; }
 .zumi-lp .hist-icon2 { width: 32px; height: 32px; border-radius: 9px; background: var(--paper-sunken); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--ink); }
-.zumi-lp .hist-name2 { font-size: 0.82rem; font-weight: 600; flex: 1; }
+.zumi-lp .hist-name2 { font-size: 0.82rem; font-weight: 700; flex: 1; }
 .zumi-lp .hist-time2 { font-size: 0.66rem; color: var(--ink-soft); }
 .zumi-lp .hist-badge2 { font-size: 0.62rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
 .zumi-lp .hist-badge2.done { color: var(--vermillion); background: var(--vermillion-soft); }
@@ -545,7 +545,7 @@
   border-radius: 18px;
   border: 2px solid var(--vermillion);
   color: var(--vermillion);
-  font-family: "Yuji Syuku", serif;
+  font-family: var(--font-yuji-syuku), serif;
   font-size: 2.8rem;
   display: flex;
   align-items: center;

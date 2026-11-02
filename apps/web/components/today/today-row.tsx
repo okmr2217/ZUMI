@@ -115,7 +115,7 @@ function Hanko({ animate }: { animate: boolean }) {
     <span
       aria-hidden
       className={cn(
-        "border-zumi-shu text-zumi-shu flex size-11 rotate-[-8deg] items-center justify-center rounded-full border-[2.5px] font-['Yuji_Syuku',serif] text-[21px] shadow-[inset_0_0_0_1px_rgba(200,64,42,0.25)]",
+        "border-zumi-shu text-zumi-shu font-seal flex size-11 rotate-[-8deg] items-center justify-center rounded-full border-[2.5px] text-[21px] shadow-[inset_0_0_0_1px_rgba(200,64,42,0.25)]",
         animate && "motion-safe:animate-stamp",
       )}
     >
