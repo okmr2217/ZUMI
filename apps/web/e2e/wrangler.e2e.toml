@@ -4,6 +4,7 @@
 #   （`.dev.vars` は設定ファイルと同じディレクトリから読まれる）
 # - カスタムドメインの routes を持たない
 # - サインアップを開く
+# - Sentry の environment を "development" にする
 name = "zumi-web-e2e"
 main = "../.open-next/worker.js"
 compatibility_date = "2025-01-01"
@@ -21,6 +22,6 @@ database_id = "3201b980-daf5-4a39-a458-54196917f777"
 [vars]
 NEXT_PUBLIC_APP_ENV = "development"
 SIGNUP_ENABLED = "true"
-# 確認メールは送らない（送信は失敗するが、better-auth はサインアップを止めずにログへ残すだけ）
+# 確認メールは送らない（空なら lib/email.ts は Resend を呼ばず、宛先と件名だけをログに出す）
 RESEND_API_KEY = ""
 # BETTER_AUTH_URL・BETTER_AUTH_SECRET は e2e/config.mjs の値を `--var` で渡す

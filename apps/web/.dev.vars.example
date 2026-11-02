@@ -6,7 +6,10 @@ BETTER_AUTH_SECRET=
 # `next dev` では localhost のまま。`opennextjs-cloudflare preview`（wrangler dev）でログインを試すときは、
 # wrangler がカスタムドメインの設定に合わせて Origin を書き換えるため http://zumi.paritto.dev にする。
 BETTER_AUTH_URL=http://localhost:3000
+# 空なら確認メールなどを送らず、宛先と件名だけをログに出す（lib/email.ts）
 RESEND_API_KEY=
+# Sentry の environment（wrangler.toml の [vars] は本番用の "production"）
+NEXT_PUBLIC_APP_ENV=development
 # ローカルではサインアップを開いておく（未設定だと閉じる。wrangler.toml の [vars] より優先される）。
 SIGNUP_ENABLED=true
 # Web Push（VAPID）。ローカル用の鍵は `npx web-push generate-vapid-keys` で作る（本番の鍵は使わない）。

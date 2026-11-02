@@ -17,7 +17,8 @@ database_name = "zumi-db"
 database_id = "3201b980-daf5-4a39-a458-54196917f777"
 
 [vars]
-NEXT_PUBLIC_APP_ENV = "development"
+# Sentry の environment。ローカルの `npm run dev` は package.json の --var で "development" にする
+NEXT_PUBLIC_APP_ENV = "production"
 # VAPID の連絡先。VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY はシークレット（`wrangler secret put`）で、
 # apps/web の購読（S7）と同じ鍵ペアを使う。未設定なら送信せず、文面の生成とログまで行う。
 VAPID_SUBJECT = "https://zumi.paritto.dev"

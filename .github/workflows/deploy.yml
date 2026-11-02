@@ -1,8 +1,14 @@
 name: Deploy
 
+# main への push で走る CI（ci.yml）が、全ジョブ（lint-typecheck-build・e2e）とも成功したときだけ
+# デプロイする。CI が失敗・キャンセル（後続の push で打ち切られた場合を含む）なら出さない。
+# workflow_run は既定ブランチ（main）にあるこのファイルの定義で動くため、変更は main に入ってから効く。
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
+  # 手動デプロイ（CI を待たずに出す）。main 以外のブランチを選んでもジョブは動かない
   workflow_dispatch: {}
 
 concurrency:
@@ -11,9 +17,15 @@ concurrency:
 
 jobs:
   deploy-notify:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     steps:
+      # workflow_run では CI が検証したコミットを出す（既定の checkout は main の最新になるため）
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: actions/setup-node@v4
         with:
@@ -31,9 +43,15 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-web:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     steps:
+      # workflow_run では CI が検証したコミットを出す（既定の checkout は main の最新になるため）
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - uses: actions/setup-node@v4
         with:
@@ -50,6 +68,8 @@ jobs:
           # NEXT_PUBLIC_* はビルド時にクライアントバンドルへ埋め込まれるため、
           # デプロイ時ではなくビルド時にここで渡す必要がある。
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
+          # Sentry の environment（wrangler.toml の [vars] と同じ値にする）
+          NEXT_PUBLIC_APP_ENV: production
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           # ソースマップアップロードは next build (Sentry webpack plugin) が
           # 行うため、デプロイ時ではなくビルド時にここで渡す必要がある

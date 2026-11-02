@@ -17,6 +17,12 @@ export async function sendEmail({
 }) {
   const { env } = getCloudflareContext();
 
+  // ローカルと E2E ではキーを空にしておき、外部に出さない（本文は確認リンクを含むため出さない）
+  if (!env.RESEND_API_KEY) {
+    console.warn(`RESEND_API_KEY が未設定のためメールを送りません: to=${to} subject=${subject}`);
+    return;
+  }
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
