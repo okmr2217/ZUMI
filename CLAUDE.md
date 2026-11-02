@@ -8,7 +8,7 @@ ZUMI（済）は、定期的にやってくる活動（ゴミ出し・お風呂�
 
 前身は Habito（Vercel + Supabase + Prisma 構成）で、ZUMI では Cloudflare（Workers + D1 + Drizzle）に全面移行する。
 
-**現在の進捗: MVP（フェーズ0〜8）と横断タスク（S1〜S11・Q1〜Q7）を実装し、2026-11-03 に `main` へリリースして `zumi.paritto.dev` に本番デプロイ済み（本番 D1 も migration `0004` まで適用済み）。サインアップは `SIGNUP_ENABLED = "false"` で閉じたまま。VAPID 鍵も 2026-11-03 に作り直し済み。残りはオーナー作業（サインアップを開く前の作業: `docs/OWNER-TASKS.md`）と、`docs/09-implementation-tasks.md` の「横断: QA・リリース準備」に残ったタスク。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
+**現在の進捗: MVP（フェーズ0〜8）と横断タスク（S1〜S11・Q1〜Q7）を実装し、2026-11-03 に `main` へリリースして `zumi.paritto.dev` に本番デプロイ済み（本番 D1 も migration `0004` まで適用済み）。サインアップは `SIGNUP_ENABLED = "false"` で閉じたまま。VAPID 鍵も 2026-11-03 に作り直し済み。リリース前の見直しで見つけた残タスクのうち、R1（運用まわり: 本番の環境名・セキュリティヘッダー・CI を待つデプロイ・Cron Monitor・`RESEND_API_KEY` が空のとき）と R2（画面まわり: エラーページ・シェア画像のキャッシュ1日・ログイン直後の二重読み込み・LP の文字色）を `development` にマージ済み（`main` へは未リリース）。残りはオーナー作業（サインアップを開く前の作業: `docs/OWNER-TASKS.md`）と、`docs/09-implementation-tasks.md` の「横断: QA・リリース準備」に残ったタスク。** 進捗の詳細は `docs/09-implementation-tasks.md` を参照。各フェーズに着手する際は、まず該当する `docs/` ファイルを読むこと。再開前の未決事項（テンプレート・オンボーディング・期日計算の境界ルール・スキーマ変更など）は 2026/11 に確定し、各 docs に「2026/11 確定」として反映済み。
 
 ## ドキュメント構成
 
@@ -118,7 +118,7 @@ QA・法務などの残りの横断タスクは S1〜S11 の完了後に指揮�
 
 - **スキーマ**: `packages/db/src/schema.ts` と `migrations/` を変更するのは一度に1セッションだけ（`drizzle-kit generate` の番号衝突を避けるため）。S1 以外でスキーマ変更が必要になったら、指揮役に報告して直列の小さな PR にする
 - **進捗の記録**: 作業セッションは `docs/09-implementation-tasks.md` のうち**自分の担当範囲のチェックボックスだけ**を更新する。CLAUDE.md の「現在の進捗」は指揮役がマージ時に更新する（並行セッションが同じ行を書き換えて衝突するのを避けるため）
-- **ローカルの dev サーバー**: better-auth の Cookie はポートで分かれないため、複数の worktree が同じホスト名（`localhost` でも `127.0.0.1` でも）で dev サーバーを動かすと、互いの Cookie を上書きしてログインが外れる。画面を確認するときは worktree ごとに別のホスト名を使う: `next dev -p <ポート>` で起動し、Chrome で `http://<セッション名>.localhost:<ポート>` を開く（Chrome は `*.localhost` を 127.0.0.1 に解決する。`next.config.ts` の `allowedDevOrigins` で `*.localhost` を許可済み）。`.dev.vars` の `BETTER_AUTH_URL` も同じ URL にする。本番相当のビルドを `wrangler dev` で確かめるときは `--local-upstream <ホスト>:<ポート>` を付けないとログインが `INVALID_ORIGIN` で失敗する。`public/` の `.html` は本番の Workers Assets で拡張子なしの URL へ 307 リダイレクトされる（`html_handling` の既定値）
+- **ローカルの dev サーバー**: better-auth の Cookie はポートで分かれないため、複数の worktree が同じホスト名（`localhost` でも `127.0.0.1` でも）で dev サーバーを動かすと、互いの Cookie を上書きしてログインが外れる。画面を確認するときは worktree ごとに別のホスト名を使う: `next dev -p <ポート>` で起動し、Chrome で `http://<セッション名>.localhost:<ポート>` を開く（Chrome は `*.localhost` を 127.0.0.1 に解決する。`next.config.ts` の `allowedDevOrigins` で `*.localhost` を許可済み）。`.dev.vars` の `BETTER_AUTH_URL` も同じ URL にする。`.dev.vars` には `NEXT_PUBLIC_APP_ENV=development` も書く（`wrangler.toml` の `[vars]` は本番用の `"production"` で、これがないと wrangler の dev で `RESEND_API_KEY` が空のときにメール送信が例外になる。`.dev.vars.example` 参照）。本番相当のビルドを `wrangler dev` で確かめるときは `--local-upstream <ホスト>:<ポート>` を付けないとログインが `INVALID_ORIGIN` で失敗する。`public/` の `.html` は本番の Workers Assets で拡張子なしの URL へ 307 リダイレクトされる（`html_handling` の既定値）
 - **完了条件**: lint・typecheck・test・build が通る。UI の変更はモック Artifact と照らし合わせ、実際の画面で確認する（`/run` や Chrome）。PR 前に `/code-review` を実行する
 - **サブエージェント**: モック Artifact の読み取りはサブエージェントに任せ、必要なアートボードの寸法・配色・構成だけを受け取る。S3 のテストケースは、実装を見ていないサブエージェントに docs/03 の境界ルールだけを渡して書かせる（実装と同じ思い込みがテストに入るのを防ぐため）。コンポーネントを共有する UI 実装は複数のエージェントに分けない
 - **リリース**: `main` への push は本番（`zumi.paritto.dev`）に自動デプロイされる。`main` へのマージは指揮役が区切りのよいところで行う

@@ -59,6 +59,16 @@
 - **D1 のバックアップ**: Time Travel で戻せるのは無料プランで 7 日、有料で 30 日まで。それより前に戻す必要が出たときのために、定期的な `wrangler d1 export` が要るかを決める
 - **本番 D1 に残っているデータ**: フェーズ1のころの検証用アカウントやデータが残っていないかを見て、公開前に消すかどうか決める（`user_settings` の行がないユーザーは、アプリを開いたときに作り直される）
 
+### Sentry のアラートの通知先 → **R1（PR #38）を `main` にリリースしたあと**
+
+R1 で notify の Cron を Sentry の Cron Monitor（slug `zumi-notify-tick`）でチェックインするようにし、web・notify とも
+本番のイベントを `environment: production` で送るようにした（それまでは本番のエラーも `development` で入っていた）。
+
+1. リリース後、最初の Cron が動くと monitor が自動で作られる。Sentry → Insights → Crons に `zumi-notify-tick`（environment `production`）が出ていることを確認する
+2. その monitor の Alerts で通知先を設定する（Owner をメンバーにするか、Settings → Integrations で Slack などをつなぎ、アラートのルールのアクションに入れる）。3分続けて取りこぼし・失敗すると monitor が Issue を作り、通知が来る
+3. 既存の issue のアラート（Alerts → Issues）で、`environment:production` の新しい issue に通知が来るかを見る。環境で絞ったルールがあれば見直す
+4. Sentry の Developer（無料）プランで使える Cron Monitor の数を料金ページで確かめる（PR #38 では1つまで無料と見たが、料金ページそのものは未確認）
+
 ### Web Push の VAPID 鍵（参考: 作り直す場合）
 
 2026-11-03 に作り直し済み（上の「完了済み」）。購読（`zumi-web`）と送信（`zumi-notify`）で同じ組を
