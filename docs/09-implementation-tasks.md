@@ -152,7 +152,7 @@ Web Push のみで通知を成立させる。
 - [x] パフォーマンス: Lighthouse 72点。Google Fonts の CSS（約238KB）が描画を約2.1秒遅らせている。`next/font` 化やサブセット化を検討する（TBT 960ms、未使用の CSS 232KB・JS 108KB の指摘もあり）→ `next/font` で自前配信にし、朱印の Yuji Syuku は「済」だけのサブセット、Noto Sans JP は LP だけで可変フォント1つにした（`app/fonts.ts`）。TBT・未使用の JS は未対応
 - [x] テストの安定化: turbo で並列にテストを回すと、web の DB テストの `beforeAll`（ローカル D1 の起動）がタイムアウトで落ちることがある（単独なら通る）。`hookTimeout` を延ばすか、DB を使うテストの並列数を絞る → migration をファイル単位の batch にし、web の vitest を `maxWorkers: "50%"`・`hookTimeout` 60秒・`testTimeout` 20秒にした
 - [ ] ログイン直後に `/onboarding` が2回読み込まれる（`/app` からのソフト遷移のあとにドキュメントを読み直し、`POST /api/settings/timezone` も2回飛ぶ。一瞬ちらつく）。原因を調べて直す（Q4 の E2E で発見）
-- [x] `RESEND_API_KEY` が空なら `sendEmail` で Resend を呼ばないようにする（ローカルと E2E から外部に出ないように。今は 401 をログに残している）→ 空なら送らず、宛先と件名だけを警告のログに出す
+- [x] `RESEND_API_KEY` が空なら `sendEmail` で Resend を呼ばないようにする（ローカルと E2E から外部に出ないように。今は 401 をログに残している）→ 空なら送らず、宛先と件名だけを警告のログに出す（`NEXT_PUBLIC_APP_ENV` が `"production"` なら例外にする）
 - [ ] LP の `--ink-faint`（#b6ab99、「クレジットカード不要」など）が AA に届かない。`zumi-soft` と同じ考え方で見直す
 - [ ] リリース後に `zumi.paritto.dev` で Lighthouse を測り直し、上の「パフォーマンス」の点数を更新する（Q7 のフォント自前配信の効果の確認）
 
@@ -161,7 +161,7 @@ Web Push のみで通知を成立させる。
 - [x] 本番の環境名: `apps/web`・`apps/notify` の `wrangler.toml` の `NEXT_PUBLIC_APP_ENV` が `"development"` のまま。notify は Sentry の `environment` にこの値を渡すため、本番のエラーが development として記録される。`"production"` にし、web の `Sentry.init`（`instrumentation-client.ts`・`sentry.server.config.ts`）にも `environment` を渡す → 本番は `"production"`。クライアントはビルド時に埋め込むため `deploy.yml` のビルドの env にも渡す。ローカル（`.dev.vars`・notify の `npm run dev`）と E2E・CI のビルドは `"development"`
 - [ ] エラーページ: `app/not-found.tsx`・`app/error.tsx`・`app/global-error.tsx` がなく、404・500 で Next.js 既定の英語のページが出る。描画中のエラーも Sentry に届かない（Sentry の Next.js SDK は `global-error.tsx` で `captureException` することを求めている）
 - [ ] シェア画像のキャッシュと削除: `/og/w/:token` は `Cache-Control: public, max-age=31536000, immutable` で返し、`caches.default` にも入れる。そのため `share_tokens` の行を消しても（依頼を受けての手での削除・退会のカスケード）、各データセンターのキャッシュに最大1年残る。プライバシーポリシーの「運営者に連絡すれば消す」と合わないので、キャッシュの期間を短くする（例: 1日）か、ポリシーの書き方を直す
-- [x] セキュリティヘッダー: 本番の応答に `x-powered-by: Next.js` が出ており、HSTS・`X-Frame-Options`（または CSP の `frame-ancestors`）・`X-Content-Type-Options`・`Referrer-Policy` が付いていない。`next.config.ts` に `poweredByHeader: false` と `headers()` を足す → HSTS・`frame-ancestors 'none'`・`X-Frame-Options: DENY`・`nosniff`・`strict-origin-when-cross-origin` を全パスに付けた。全面的な CSP は入れていない
+- [x] セキュリティヘッダー: 本番の応答に `x-powered-by: Next.js` が出ており、HSTS・`X-Frame-Options`（または CSP の `frame-ancestors`）・`X-Content-Type-Options`・`Referrer-Policy` が付いていない。`next.config.ts` に `poweredByHeader: false` と `headers()` を足す → HSTS・`frame-ancestors 'none'`・`X-Frame-Options: DENY`・`nosniff`・`strict-origin-when-cross-origin` を全パスに付けた（Worker を通らない静的アセットは `public/_headers`）。全面的な CSP は入れていない
 - [ ] 監視: notify の Cron が止まったり失敗し続けたりしても気づけない。Sentry の Cron Monitors などで毎分の実行を見張り、Sentry のアラートの通知先を決める。D1 の容量も見る（[05](./05-tech-stack.md) の「ログの肥大化を監視する」）→ notify の `scheduled` を `Sentry.withMonitor`（slug `zumi-notify-tick`）で包んだ。残りは Sentry のアラートの通知先の設定（オーナー）と D1 の容量の監視
 
 ## 課金（MVP対象外・v1.1以降）

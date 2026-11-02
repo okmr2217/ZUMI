@@ -5,6 +5,7 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // 全面的な CSP は Sentry・next/font・Next.js のインラインスクリプトと衝突しやすいため入れず、
 // 埋め込みの禁止（frame-ancestors）だけにとどめる。シェア画像（/og/w/:token）は SNS の
 // クローラーが直接読むだけで、これらのヘッダーの影響を受けない。
+// Worker を通らない静的アセットには public/_headers で同じ値を付ける（値は揃えること）。
 const SECURITY_HEADERS = [
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
   { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },

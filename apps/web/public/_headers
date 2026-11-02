@@ -1,0 +1,8 @@
+# Workers Static Assets が Worker を通さずに返すファイル（/_next/static・sw.js・icons など）の
+# レスポンスヘッダー。Worker を通る応答は next.config.ts の SECURITY_HEADERS が付ける。値は揃えること。
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
