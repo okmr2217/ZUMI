@@ -1,9 +1,8 @@
-import { and, eq, gte, isNull, lte, or, sql, type AnyColumn } from "drizzle-orm";
+import { and, eq, or, sql, type AnyColumn } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import { lastDoneBefore } from "@zumi/db/queries";
+import { loadScheduleInputs } from "@zumi/db/queries";
 import * as schema from "@zumi/db/schema";
-import { dutyPauses, duties, logs, pushSubscriptions, userSettings } from "@zumi/db/schema";
-import type { DutyLog } from "@zumi/types";
+import { pushSubscriptions, userSettings } from "@zumi/db/schema";
 import type { NotifyDuty } from "./digest";
 import type { NotifySettings } from "./schedule";
 import type { PushSubscriptionTarget } from "./webpush";
@@ -78,64 +77,20 @@ export function createD1Store(d1: D1Database): NotifyStore {
     },
 
     async loadDuties(settings, rangeStart, today, now) {
-      // 4本とも user_id で絞る。D1 の batch で1往復にまとめる
-      const [dutyRows, pauseRows, logRows, lastDoneRows] = await db.batch([
-        db
-          .select()
-          .from(duties)
-          .where(
-            and(
-              eq(duties.userId, settings.userId),
-              or(
-                isNull(duties.archivedAt),
-                gte(duties.archivedAt, new Date(now.getTime() - ARCHIVED_LOOKBACK_MS)),
-              ),
-            ),
-          ),
-        db
-          .select({
-            dutyId: dutyPauses.dutyId,
-            startDate: dutyPauses.startDate,
-            endDate: dutyPauses.endDate,
-          })
-          .from(dutyPauses)
-          .innerJoin(duties, eq(duties.id, dutyPauses.dutyId))
-          .where(eq(duties.userId, settings.userId)),
-        db
-          .select({ dutyId: logs.dutyId, targetDate: logs.targetDate, status: logs.status })
-          .from(logs)
-          .where(
-            and(
-              eq(logs.userId, settings.userId),
-              gte(logs.targetDate, rangeStart),
-              lte(logs.targetDate, today),
-            ),
-          ),
-        // SINCE_LAST の前回 DONE（集計の範囲より前の最新の DONE）
-        db
-          .select({ dutyId: duties.id, targetDate: lastDoneBefore(rangeStart) })
-          .from(duties)
-          .where(and(eq(duties.userId, settings.userId), eq(duties.scheduleType, "SINCE_LAST"))),
-      ]);
-
-      return dutyRows.map((duty) => {
-        const dutyLogs: Pick<DutyLog, "targetDate" | "status">[] = logRows.filter(
-          (log) => log.dutyId === duty.id,
-        );
-        const lastDone = lastDoneRows.find((row) => row.dutyId === duty.id)?.targetDate;
-        if (lastDone) dutyLogs.push({ targetDate: lastDone, status: "DONE" });
-        return {
-          name: duty.name,
-          sortOrder: duty.sortOrder,
-          schedule: {
-            duty,
-            logs: dutyLogs,
-            pauses: pauseRows.filter((pause) => pause.dutyId === duty.id),
-            timeZone: settings.timezone,
-            weekStart: settings.weekStart,
-          },
-        };
+      // 今日タブ・振り返りと同じ読み込み（D1 の batch で1往復）
+      const rows = await loadScheduleInputs(db, {
+        users: [
+          { userId: settings.userId, timeZone: settings.timezone, weekStart: settings.weekStart },
+        ],
+        from: rangeStart,
+        to: today,
+        archivedSince: new Date(now.getTime() - ARCHIVED_LOOKBACK_MS),
       });
+      return rows.map(({ duty, schedule }) => ({
+        name: duty.name,
+        sortOrder: duty.sortOrder,
+        schedule,
+      }));
     },
 
     async listSubscriptions(userId) {
