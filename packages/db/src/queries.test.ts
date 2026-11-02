@@ -1,4 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import type { D1Database } from "@cloudflare/workers-types";
 import { drizzle } from "drizzle-orm/d1";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -184,7 +185,7 @@ async function seed() {
 
 beforeAll(async () => {
   proxy = await getPlatformProxy<{ DB: D1Database }>({
-    configPath: new URL("../wrangler.toml", import.meta.url).pathname,
+    configPath: fileURLToPath(new URL("../wrangler.toml", import.meta.url)),
     persist: false,
   });
   d1 = proxy.env.DB;
@@ -445,12 +446,12 @@ describe("クエリ回数とインデックス", () => {
       await loadScheduleInputs(drizzle(db, { schema }), { users, ...RANGE, archivedSince });
       expect(batches()).toBe(1);
       expect(queries).toHaveLength(4);
-      for (const query of queries) {
-        const plan = await queryPlan(query);
+      const plans = await Promise.all(queries.map(queryPlan));
+      plans.forEach((plan, i) => {
         const scans = plan.filter((detail) => /^SCAN (duties|logs|duty_pauses)\b/.test(detail));
-        expect(scans, query.sql).toEqual([]);
-      }
-      const [dutyPlan, , logPlan] = await Promise.all(queries.map(queryPlan));
+        expect(scans, queries[i]!.sql).toEqual([]);
+      });
+      const [dutyPlan, , logPlan] = plans;
       expect(dutyPlan!.join("\n")).toContain("duties_user_status_idx");
       expect(logPlan!.join("\n")).toContain("logs_user_date_idx");
     }
