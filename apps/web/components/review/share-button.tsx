@@ -5,12 +5,12 @@ import { Share2 } from "lucide-react";
 
 type ShareState = "idle" | "preparing" | "ready" | "error";
 
-const LABELS: Record<ShareState, string> = {
-  idle: "共有",
-  preparing: "準備中",
+const LABELS: Record<ShareState, { text: string; aria: string }> = {
+  idle: { text: "共有", aria: "週次サマリーを画像で共有" },
+  preparing: { text: "準備中", aria: "共有する画像を準備中" },
   // 画像の用意に時間がかかり、ブラウザがタップ直後の共有として扱わなかったとき
-  ready: "共有する",
-  error: "もう一度",
+  ready: { text: "共有する", aria: "画像の準備ができました。共有する" },
+  error: { text: "もう一度", aria: "画像を用意できませんでした。もう一度試す" },
 };
 
 /**
@@ -39,6 +39,7 @@ export function ShareButton({ week }: { week: string }) {
 
   async function handleClick() {
     if (state === "preparing") return;
+    const retrying = state === "ready";
     setState("preparing");
     let file: File;
     try {
@@ -59,8 +60,9 @@ export function ShareButton({ week }: { week: string }) {
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         setState("idle");
-      } else if (error instanceof DOMException && error.name === "NotAllowedError") {
-        // 取り寄せている間にタップの扱いが切れた（iOS の Safari など）。次のタップですぐ共有する
+      } else if (error instanceof DOMException && error.name === "NotAllowedError" && !retrying) {
+        // 取り寄せている間にタップの扱いが切れた（iOS の Safari など）。次のタップですぐ共有する。
+        // 次のタップでも断られたら、共有自体が許されていない環境とみなしてダウンロードする
         setState("ready");
       } else {
         download(file);
@@ -74,11 +76,11 @@ export function ShareButton({ week }: { week: string }) {
       type="button"
       onClick={handleClick}
       disabled={state === "preparing"}
-      aria-label="週次サマリーを画像で共有"
+      aria-label={LABELS[state].aria}
       className="bg-zumi-shu-bg text-zumi-shu ml-1 inline-flex items-center gap-[5px] rounded-[20px] px-[11px] py-[5px] text-[11.5px] font-bold disabled:opacity-60"
     >
       <Share2 className="size-[13px]" strokeWidth={1.7} aria-hidden />
-      <span aria-live="polite">{LABELS[state]}</span>
+      <span aria-hidden>{LABELS[state].text}</span>
     </button>
   );
 }

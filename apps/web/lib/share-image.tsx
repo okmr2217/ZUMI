@@ -171,7 +171,7 @@ function DiffBadge({ diff }: { diff: number }) {
         color: up ? SUCCESS : SOFT,
       }}
     >
-      <span style={{ fontSize: 26, fontWeight: 700 }}>先週より</span>
+      <span style={{ fontSize: 26, fontWeight: 700 }}>{diff === 0 ? "先週と" : "先週より"}</span>
       <span style={{ fontSize: diff === 0 ? 56 : 92, fontWeight: 700, lineHeight: 1.1 }}>
         {diff === 0 ? "同じ" : `${up ? "+" : "−"}${Math.abs(diff)}`}
       </span>
@@ -316,14 +316,17 @@ function collectText(node: ReactNode, out: Set<string>): void {
 
 export async function renderShareImage(card: ShareCard, seed: string): Promise<ImageResponse> {
   const element = <ShareImage card={card} seed={seed} />;
-  const chars = new Set<string>();
+  // 「…」は長い Duty 名を切ったときに Satori が足す字
+  const chars = new Set<string>(["…"]);
   collectText(element, chars);
+  const { fonts, complete } = await loadShareFonts([...chars].join(""));
   return new ImageResponse(element, {
     ...SHARE_IMAGE_SIZE,
-    fonts: await loadShareFonts([...chars].join("")),
+    fonts,
     headers: {
-      // トークンごとに画像は変わらない（シェアし直すとトークンが変わる）
-      "Cache-Control": "public, max-age=31536000, immutable",
+      // トークンごとに画像は変わらない（シェアし直すとトークンが変わる）。
+      // フォントを取れず字が欠けうる画像はキャッシュさせず、次に開いたときに描き直す
+      "Cache-Control": complete ? "public, max-age=31536000, immutable" : "no-store",
     },
   });
 }

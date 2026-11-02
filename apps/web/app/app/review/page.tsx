@@ -36,7 +36,8 @@ export default async function ReviewPage({
             <WeekLink href={data.nextWeekHref} label="次の週">
               <ChevronRight className="size-4" strokeWidth={1.8} aria-hidden />
             </WeekLink>
-            <ShareButton week={data.summary.weekStart} />
+            {/* 週を送ったら、前の週の「もう一度」などの状態を持ち越さない */}
+            <ShareButton key={data.summary.weekStart} week={data.summary.weekStart} />
           </div>
         </div>
         <WeeklySummaryCard summary={data.summary} />

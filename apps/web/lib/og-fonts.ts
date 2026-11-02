@@ -26,32 +26,41 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
 const GOTHIC = "Zen Kaku Gothic New";
 export const SEAL_FONT = "Yuji Syuku";
 
+/** Google Fonts が応答しないときに、画像のリクエストごと待たせないための上限 */
+const FONT_FETCH_TIMEOUT_MS = 4000;
+
 /** Google Fonts から `text` の字だけを含む TrueType を取る。失敗したら null */
 async function fetchGoogleFont(weight: number, text: string): Promise<ArrayBuffer | null> {
   try {
+    const signal = AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS);
     const params = new URLSearchParams({
       family: `${GOTHIC}:wght@${weight}`,
       text,
     });
     // User-Agent を付けないと TrueType の URL が返る（Satori は woff2 を読めない）
-    const css = await fetch(`https://fonts.googleapis.com/css2?${params}`).then((res) =>
-      res.ok ? res.text() : "",
+    const css = await fetch(`https://fonts.googleapis.com/css2?${params}`, { signal }).then(
+      (res) => (res.ok ? res.text() : ""),
     );
     const url = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1];
     if (!url) return null;
-    const res = await fetch(url);
+    const res = await fetch(url, { signal });
     return res.ok ? res.arrayBuffer() : null;
   } catch {
     return null;
   }
 }
 
-/** `text` を描くためのフォント（本文 400 / 500 / 700 と朱印の Yuji Syuku） */
-export async function loadShareFonts(text: string): Promise<OgFont[]> {
+/**
+ * `text` を描くためのフォント（本文 400 / 500 / 700 と朱印の Yuji Syuku）。
+ * `complete` は Google Fonts から全部取れたか（false なら埋め込みで代えていて、字が欠けうる）
+ */
+export async function loadShareFonts(
+  text: string,
+): Promise<{ fonts: OgFont[]; complete: boolean }> {
   const [regular, medium, bold] = await Promise.all(
     [400, 500, 700].map((weight) => fetchGoogleFont(weight, text)),
   );
-  return [
+  const fonts: OgFont[] = [
     {
       name: GOTHIC,
       data: regular ?? base64ToArrayBuffer(ZKG_400_B64),
@@ -69,4 +78,5 @@ export async function loadShareFonts(text: string): Promise<OgFont[]> {
     // 朱印の「済」は埋め込みのサブセットに入っている
     { name: SEAL_FONT, data: base64ToArrayBuffer(YUJI_SYUKU_B64), weight: 400, style: "normal" },
   ];
+  return { fonts, complete: Boolean(regular && medium && bold) };
 }
