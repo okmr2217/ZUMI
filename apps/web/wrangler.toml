@@ -22,10 +22,12 @@ database_id = "3201b980-daf5-4a39-a458-54196917f777"
 # Sentry 等の非シークレットな設定値はここに追加する。
 # シークレット（VAPID鍵・Resend APIキー等）は `wrangler secret put` で設定し、
 # ここには書かない。
-NEXT_PUBLIC_APP_ENV = "development"
+# Sentry の environment。ローカルは .dev.vars、E2E は e2e/wrangler.e2e.toml で "development" にする。
+# クライアントのバンドルにはビルド時に埋め込まれるため、deploy.yml のビルドの env にも同じ値を渡す。
+NEXT_PUBLIC_APP_ENV = "production"
 # better-auth の baseURL（シークレットではないためここで管理する）。
 BETTER_AUTH_URL = "https://zumi.paritto.dev"
 # 公開前のサインアップ制限（docs/05-tech-stack.md「ドメイン構成」）。"true" のときだけ
 # サインアップを受け付ける。`wrangler deploy` は [vars] でダッシュボードの値を上書き
 # するため、公開時はここを "true" に変えてデプロイする。
-SIGNUP_ENABLED = "false"
+SIGNUP_ENABLED = "true"

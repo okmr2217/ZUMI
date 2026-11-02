@@ -30,6 +30,7 @@
   - https://zumi.paritto.dev （zumi-web、カスタムドメイン。`workers.dev` のプレビューURLは `routes` 設定により無効化される仕様のため使用不可）
   - https://zumi-notify.okumuradaichi2007.workers.dev （zumi-notify、毎分 Cron 動作中）
 - ✅ **GitHub Actions からの自動デプロイ**: `.github/workflows/deploy.yml` を追加し、`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` を GitHub Actions Secrets に登録済み。`main` への push（または手動実行）で `zumi-notify`・`zumi-web` が自動デプロイされることを確認済み
+- ✅ **VAPID 鍵の作り直し**（2026-11-03、オーナー）: 1-5 の鍵が web と notify で同じ組か確かめられないため、新しい組を作り、`zumi-web` の `VAPID_PUBLIC_KEY`、`zumi-notify` の `VAPID_PUBLIC_KEY`・`VAPID_PRIVATE_KEY` に入れ直した。`zumi-web` の `VAPID_PRIVATE_KEY` は削除済み。`wrangler secret list` でシークレット名がそろっていることを確認した（指揮役）。本番にはまだ購読がなかったので影響なし。実機で通知が届くかは、[09](./09-implementation-tasks.md) の「実機での確認」で見る
 
 ## 未完了（着手時期が決まっているもの）
 
@@ -41,7 +42,7 @@
 - PR #32 の確認事項10項目を見る（住所の扱い、専属的合意管轄、免責の範囲、外国の事業者の扱い、外部送信規律など）。本文は専門家のレビューを経ていない下書き
 - Sentry の `zumi-web`・`zumi-notify` で「Prevent Storing of IP Addresses」を有効にし、Sentry・Resend の保存期間を確認する（ポリシーは「IP をエラー情報に含めない」「各事業者の定める期間」と書いている）
 - Cloudflare ダッシュボード（`paritto.dev` → セキュリティ → WAF → レート制限ルール）で、認証の API にレート制限ルールを1本作る。対象は `/api/auth/sign-in`・`/api/auth/sign-up`・`/api/auth/request-password-reset`・`/api/auth/send-verification-email`（パスが `/api/auth/` で始まる POST にまとめてもよい）。無料プランでも1本作れる。better-auth の rate limit はメモリに置かれ、Workers の isolate ごとに分かれるのでベストエフォートにしかならないため（2026/11 確定。D1 に持たせる方法はスキーマ変更が要るので採らない）
-- シェア URL を個別に無効にする機能はない。ポリシーでは「運営者に連絡」としたので、依頼が来たら本番 D1 の `share_tokens` の該当行を手で消す
+- シェア URL を個別に無効にする機能はない。ポリシーでは「運営者に連絡」としたので、依頼が来たら本番 D1 の `share_tokens` の該当行を手で消す。行を消しても、画像はエッジとブラウザのキャッシュに最大1日残る（`/og/w/:token` のキャッシュは1日。[03](./03-duty-log-review-account.md#シェア画像の設計方針) の「シェア画像の運用」）。急ぐ依頼なら、Cloudflare ダッシュボードの「キャッシュ → 構成 → カスタム削除」でその URL（`https://zumi.paritto.dev/og/w/<トークン>`）を消す。SNS など外部のサービスが保存した画像は消せない（ポリシーにもそう書いている）
 
 本番のサインアップは `apps/web/wrangler.toml` の `[vars]` の `SIGNUP_ENABLED = "false"` で
 閉じている（"true" 以外は閉じる側に倒す）。`wrangler deploy` は `[vars]` でダッシュボードの値を
@@ -49,18 +50,30 @@
 `main` にマージ（自動デプロイ）することで開く。ローカルでは `apps/web/.dev.vars` に
 `SIGNUP_ENABLED=true` を書く（`.dev.vars.example` 参照）。
 
-### Web Push の VAPID 鍵の確認 → **通知（フェーズ4）を `main` にマージする前**
+### 契約プランと上限・本番データの確認 → **サインアップを開く前**
 
-**方針（2026/11 決定）**: 登録済みの鍵が web と notify で同じ組か確かめられないため、リリース時に下の手順で作り直して両方に入れる。`zumi-web` の `VAPID_PRIVATE_KEY` も削除する。鍵が入ると、購読している人には週次サマリーが届き始める（`weekly_summary_enabled` は既定で ON）。
+2026/11 のリリース前の見直しで追加。どれも Claude の権限では確認できなかった（Cloudflare の契約情報は API トークンの権限外、本番 D1 の読み取りは許可していない）。
 
-鍵の組は 1-5 で登録済み。購読（`zumi-web`）と送信（`zumi-notify`）で同じ組を使っていないと、
-送信がすべて失敗する。次を確認する。
+- **Workers のプラン**: 無料プランだと CPU 時間が1リクエスト 10ms まで、外部への fetch が1回の起動で 50 件までに制限される。シェア画像（Satori）や Next.js の SSR は 10ms を超えやすい。notify は1分ごとの Cron 1回で該当する全員に送るので、既定の朝 7:00 に人が集まると数十人で 50 件を超えて送れなくなる。有料プラン（Workers Paid）なら問題にならない。無料プランのままにするなら、notify を分割して送る作りに変える必要がある
+- **Resend のプラン**: 無料プランは1日 100 通・月 3,000 通まで。確認メールとパスワード再設定がこれを使うので、公開直後に申し込みが集中すると確認メールが届かず登録できない人が出る。上限に達したときに気づけるよう、Resend の通知か Sentry で送信の失敗を見る
+- **D1 のバックアップ**: Time Travel で戻せるのは無料プランで 7 日、有料で 30 日まで。それより前に戻す必要が出たときのために、定期的な `wrangler d1 export` が要るかを決める
+- **本番 D1 に残っているデータ**: フェーズ1のころの検証用アカウントやデータが残っていないかを見て、公開前に消すかどうか決める（`user_settings` の行がないユーザーは、アプリを開いたときに作り直される）
 
-- `zumi-web` の `VAPID_PUBLIC_KEY` と、`zumi-notify` の `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` が
-  同じ組であること。シークレットは値を読み出せないため、確信が持てなければ下の手順で作り直す
-  （公開前で購読者がいないので、作り直しても影響はない）
-- `zumi-web` の `VAPID_PRIVATE_KEY` は使わない（送信は notify だけが行う）。消してよい:
-  `npx wrangler secret delete VAPID_PRIVATE_KEY --name zumi-web`
+### Sentry のアラートの通知先 → **R1（PR #38）を `main` にリリースしたあと**
+
+R1 で notify の Cron を Sentry の Cron Monitor（slug `zumi-notify-tick`）でチェックインするようにし、web・notify とも
+本番のイベントを `environment: production` で送るようにした（それまでは本番のエラーも `development` で入っていた）。
+
+1. リリース後、最初の Cron が動くと monitor が自動で作られる。Sentry → Insights → Crons に `zumi-notify-tick`（environment `production`）が出ていることを確認する
+2. その monitor の Alerts で通知先を設定する（Owner をメンバーにするか、Settings → Integrations で Slack などをつなぎ、アラートのルールのアクションに入れる）。3分続けて取りこぼし・失敗すると monitor が Issue を作り、通知が来る
+3. 既存の issue のアラート（Alerts → Issues）で、`environment:production` の新しい issue に通知が来るかを見る。環境で絞ったルールがあれば見直す
+4. Sentry の Developer（無料）プランで使える Cron Monitor の数を料金ページで確かめる（PR #38 では1つまで無料と見たが、料金ページそのものは未確認）
+
+### Web Push の VAPID 鍵（参考: 作り直す場合）
+
+2026-11-03 に作り直し済み（上の「完了済み」）。購読（`zumi-web`）と送信（`zumi-notify`）で同じ組を
+使っていないと、送信がすべて失敗する。`zumi-web` には公開鍵だけを置く（送信は notify だけが行う）。
+シークレットの書き込みは Claude の権限判定で止められるため、オーナーが実行する。
 
 作り直す手順:
 

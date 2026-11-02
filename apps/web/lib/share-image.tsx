@@ -15,6 +15,12 @@ import type { ShareCard, ShareCardDuty } from "./share";
  * - フッターにドメインを焼き込む。ストリークは出さない
  */
 
+/**
+ * シェア画像をキャッシュさせる秒数（1日）。シェアした直後の拡散で同じ画像が何度も開かれても、
+ * 描画は各データセンターで1日1回に収まる。行を消したあとに画像が残るのも最大1日になる
+ */
+export const SHARE_IMAGE_MAX_AGE = 60 * 60 * 24;
+
 /** 4:5。Instagram のフィードで切られない最も縦長の比率で、X・Threads でも切られずに出る */
 export const SHARE_IMAGE_SIZE = { width: 1080, height: 1350 } as const;
 
@@ -331,9 +337,10 @@ export async function renderShareImage(
     ...SHARE_IMAGE_SIZE,
     fonts,
     headers: {
-      // トークンごとに画像は変わらない（シェアし直すとトークンが変わる）。
+      // トークンごとに画像は変わらないが、行を消したとき（シェアし直し・依頼を受けての削除・退会）に
+      // エッジやブラウザに残る期間を短くするため、1日で切る（docs/03「シェア画像の運用」）。
       // フォントを取れず字が欠けうる画像はキャッシュさせず、次に開いたときに描き直す
-      "Cache-Control": complete ? "public, max-age=31536000, immutable" : "no-store",
+      "Cache-Control": complete ? `public, max-age=${SHARE_IMAGE_MAX_AGE}` : "no-store",
     },
   });
   return { image, complete };
