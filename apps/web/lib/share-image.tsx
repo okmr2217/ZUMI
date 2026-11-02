@@ -314,13 +314,20 @@ function collectText(node: ReactNode, out: Set<string>): void {
   }
 }
 
-export async function renderShareImage(card: ShareCard, seed: string): Promise<ImageResponse> {
+/**
+ * `complete` はフォントがそろったかどうか。欠けた画像はキャッシュさせず（呼び出し側のエッジキャッシュにも入れず）、
+ * 次に開いたときに描き直す
+ */
+export async function renderShareImage(
+  card: ShareCard,
+  seed: string,
+): Promise<{ image: ImageResponse; complete: boolean }> {
   const element = <ShareImage card={card} seed={seed} />;
   // 「…」は長い Duty 名を切ったときに Satori が足す字
   const chars = new Set<string>(["…"]);
   collectText(element, chars);
   const { fonts, complete } = await loadShareFonts([...chars].join(""));
-  return new ImageResponse(element, {
+  const image = new ImageResponse(element, {
     ...SHARE_IMAGE_SIZE,
     fonts,
     headers: {
@@ -329,4 +336,5 @@ export async function renderShareImage(card: ShareCard, seed: string): Promise<I
       "Cache-Control": complete ? "public, max-age=31536000, immutable" : "no-store",
     },
   });
+  return { image, complete };
 }

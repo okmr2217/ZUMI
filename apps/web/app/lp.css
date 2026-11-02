@@ -68,7 +68,9 @@
 .zumi-lp .wrap {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 0 clamp(20px, 5vw, 48px);
+  /* viewport-fit=cover のため、横向きのノッチ付き iPhone ではノッチの内側から 20px 空ける */
+  padding: 0 max(clamp(20px, 5vw, 48px), env(safe-area-inset-right) + 20px)
+    0 max(clamp(20px, 5vw, 48px), env(safe-area-inset-left) + 20px);
 }
 
 .zumi-lp .eyebrow {
@@ -133,7 +135,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px clamp(20px, 5vw, 48px);
+  padding: 16px max(clamp(20px, 5vw, 48px), env(safe-area-inset-right) + 20px)
+    16px max(clamp(20px, 5vw, 48px), env(safe-area-inset-left) + 20px);
   max-width: 1080px;
   margin: 0 auto;
 }

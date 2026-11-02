@@ -1,36 +1,17 @@
+import { sendJson } from "@/lib/api-client";
 import type { LogInput } from "@/lib/log-input";
 
-/** 記録 API の呼び出し（ブラウザ側）。失敗時はエラーコードを返し、文言は画面側で決める */
-export type LogApiResult = { ok: true } | { ok: false; error: string };
-
-async function send(url: string, method: "PUT" | "DELETE", body?: unknown): Promise<LogApiResult> {
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-    if (res.ok) return { ok: true };
-    const data: unknown = await res.json().catch(() => null);
-    const error =
-      data && typeof data === "object" && "error" in data && typeof data.error === "string"
-        ? data.error
-        : "unknown";
-    return { ok: false, error };
-  } catch {
-    return { ok: false, error: "network" };
-  }
-}
+export type { ApiResult as LogApiResult } from "@/lib/api-client";
 
 const logUrl = (dutyId: string, date: string) =>
   `/api/duties/${encodeURIComponent(dutyId)}/logs/${date}`;
 
 /** `LogInput` は送信前の形（`note` の空文字は API 側で null にする） */
 export const recordLogRequest = (dutyId: string, date: string, input: LogInput) =>
-  send(logUrl(dutyId, date), "PUT", input);
+  sendJson(logUrl(dutyId, date), "PUT", input);
 
 export const deleteLogRequest = (dutyId: string, date: string) =>
-  send(logUrl(dutyId, date), "DELETE");
+  sendJson(logUrl(dutyId, date), "DELETE");
 
 export function logErrorMessage(error: string): string {
   switch (error) {

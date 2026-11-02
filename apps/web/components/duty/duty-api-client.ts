@@ -1,34 +1,13 @@
+import { sendJson } from "@/lib/api-client";
 import type { DutyInput } from "@/lib/duty-input";
 
-/** Duty API の呼び出し（ブラウザ側）。失敗時はエラーコードを返し、文言は画面側で決める */
-export type DutyApiResult = { ok: true } | { ok: false; error: string };
-
-async function send(url: string, method: string, body: unknown): Promise<DutyApiResult> {
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (res.ok) return { ok: true };
-    const data: unknown = await res.json().catch(() => null);
-    const error =
-      data && typeof data === "object" && "error" in data && typeof data.error === "string"
-        ? data.error
-        : "unknown";
-    return { ok: false, error };
-  } catch {
-    return { ok: false, error: "network" };
-  }
-}
-
-export const createDutyRequest = (input: DutyInput) => send("/api/duties", "POST", input);
+export const createDutyRequest = (input: DutyInput) => sendJson("/api/duties", "POST", input);
 
 export const updateDutyRequest = (id: string, input: DutyInput) =>
-  send(`/api/duties/${encodeURIComponent(id)}`, "PATCH", input);
+  sendJson(`/api/duties/${encodeURIComponent(id)}`, "PATCH", input);
 
 export const changeDutyStatusRequest = (id: string, action: "pause" | "resume" | "archive") =>
-  send(`/api/duties/${encodeURIComponent(id)}/status`, "POST", { action });
+  sendJson(`/api/duties/${encodeURIComponent(id)}/status`, "POST", { action });
 
 export const LIMIT_MESSAGE = "Duty は10件までです。アーカイブすると枠が空きます。";
 
