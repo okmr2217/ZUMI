@@ -1,6 +1,6 @@
-import { and, asc, desc, eq, gte, isNull, lt, lte, or, sql } from "drizzle-orm";
-import { lastDoneBefore } from "@zumi/db/queries";
-import { duties, dutyPauses, logs } from "@zumi/db/schema";
+import { and, asc, desc, eq, gte, isNull, lt, or, sql } from "drizzle-orm";
+import { loadScheduleInputs } from "@zumi/db/queries";
+import { duties, logs } from "@zumi/db/schema";
 import {
   addDays,
   getDaysInMonth,
@@ -8,7 +8,6 @@ import {
   getWeekday,
   getWeeklyAchievement,
   toLocalDate,
-  type DutyLog,
   type DutyScheduleInput,
   type LogStatus,
   type WeekStart,
@@ -172,7 +171,7 @@ export function buildWeeklySummary(
 /**
  * 週次サマリーの入力を読む。一時停止・アーカイブした Duty も含める（その週の有効な日の分は数えるため）。
  * 前の週の初日より前にアーカイブした Duty は、どちらの週にも数えないので読まない。
- * 4本のクエリを D1 の batch で1往復にまとめる。
+ * 読み込みは今日タブ・notify と同じ `loadScheduleInputs`（D1 の batch で1往復）。
  */
 export async function loadSummaryDuties(
   db: Db,
@@ -182,55 +181,13 @@ export async function loadSummaryDuties(
 ): Promise<SummaryDuty[]> {
   const week = getWeekRange(weekDate, calendar.weekStart);
   const rangeStart = addDays(week.start, -7);
-  const relevant = and(
-    eq(duties.userId, userId),
-    or(isNull(duties.archivedAt), gte(duties.archivedAt, instantBefore(rangeStart))),
-  );
-  const [dutyRows, pauseRows, logRows, lastDoneRows] = await db.batch([
-    db.select().from(duties).where(relevant).orderBy(asc(duties.sortOrder), asc(duties.createdAt)),
-    db
-      .select({
-        dutyId: dutyPauses.dutyId,
-        startDate: dutyPauses.startDate,
-        endDate: dutyPauses.endDate,
-      })
-      .from(dutyPauses)
-      .innerJoin(duties, eq(duties.id, dutyPauses.dutyId))
-      .where(relevant),
-    db
-      .select({ dutyId: logs.dutyId, targetDate: logs.targetDate, status: logs.status })
-      .from(logs)
-      .where(
-        and(
-          eq(logs.userId, userId),
-          gte(logs.targetDate, rangeStart),
-          lte(logs.targetDate, week.end),
-        ),
-      ),
-    // SINCE_LAST の前回 DONE（前の週より前の最新の DONE）
-    db
-      .select({ dutyId: duties.id, targetDate: lastDoneBefore(rangeStart) })
-      .from(duties)
-      .where(and(relevant, eq(duties.scheduleType, "SINCE_LAST"))),
-  ]);
-
-  return dutyRows.map((duty) => {
-    const dutyLogs: Pick<DutyLog, "targetDate" | "status">[] = logRows.filter(
-      (log) => log.dutyId === duty.id,
-    );
-    const lastDone = lastDoneRows.find((row) => row.dutyId === duty.id)?.targetDate;
-    if (lastDone) dutyLogs.push({ targetDate: lastDone, status: "DONE" });
-    return {
-      duty,
-      schedule: {
-        duty,
-        logs: dutyLogs,
-        pauses: pauseRows.filter((pause) => pause.dutyId === duty.id),
-        timeZone: calendar.timeZone,
-        weekStart: calendar.weekStart,
-      },
-    };
+  const rows = await loadScheduleInputs(db, {
+    users: [{ userId, ...calendar }],
+    from: rangeStart,
+    to: week.end,
+    archivedSince: instantBefore(rangeStart),
   });
+  return rows.map(({ duty, schedule }) => ({ duty, schedule }));
 }
 
 export async function loadWeeklySummary(
