@@ -62,6 +62,8 @@ export function SettingsPanel({ email, notificationSettings, vapidPublicKey }: S
           sub="5つの決め方と「そろそろ」の考え方"
           onClick={() => setSubSheet("help")}
         />
+        <SettingsLinkRow label="利用規約" href="/terms" />
+        <SettingsLinkRow label="プライバシーポリシー" href="/privacy" />
       </SettingsGroup>
 
       <button
