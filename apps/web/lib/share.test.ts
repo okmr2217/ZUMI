@@ -2,7 +2,15 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { duties, logs, shareTokens } from "@zumi/db/schema";
 import { eq } from "drizzle-orm";
 import { loadWeeklySummary } from "./review";
-import { generateShareToken, isShareToken, issueShareToken, loadShareCard } from "./share";
+import {
+  generateShareToken,
+  isShareToken,
+  issueShareToken,
+  loadShareCard,
+  parseShareCard,
+  type ShareCard,
+  type ShareCardDuty,
+} from "./share";
 import { createTestDb } from "./test-d1";
 
 const CALENDAR = { timeZone: "Asia/Tokyo", weekStart: 1 as const };
@@ -107,5 +115,62 @@ describe("シェア用トークン", () => {
   it("形の合わないトークン・存在しないトークンは null", async () => {
     expect(await loadShareCard(testDb.db, "../../etc")).toBeNull();
     expect(await loadShareCard(testDb.db, generateShareToken())).toBeNull();
+  });
+});
+
+const VALID_CARD: ShareCard = {
+  weekStart: "2026-11-02",
+  weekEnd: "2026-11-08",
+  weekNumber: 45,
+  isCurrentWeek: true,
+  done: 3,
+  total: 7,
+  diff: 1,
+  caption: "いい調子です",
+  duties: [{ name: "プロテイン", icon: "cup-soda", schedule: "毎日", done: 3, total: 7 }],
+};
+
+describe("保存したカードの検証", () => {
+  it("正しい形はそのまま読める", () => {
+    expect(parseShareCard(structuredClone(VALID_CARD))).toEqual(VALID_CARD);
+  });
+
+  it("キーが欠けた形・型が違う形は null", () => {
+    const withoutCaption: Partial<ShareCard> = structuredClone(VALID_CARD);
+    delete withoutCaption.caption;
+    expect(parseShareCard(withoutCaption)).toBeNull();
+    const dutyWithoutTotal: Partial<ShareCardDuty> = structuredClone(VALID_CARD.duties[0]!);
+    delete dutyWithoutTotal.total;
+    expect(parseShareCard({ ...VALID_CARD, duties: [dutyWithoutTotal] })).toBeNull();
+    expect(parseShareCard({ ...VALID_CARD, done: "3" })).toBeNull();
+    expect(parseShareCard({ ...VALID_CARD, weekStart: "2026/11/02" })).toBeNull();
+    expect(parseShareCard(null)).toBeNull();
+  });
+
+  it("余計なキーは落として読む（Duty の id などを描画側へ渡さない）", () => {
+    const card = parseShareCard({
+      ...VALID_CARD,
+      userId: "user-1",
+      duties: VALID_CARD.duties.map((duty) => ({ ...duty, id: "duty-1" })),
+    });
+    expect(card).toEqual(VALID_CARD);
+    expect(card).not.toHaveProperty("userId");
+    expect(card?.duties[0]).not.toHaveProperty("id");
+  });
+
+  it("形が合わない行は、トークンがあっても null（route で 404 にする）", async () => {
+    const userId = "share-4";
+    await testDb.createUser(userId);
+    const token = generateShareToken();
+    const broken: Partial<ShareCard> = structuredClone(VALID_CARD);
+    delete broken.duties;
+    await testDb.db.insert(shareTokens).values({
+      token,
+      userId,
+      weekStart: VALID_CARD.weekStart,
+      card: broken,
+      createdAt: new Date(),
+    });
+    expect(await loadShareCard(testDb.db, token)).toBeNull();
   });
 });

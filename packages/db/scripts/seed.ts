@@ -2,8 +2,10 @@
  * ローカル D1（wrangler d1 execute --local）向けの開発用シードスクリプト。
  * 本番/リモート D1 に対しては実行しない想定。
  *
- * 使い方:
- *   npm run db:seed --workspace=@zumi/db
+ * 使い方（先に `npm run db:migrate:local` で migration を当てておく）:
+ *   npm run db:seed
+ *
+ * 何度実行してもよい。前回のシードユーザーは消してから入れ直す（関連する行は外部キーの cascade で消える）。
  *
  * 実体は `wrangler d1 execute zumi-db --local --persist-to ../../apps/web/.wrangler/state --file=...` を
  * 呼び出すラッパー。TypeScript 側で ID 生成や日付計算を行ってから SQL を
@@ -21,6 +23,8 @@ const userId = randomUUID();
 const dutyId = randomUUID();
 
 const sql = `
+DELETE FROM user WHERE email = 'seed@example.com';
+
 INSERT INTO user (id, name, email, email_verified, created_at, updated_at)
 VALUES ('${userId}', 'Seed User', 'seed@example.com', 1, ${nowMs}, ${nowMs});
 

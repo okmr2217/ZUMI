@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { shareTokens } from "@zumi/db/schema";
 import type { Db, UserCalendar } from "./duties";
 import { loadWeeklySummary, type WeeklySummary } from "./review";
@@ -11,25 +12,39 @@ import { loadWeeklySummary, type WeeklySummary } from "./review";
  * 数字は振り返りタブと同じ `loadWeeklySummary`（`getWeeklyAchievement` の合計）から取り、ここで集計し直さない。
  */
 
-/** 画像に描く値。`WeeklySummary` から、Duty の id など画像に要らないものを除いたもの */
-export interface ShareCard {
-  weekStart: string;
-  weekEnd: string;
-  weekNumber: number;
-  isCurrentWeek: boolean;
-  done: number;
-  total: number;
-  diff: number;
-  caption: string;
-  duties: ShareCardDuty[];
-}
+/** Duty 1件の行。`WeeklySummary` の Duty から、id など画像に要らないものを除いたもの */
+const shareCardDutySchema = z.object({
+  name: z.string(),
+  icon: z.string(),
+  schedule: z.string(),
+  done: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+});
 
-export interface ShareCardDuty {
-  name: string;
-  icon: string;
-  schedule: string;
-  done: number;
-  total: number;
+/**
+ * 画像に描く値。`WeeklySummary` から、Duty の id など画像に要らないものを除いたもの。
+ * `share_tokens.card` は JSON の text なので、読み込み時にこの形で検証する（docs/03「シェア画像の運用」）。
+ * 余計なキーは落とす（画像に要らない値を描画側へ渡さないため）
+ */
+const shareCardSchema = z.object({
+  weekStart: z.iso.date(),
+  weekEnd: z.iso.date(),
+  weekNumber: z.number().int().positive(),
+  isCurrentWeek: z.boolean(),
+  done: z.number().int().nonnegative(),
+  total: z.number().int().nonnegative(),
+  diff: z.number().int(),
+  caption: z.string(),
+  duties: z.array(shareCardDutySchema),
+});
+
+export type ShareCard = z.infer<typeof shareCardSchema>;
+export type ShareCardDuty = z.infer<typeof shareCardDutySchema>;
+
+/** 保存したカードを検証する。形が合わない古い行は null（呼び出し側で 404 にする） */
+export function parseShareCard(value: unknown): ShareCard | null {
+  const parsed = shareCardSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }
 
 export function toShareCard(summary: WeeklySummary): ShareCard {
@@ -100,5 +115,5 @@ export async function loadShareCard(db: Db, token: string): Promise<ShareCard | 
     .from(shareTokens)
     .where(eq(shareTokens.token, token))
     .get();
-  return row ? (row.card as unknown as ShareCard) : null;
+  return row ? parseShareCard(row.card) : null;
 }

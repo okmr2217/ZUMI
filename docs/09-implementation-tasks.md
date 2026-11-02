@@ -19,7 +19,7 @@
 - [x] Sentry 初期設定（web/notify 双方。DSN・ソースマップアップロード用トークンまで設定済み）
 - [x] CI（GitHub Actions）: lint/typecheck/build のパイプライン
 - [x] CD（GitHub Actions）: `main` push / 手動実行で `zumi-web`・`zumi-notify` を Cloudflare Workers へ自動デプロイ
-- [ ] ローカル開発用 D1（`wrangler d1` ローカルモード）とシードスクリプトの動作確認（スクリプト自体は用意済み、実行確認は未実施）
+- [x] ローカル開発用 D1（`wrangler d1` ローカルモード）とシードスクリプトの動作確認（migration 0004 まで当てた新しいローカル D1 で実行確認済み。繰り返し実行できるよう、前回のシードユーザーを消してから入れ直す）
 
 zumi-web（https://zumi.paritto.dev）・zumi-notify は本番 Cloudflare 環境に実デプロイ済み。詳細・残タスクは [OWNER-TASKS.md](./OWNER-TASKS.md) を参照。
 
@@ -145,9 +145,9 @@ Web Push のみで通知を成立させる。
 - [ ] 本番D1・Cron Trigger・カスタムドメイン（`zumi.paritto.dev`）の疎通確認
 - [ ] Cloudflare Workers デプロイパイプライン整備
 - [ ] リポジトリ全体に prettier（tailwind プラグイン込み）を一括でかけ、CI に `format:check` を足す（並行の作業セッションが落ち着いてから。途中でかけると各ブランチと衝突するため）
-- [ ] シェア画像の仕上げ（[03](./03-duty-log-review-account.md#シェア画像の設計方針) の「シェア画像の運用」）: `/og/w/:token` を `caches.default` でキャッシュする。`share_tokens.card` を読み込み時に zod で検証し、合わない行は 404 にする
+- [x] シェア画像の仕上げ（[03](./03-duty-log-review-account.md#シェア画像の設計方針) の「シェア画像の運用」）: `/og/w/:token` を `caches.default` でキャッシュする。`share_tokens.card` を読み込み時に zod で検証し、合わない行は 404 にする
 - [ ] 実機（iOS Safari・ホーム画面アプリ・Android Chrome）での確認: シェアの共有シートとダウンロードへの切り替え、Web Push の受信と通知タップからの遷移、ログアウト時の購読解除
-- [ ] LP の safe-area 対応: `viewport-fit=cover` により、横向きのノッチ付き iPhone で LP の左右の余白がノッチにわずかに重なる。`lp.css` の `.wrap` に `env(safe-area-inset-*)` の余白を足す
+- [x] LP の safe-area 対応: `viewport-fit=cover` により、横向きのノッチ付き iPhone で LP の左右の余白がノッチにわずかに重なる。`lp.css` の `.wrap` に `env(safe-area-inset-*)` の余白を足す
 
 ## 課金（MVP対象外・v1.1以降）
 
