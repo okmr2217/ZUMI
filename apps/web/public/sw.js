@@ -1,8 +1,11 @@
 // Service Worker: Web Push の受信・通知の表示・タップ時の遷移（docs/02-notifications.md）。
 // `/app` スコープで登録する（lib/push-client.ts の registerServiceWorker）。
 //
-// fetch ハンドラは持たない。認証が必要なページや API をキャッシュすると、
-// ログアウト後や別アカウントで古い内容が出るため、オフライン対応は入れていない。
+// オフライン対応は最小限にとどめる。キャッシュするのは public/offline.html（ユーザーデータを
+// 含まない静的ページ）だけで、`/app` 配下のナビゲーションがネットワークエラーになったときに
+// それを返す。認証が必要なページや API の応答はキャッシュしない。ログアウト後や
+// 別アカウントで古い内容が出るため。ナビゲーション以外の要求（API・RSC・静的ファイル）には
+// 手を出さず、ブラウザの通常の処理に任せる。
 //
 // push のペイロード（apps/notify が web-push で送る JSON）:
 //   { "title": string, "body"?: string, "url"?: string, "tag"?: string }
@@ -12,12 +15,74 @@
 const DEFAULT_URL = "/app";
 const NOTIFICATION_ICON = "/icons/icon-192.png";
 
-self.addEventListener("install", () => {
-  self.skipWaiting();
+// public/offline.html を変えたら CACHE_VERSION を上げる。sw.js 自体が変わらないと
+// ブラウザは worker を入れ直さず、古いオフライン用ページを返し続けるため。
+const CACHE_PREFIX = "zumi-offline-";
+const CACHE_VERSION = "v1";
+const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
+const OFFLINE_URL = "/offline.html";
+
+/** オフライン用ページを今の版のキャッシュに入れる。入っていれば true。 */
+async function cacheOfflinePage() {
+  const cache = await caches.open(CACHE_NAME);
+  if (await cache.match(OFFLINE_URL)) return true;
+  try {
+    const response = await fetch(OFFLINE_URL, { cache: "reload" });
+    if (!response.ok) return false;
+    // 本番の Workers Assets は `/offline.html` を `/offline` へリダイレクトする（html_handling）。
+    // リダイレクトを経た応答はナビゲーションへ返すとブラウザがエラーにするため、作り直して保存する。
+    // 本文は展開済みなので、Content-Encoding・Content-Length は引き継がず Content-Type だけ写す。
+    const headers = { "Content-Type": response.headers.get("Content-Type") ?? "text/html" };
+    await cache.put(OFFLINE_URL, new Response(await response.blob(), { headers }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+self.addEventListener("install", (event) => {
+  // オフライン用ページの取得に失敗しても、インストール自体は止めない（止めると Web Push まで
+  // 使えなくなるため）。取れなかった分は activate と、次にオンラインで開いたときに取り直す。
+  event.waitUntil(cacheOfflinePage().then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    (async () => {
+      // このアプリが作った古い版のキャッシュだけを消す。今の版に入れられなかったときは、
+      // オフライン時に返せるものがなくなるので古い版を残す。
+      if (await cacheOfflinePage()) {
+        const names = await caches.keys();
+        await Promise.all(
+          names
+            .filter((name) => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
+            .map((name) => caches.delete(name)),
+        );
+      }
+      // worker の起動を待たずにナビゲーションの要求を先に出させる（fetch ハンドラで遅くしないため）。
+      await self.registration.navigationPreload?.enable();
+      await self.clients.claim();
+    })(),
+  );
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode !== "navigate") return;
+
+  event.respondWith(
+    (async () => {
+      try {
+        const response = (await event.preloadResponse) ?? (await fetch(event.request));
+        // インストール時に取れなかった場合に備えて、オンラインのうちに入れておく（入っていれば何もしない）。
+        event.waitUntil(cacheOfflinePage());
+        return response;
+      } catch {
+        // 今の版になければ、activate で残した古い版から返す。
+        const offline = await caches.match(OFFLINE_URL);
+        return offline ?? Response.error();
+      }
+    })(),
+  );
 });
 
 /** 同一オリジンのパスだけを通す。外部 URL や不正な値は既定の `/app` にする。 */

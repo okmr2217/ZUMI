@@ -118,10 +118,10 @@ Web Push のみで通知を成立させる。
 ### 横断: PWA対応
 
 - [x] `manifest.json`（アイコン、テーマカラー、`display: standalone`）
-- [ ] Service Worker のキャッシュ戦略（最小限のオフライン対応）
+- [x] Service Worker のキャッシュ戦略（最小限のオフライン対応。キャッシュするのは `public/offline.html` だけで、`/app` 配下のナビゲーションがネットワークエラーのときに返す。認証が必要なページ・API はキャッシュしない）
 - [x] iOS「ホーム画面に追加」導線UI（iOS Web Push制約の案内。オンボーディングのステップ3と共通）
 - [x] iOS のスタンドアロン起動用 meta（`appleWebApp` と `apple-mobile-web-app-capable`。clipnote の `apps/web/src/app/layout.tsx` と同じ対応）、manifest のアイコン
-- [ ] Lighthouse PWA監査・インストール可能性の確認
+- [x] Lighthouse PWA監査・インストール可能性の確認（Lighthouse 11 の PWA カテゴリで全項目合格。v12 以降は PWA カテゴリが廃止されたため 11 で計測）
 
 ### 横断: 公開前のサインアップ制限（早めに対応）
 
