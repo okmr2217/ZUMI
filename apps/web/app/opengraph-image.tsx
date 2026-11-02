@@ -1,12 +1,6 @@
 import { ImageResponse } from "next/og";
+import { base64ToArrayBuffer } from "@/lib/og-fonts";
 import { ZKG_400_B64, ZKG_700_B64, ZKG_900_B64, YUJI_SYUKU_B64 } from "./_og-fonts/data";
-
-function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes.buffer;
-}
 
 export const alt = "ZUMI（済） — 定期的な「やらなきゃ」を、可視化しよう。";
 export const size = { width: 1200, height: 630 };

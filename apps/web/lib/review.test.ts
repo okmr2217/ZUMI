@@ -12,6 +12,7 @@ import {
   loadHistory,
   loadSummaryDuties,
   loadWeeklySummary,
+  type SummaryDuty,
 } from "./review";
 import { createTestDb } from "./test-d1";
 
@@ -267,9 +268,10 @@ describe("週次サマリー", () => {
       done: 9,
       total: 16,
     });
-    // 前の週: 毎日3 + 火金1 + 毎月1 + 週2 2 + 2日空いたら1 + 一時停止1 + アーカイブ0 = 9
-    expect(summary.previousDone).toBe(9);
-    expect(summary.diff).toBe(0);
+    // 前の週の同じ曜日（10/29 木）まで: 毎日3 + 火金1 + 週2 2 + 2日空いたら1 + 一時停止1 = 8
+    // （毎月1日の 11/1 は日曜なのでまだ数えない）
+    expect(summary.previousDone).toBe(8);
+    expect(summary.diff).toBe(1);
   });
 
   it("週次通知（apps/notify の summarizeWeek）と同じ数字になる", async () => {
@@ -279,9 +281,52 @@ describe("週次サマリー", () => {
       const expected = summarizeWeek(notifyDuties, today);
       const summary = await loadWeeklySummary(testDb.db, userId, today, today, CALENDAR);
       expect({ done: summary.done, total: summary.total }).toEqual(expected.thisWeek);
-      expect(summary.previousDone).toBe(expected.lastWeek.done);
-      expect(summary.diff).toBe(expected.thisWeek.done - expected.lastWeek.done);
     }
+    // 前週比は、週次通知を送る週の最終日にはどちらの定義でも同じになる
+    const lastDay = "2026-11-08";
+    const notifyDuties = await loadNotifyDuties(testDb.d1, userId, "2026-10-26", lastDay);
+    const expected = summarizeWeek(notifyDuties, lastDay);
+    const summary = await loadWeeklySummary(testDb.db, userId, lastDay, lastDay, CALENDAR);
+    expect(summary.previousDone).toBe(expected.lastWeek.done);
+    expect(summary.diff).toBe(expected.thisWeek.done - expected.lastWeek.done);
+  });
+
+  describe("前週比は、今週なら前の週の同じ曜日まで、終わった週なら前の週まるごとで比べる", () => {
+    // 前の2週は毎日済ませ、今週（月曜始まりは 11/2〜、日曜始まりは 11/1〜）は何もしていない
+    const doneLogs: { targetDate: string; status: LogStatus }[] = [];
+    for (let date = "2026-10-18"; date <= "2026-11-01"; date = addDays(date, 1)) {
+      doneLogs.push({ targetDate: date, status: "DONE" });
+    }
+    const dailyDuty = (weekStart: 0 | 1): SummaryDuty => {
+      const duty = {
+        id: "daily",
+        name: "毎日",
+        icon: "circle",
+        scheduleConfig: { type: "DAILY" } as const,
+        createdAt: jst("2026-10-01"),
+        archivedAt: null,
+      };
+      return { duty, schedule: { duty, logs: doneLogs, pauses: [], timeZone: TZ, weekStart } };
+    };
+
+    it.each([
+      // [週の始まり, 今日, 開く週, 前の週の済んだ数]
+      [1, "2026-11-02", "2026-11-02", 1], // 週の初日（月）: 前の週の月曜だけ
+      [1, "2026-11-05", "2026-11-02", 4], // 週の途中（木）: 前の週の月〜木
+      [1, "2026-11-08", "2026-11-02", 7], // 週の最終日（日）: 前の週まるごと
+      [1, "2026-11-05", "2026-10-26", 7], // 終わった週: 前の週まるごと
+      [0, "2026-11-01", "2026-11-01", 1], // 週の初日（日）
+      [0, "2026-11-04", "2026-11-01", 4], // 週の途中（水）
+      [0, "2026-11-07", "2026-11-01", 7], // 週の最終日（土）
+      [0, "2026-11-05", "2026-10-25", 7], // 終わった週
+    ] as const)(
+      "週の始まり %i・今日 %s・%s の週 → 前の週 %i",
+      (weekStart, today, week, expected) => {
+        const summary = buildWeeklySummary([dailyDuty(weekStart)], week, today, weekStart);
+        expect(summary.previousDone).toBe(expected);
+        expect(summary.diff).toBe(summary.done - expected);
+      },
+    );
   });
 
   it("日曜始まりでは週の区切りが変わる", async () => {
@@ -296,14 +341,15 @@ describe("週次サマリー", () => {
       timeZone: TZ,
       weekStart: 0,
     });
-    // 11/1（日）〜11/7（土）の今日まで: 11/1〜11/5 の5日中2日。前の週（10/25〜10/31）は1日
+    // 11/1（日）〜11/7（土）の今日まで: 11/1〜11/5 の5日中2日。
+    // 前の週（10/25〜10/31）の同じ曜日（10/29 木）までには、10/31 の済はまだ入らない
     expect(summary).toMatchObject({
       weekStart: "2026-11-01",
       weekEnd: "2026-11-07",
       done: 2,
       total: 5,
-      previousDone: 1,
-      diff: 1,
+      previousDone: 0,
+      diff: 2,
     });
   });
 

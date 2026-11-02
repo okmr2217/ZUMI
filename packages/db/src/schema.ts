@@ -130,4 +130,24 @@ export const logs = sqliteTable(
   }),
 );
 
+// シェア画像（/og/w/:token）のトークン。押した時点の週次サマリーを `card` に固定して持つ
+// （リンクを知っている人に、その後の記録を見せ続けないため）。ユーザー×週で1行で、
+// シェアし直すとトークンごと作り直す（古い URL は使えなくなる）
+export const shareTokens = sqliteTable(
+  "share_tokens",
+  {
+    token: text("token").primaryKey(), // 推測されにくい乱数（128bit を base64url）
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    weekStart: text("week_start").notNull(), // "2026-11-02"（その週の初日）
+    // 画像に描く値。形は apps/web の `ShareCard`（lib/share.ts）
+    card: text("card", { mode: "json" }).$type<Record<string, unknown>>().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (t) => ({
+    uniqUserWeek: uniqueIndex("share_tokens_user_week_uniq").on(t.userId, t.weekStart),
+  }),
+);
+
 export * from "./auth-schema";

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Clock, Settings } from "lucide-react";
 import { addDays } from "@zumi/types";
-import { formatDayLabel, type DayMode } from "@/lib/today";
+import { formatDayLabel } from "@/lib/date-label";
+import type { DayMode } from "@/lib/today";
 
 const TITLES: Record<DayMode, string> = {
   today: "今日",

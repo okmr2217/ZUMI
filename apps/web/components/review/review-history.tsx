@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DutyIcon } from "@/components/duty/duty-icon";
 import type { HistoryDay, HistoryDutyOption, HistoryEntry, HistoryPage } from "@/lib/review";
-import { formatDayLabel } from "@/lib/today";
+import { formatDayLabel } from "@/lib/date-label";
 import { cn } from "@/lib/utils";
 
 /**

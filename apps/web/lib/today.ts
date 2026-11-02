@@ -92,9 +92,3 @@ export function buildTodayItems(
   const order = (item: TodayItem) => (item.section === null ? 3 : SECTION_ORDER[item.section]);
   return items.sort((a, b) => order(a) - order(b));
 }
-
-/** 日付ナビの日付（例: 「11月2日（月）」） */
-export function formatDayLabel(date: string): string {
-  const [, m, d] = date.split("-").map(Number) as [number, number, number];
-  return `${m}月${d}日（${WEEKDAY_LABELS[getWeekday(date)]}）`;
-}
