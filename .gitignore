@@ -13,6 +13,9 @@ dist/
 .DS_Store
 .vercel/
 coverage/
+test-results/
+playwright-report/
+blob-report/
 .open-next/
 worker-configuration.d.ts
 *.tsbuildinfo

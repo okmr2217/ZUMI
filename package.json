@@ -13,6 +13,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:e2e": "npm run test:e2e --workspace=@zumi/web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "npm run generate --workspace=@zumi/db",
