@@ -151,6 +151,10 @@ Web Push のみで通知を成立させる。
 - [x] アクセシビリティ: `zumi-soft`（#8a8072）が小さい文字で AA に届かない（生成り地で 3.6:1、白地で 3.88:1。下部タブのラベル・補足文など）。デザイントークンを見直す（Q3 の Lighthouse 監査より）→ 明度だけ下げた #70685C にした（生成り地 5.10:1・白地 5.49:1・pill 地 4.65:1）。LP の `--ink-soft` も同じ値
 - [x] パフォーマンス: Lighthouse 72点。Google Fonts の CSS（約238KB）が描画を約2.1秒遅らせている。`next/font` 化やサブセット化を検討する（TBT 960ms、未使用の CSS 232KB・JS 108KB の指摘もあり）→ `next/font` で自前配信にし、朱印の Yuji Syuku は「済」だけのサブセット、Noto Sans JP は LP だけで可変フォント1つにした（`app/fonts.ts`）。TBT・未使用の JS は未対応
 - [x] テストの安定化: turbo で並列にテストを回すと、web の DB テストの `beforeAll`（ローカル D1 の起動）がタイムアウトで落ちることがある（単独なら通る）。`hookTimeout` を延ばすか、DB を使うテストの並列数を絞る → migration をファイル単位の batch にし、web の vitest を `maxWorkers: "50%"`・`hookTimeout` 60秒・`testTimeout` 20秒にした
+- [ ] ログイン直後に `/onboarding` が2回読み込まれる（`/app` からのソフト遷移のあとにドキュメントを読み直し、`POST /api/settings/timezone` も2回飛ぶ。一瞬ちらつく）。原因を調べて直す（Q4 の E2E で発見）
+- [ ] `RESEND_API_KEY` が空なら `sendEmail` で Resend を呼ばないようにする（ローカルと E2E から外部に出ないように。今は 401 をログに残している）
+- [ ] LP の `--ink-faint`（#b6ab99、「クレジットカード不要」など）が AA に届かない。`zumi-soft` と同じ考え方で見直す
+- [ ] リリース後に `zumi.paritto.dev` で Lighthouse を測り直し、上の「パフォーマンス」の点数を更新する（Q7 のフォント自前配信の効果の確認）
 
 ## 課金（MVP対象外・v1.1以降）
 
