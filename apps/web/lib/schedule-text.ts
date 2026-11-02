@@ -5,13 +5,14 @@ import {
   type ScheduleConfig,
   type WeekStart,
 } from "@zumi/types";
+import { WEEKDAY_LABELS } from "./date-label";
 
 /**
  * 繰り返し設定・次の期日の文言（docs/03「繰り返しタイプの選択UI」の「共通仕様」）。
  * 設定結果を都度言語化して、ユーザーが自分で設定ミスに気づけるようにする。
  */
 
-export const WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"] as const;
+export { WEEKDAY_LABELS };
 
 /** 週の始まりから並べた曜日（0=日 〜 6=土） */
 export function orderedWeekdays(weekStart: WeekStart): number[] {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/app/page-header";
 import { ReviewHistory } from "@/components/review/review-history";
+import { ShareButton } from "@/components/review/share-button";
 import { WeeklySummaryCard } from "@/components/review/weekly-summary-card";
 import { getReviewPageData } from "@/lib/review-page-data";
 
@@ -35,7 +36,8 @@ export default async function ReviewPage({
             <WeekLink href={data.nextWeekHref} label="次の週">
               <ChevronRight className="size-4" strokeWidth={1.8} aria-hidden />
             </WeekLink>
-            {/* シェアの導線（S10）はここに置く */}
+            {/* 週を送ったら、前の週の「もう一度」などの状態を持ち越さない */}
+            <ShareButton key={data.summary.weekStart} week={data.summary.weekStart} />
           </div>
         </div>
         <WeeklySummaryCard summary={data.summary} />

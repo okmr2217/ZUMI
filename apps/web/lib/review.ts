@@ -38,6 +38,22 @@ export function getHistoryStartDate(today: string): string {
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+/**
+ * 振り返りで開ける週（週の初日）の範囲。無料プランの履歴の範囲（直近3ヶ月）にまるごと入る週から今週まで
+ * （範囲の初日が週の途中なら、その週は開けない。範囲より前の日の記録を集計に出さないため）
+ */
+export function getReviewWeekRange(
+  today: string,
+  weekStart: WeekStart,
+): { oldest: string; current: string } {
+  const historyStart = getHistoryStartDate(today);
+  const historyStartWeek = getWeekRange(historyStart, weekStart).start;
+  return {
+    oldest: historyStartWeek === historyStart ? historyStartWeek : addDays(historyStartWeek, 7),
+    current: getWeekRange(today, weekStart).start,
+  };
+}
+
 /** 日付（ユーザーのタイムゾーン）の0時より確実に前の時刻。タイムゾーンは UTC+14 まであるため1日引く */
 const instantBefore = (date: string) => new Date(Date.parse(`${date}T00:00:00Z`) - 86_400_000);
 
@@ -68,7 +84,10 @@ export interface WeeklySummary {
   isCurrentWeek: boolean;
   done: number;
   total: number;
-  /** 前の週の済んだ数 */
+  /**
+   * 前の週の済んだ数。今週は前の週の同じ曜日まで、終わった週は前の週まるごとで数える
+   * （週の前半に大きなマイナスが出ないようにするため。docs/03「3-4」2026/11 確定）
+   */
   previousDone: number;
   /** `done - previousDone` */
   diff: number;
@@ -114,13 +133,16 @@ export function buildWeeklySummary(
 ): WeeklySummary {
   const week = getWeekRange(weekDate, weekStart);
   const previousWeekDate = addDays(week.start, -7);
+  // 前の週は「今日の7日前」の時点で数える。今週なら前の週の同じ曜日まで、
+  // 終わった週なら7日前でも前の週の最終日より後なので、前の週まるごとになる
+  const previousAsOf = addDays(today, -7);
   let done = 0;
   let total = 0;
   let previousDone = 0;
   const breakdown: WeeklySummaryDuty[] = [];
   for (const { duty, schedule } of summaryDuties) {
     const achievement = getWeeklyAchievement(schedule, week.start, today);
-    previousDone += getWeeklyAchievement(schedule, previousWeekDate, today).done;
+    previousDone += getWeeklyAchievement(schedule, previousWeekDate, previousAsOf).done;
     done += achievement.done;
     total += achievement.total;
     if (achievement.total === 0) continue;

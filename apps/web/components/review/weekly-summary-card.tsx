@@ -1,4 +1,5 @@
 import { DutyIcon } from "@/components/duty/duty-icon";
+import { formatPeriod } from "@/lib/date-label";
 import type { WeeklySummary, WeeklySummaryDuty } from "@/lib/review";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +41,6 @@ export function WeeklySummaryCard({ summary }: { summary: WeeklySummary }) {
       </div>
     </div>
   );
-}
-
-/** 「2026.08.17 — 08.23」。年をまたぐ週は終わりにも年を付ける */
-function formatPeriod(start: string, end: string): string {
-  const dotted = (date: string) => date.replaceAll("-", ".");
-  return `${dotted(start)} — ${start.slice(0, 4) === end.slice(0, 4) ? dotted(end.slice(5)) : dotted(end)}`;
 }
 
 /** 前週との差分（済んだ数の差）。減ったときも責める色にはしない */
