@@ -93,13 +93,13 @@ export function ChangePasswordForm() {
       {error && (
         <p
           role="alert"
-          className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+          className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
         >
           {error}
         </p>
       )}
       {success && (
-        <p role="status" className="text-zumi-soft text-[12.5px]">
+        <p role="status" className="text-[12.5px] text-zumi-soft">
           パスワードを変更しました。他の端末ではログインし直してください。
         </p>
       )}
@@ -107,7 +107,7 @@ export function ChangePasswordForm() {
       <button
         type="submit"
         disabled={pending}
-        className="bg-zumi-shu w-full rounded-2xl p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
+        className="w-full rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
       >
         {pending ? "変更しています…" : "パスワードを変更する"}
       </button>

@@ -26,7 +26,7 @@ export default async function OnboardingPage() {
   ]);
 
   return (
-    <div className="bg-zumi-bg font-zumi text-zumi-ink min-h-dvh">
+    <div className="min-h-dvh bg-zumi-bg font-zumi text-zumi-ink">
       <TimezoneSync />
       <OnboardingFlow
         calendar={calendar}

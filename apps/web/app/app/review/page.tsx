@@ -25,7 +25,7 @@ export default async function ReviewPage({
         <div className="mb-2.5 flex items-center justify-between">
           <h2
             id="weekly-summary-heading"
-            className="text-zumi-soft text-xs font-bold tracking-[.08em]"
+            className="text-xs font-bold tracking-[.08em] text-zumi-soft"
           >
             週次サマリー
           </h2>
@@ -46,7 +46,7 @@ export default async function ReviewPage({
       <section className="px-[22px] pt-7" aria-labelledby="history-heading">
         <h2
           id="history-heading"
-          className="text-zumi-soft mb-2.5 text-xs font-bold tracking-[.08em]"
+          className="mb-2.5 text-xs font-bold tracking-[.08em] text-zumi-soft"
         >
           履歴
         </h2>

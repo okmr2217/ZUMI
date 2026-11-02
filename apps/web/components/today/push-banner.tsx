@@ -42,15 +42,15 @@ export function PushBanner({ vapidPublicKey }: { vapidPublicKey: string | null }
   return (
     <section
       aria-label="通知の許可"
-      className="border-zumi-line bg-zumi-card mx-[22px] mt-3 flex items-start gap-3 rounded-2xl border p-3.5"
+      className="mx-[22px] mt-3 flex items-start gap-3 rounded-2xl border border-zumi-line bg-zumi-card p-3.5"
     >
-      <span className="bg-zumi-tint text-zumi-shu flex size-9 shrink-0 items-center justify-center rounded-full">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-zumi-tint text-zumi-shu">
         <Bell className="size-[18px]" strokeWidth={1.8} aria-hidden />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div>
           <p className="text-[13.5px] font-bold">通知をオンにしませんか</p>
-          <p className="text-zumi-soft mt-0.5 text-[11.5px] leading-relaxed">
+          <p className="mt-0.5 text-[11.5px] leading-relaxed text-zumi-soft">
             その日の Duty と、まだ済んでいないものをお知らせします。
           </p>
         </div>
@@ -58,12 +58,12 @@ export function PushBanner({ vapidPublicKey }: { vapidPublicKey: string | null }
           type="button"
           onClick={subscribe}
           disabled={busy}
-          className="bg-zumi-shu w-fit rounded-[20px] px-3.5 py-2 text-xs font-bold text-white disabled:opacity-60"
+          className="w-fit rounded-[20px] bg-zumi-shu px-3.5 py-2 text-xs font-bold text-white disabled:opacity-60"
         >
           {busy ? "設定中…" : "通知をオンにする"}
         </button>
         {error && (
-          <p role="alert" className="text-zumi-shu-deep text-[11.5px] font-semibold">
+          <p role="alert" className="text-[11.5px] font-semibold text-zumi-shu-deep">
             {error}
           </p>
         )}
@@ -72,7 +72,7 @@ export function PushBanner({ vapidPublicKey }: { vapidPublicKey: string | null }
         type="button"
         onClick={dismiss}
         aria-label="閉じる"
-        className="text-zumi-soft -m-1.5 flex size-8 shrink-0 items-center justify-center rounded-full"
+        className="-m-1.5 flex size-8 shrink-0 items-center justify-center rounded-full text-zumi-soft"
       >
         <X className="size-4" strokeWidth={1.8} aria-hidden />
       </button>

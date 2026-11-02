@@ -48,11 +48,11 @@ export function TemplateGrid({
                 <DutyIcon name={template.icon} className="size-[18px]" strokeWidth={1.7} />
               </span>
               <span className="text-[13.5px] font-bold">{template.name}</span>
-              <span className="text-zumi-soft -mt-1 text-[10.5px]">
+              <span className="-mt-1 text-[10.5px] text-zumi-soft">
                 {summarizeSchedule(template.scheduleConfig, weekStart)}
               </span>
               {marked && (
-                <span className="bg-zumi-shu absolute right-3 top-3 flex size-5 items-center justify-center rounded-full text-white">
+                <span className="absolute right-3 top-3 flex size-5 items-center justify-center rounded-full bg-zumi-shu text-white">
                   <Check className="size-3" strokeWidth={2.6} aria-label="追加済み" />
                 </span>
               )}

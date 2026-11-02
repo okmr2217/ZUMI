@@ -213,7 +213,7 @@ export function TodayView({
       {mode === "today" && <PushBanner vapidPublicKey={vapidPublicKey} />}
 
       <div className="flex flex-col gap-2 px-[22px] pb-1 pt-3.5">
-        <div className="text-zumi-soft flex justify-between text-[13px]">
+        <div className="flex justify-between text-[13px] text-zumi-soft">
           <span>{text.progress}</span>
           <span>
             {doneCount} / {scheduled.length}
@@ -225,7 +225,7 @@ export function TodayView({
           aria-valuemin={0}
           aria-valuemax={scheduled.length}
           aria-valuenow={doneCount}
-          className="bg-zumi-line h-1.5 overflow-hidden rounded"
+          className="h-1.5 overflow-hidden rounded bg-zumi-line"
         >
           <div
             className={cn(
@@ -241,16 +241,16 @@ export function TodayView({
 
       <div className="flex flex-col gap-[22px] px-[22px] pt-2">
         {!hasDuties ? (
-          <div className="border-zumi-line text-zumi-soft mt-2 rounded-2xl border border-dashed px-4 py-8 text-center text-[13px] leading-relaxed">
+          <div className="mt-2 rounded-2xl border border-dashed border-zumi-line px-4 py-8 text-center text-[13px] leading-relaxed text-zumi-soft">
             まだ Duty がありません。
             <br />
-            <Link href="/app/duties" className="text-zumi-shu font-bold">
+            <Link href="/app/duties" className="font-bold text-zumi-shu">
               Duty タブ
             </Link>
             から、定期的にやることを登録しましょう。
           </div>
         ) : items.length === 0 ? (
-          <p className="text-zumi-soft mt-2 py-6 text-center text-[13px]">{text.empty}</p>
+          <p className="mt-2 py-6 text-center text-[13px] text-zumi-soft">{text.empty}</p>
         ) : mode === "today" ? (
           <>
             {SECTIONS.map(({ section, label }) => {
@@ -278,7 +278,7 @@ export function TodayView({
                   type="button"
                   aria-expanded={doneOpen}
                   onClick={() => setDoneOpen((open) => !open)}
-                  className="text-zumi-soft flex w-full items-center justify-between px-1 py-3 text-[13px] font-medium"
+                  className="flex w-full items-center justify-between px-1 py-3 text-[13px] font-medium text-zumi-soft"
                 >
                   <span>済んだもの {doneItems.length}件</span>
                   <ChevronDown
@@ -293,12 +293,12 @@ export function TodayView({
           </>
         ) : (
           <section>
-            <h2 className="text-zumi-soft mb-2.5 text-xs font-bold tracking-[.08em]">
+            <h2 className="mb-2.5 text-xs font-bold tracking-[.08em] text-zumi-soft">
               {text.list}
             </h2>
             <ul className="flex flex-col gap-2.5">{items.map(row)}</ul>
             {text.hint && (
-              <p className="text-zumi-soft pb-[18px] pt-3.5 text-center text-[11.5px]">
+              <p className="pb-[18px] pt-3.5 text-center text-[11.5px] text-zumi-soft">
                 {text.hint}
               </p>
             )}
@@ -323,7 +323,7 @@ export function TodayView({
       {toast && (
         <p
           role="status"
-          className="bg-zumi-ink fixed inset-x-0 bottom-[calc(66px+max(12px,env(safe-area-inset-bottom))+12px)] z-30 mx-auto w-[calc(100%-44px)] max-w-[386px] rounded-2xl px-4 py-3 text-[13px] text-white shadow-[0_8px_24px_rgba(30,26,20,.25)]"
+          className="fixed inset-x-0 bottom-[calc(66px+max(12px,env(safe-area-inset-bottom))+12px)] z-30 mx-auto w-[calc(100%-44px)] max-w-[386px] rounded-2xl bg-zumi-ink px-4 py-3 text-[13px] text-white shadow-[0_8px_24px_rgba(30,26,20,.25)]"
         >
           {toast}
         </p>

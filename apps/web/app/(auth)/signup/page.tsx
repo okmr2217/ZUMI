@@ -12,7 +12,8 @@ export default function SignupPage() {
         <div className="space-y-1">
           <h1 className="text-xl font-semibold">新規登録は準備中です</h1>
           <p className="text-sm text-muted-foreground">
-            ZUMI は現在、公開に向けて準備を進めています。新規登録の受付開始まで、もうしばらくお待ちください。
+            ZUMI
+            は現在、公開に向けて準備を進めています。新規登録の受付開始まで、もうしばらくお待ちください。
           </p>
         </div>
         <p className="text-center text-sm text-muted-foreground">

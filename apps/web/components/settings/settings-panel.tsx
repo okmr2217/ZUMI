@@ -48,7 +48,7 @@ export function SettingsPanel({ email, notificationSettings, vapidPublicKey }: S
           <span className="max-w-[180px] truncate">{email}</span>
         </SettingsRow>
         <SettingsLinkRow label="パスワード変更" onClick={() => setSubSheet("password")} />
-        <SignOutButton className="border-zumi-line flex w-full border-b px-[15px] py-3 text-left text-[13.5px] font-semibold last:border-b-0 disabled:opacity-40" />
+        <SignOutButton className="flex w-full border-b border-zumi-line px-[15px] py-3 text-left text-[13.5px] font-semibold last:border-b-0 disabled:opacity-40" />
       </SettingsGroup>
 
       {/* エクスポートは v1.1（docs/07）。モックにある項目なので、準備中として出しておく */}
@@ -69,7 +69,7 @@ export function SettingsPanel({ email, notificationSettings, vapidPublicKey }: S
       <button
         type="button"
         onClick={() => setSubSheet("delete")}
-        className="text-zumi-shu-deep self-center py-1 text-[12.5px] font-semibold"
+        className="self-center py-1 text-[12.5px] font-semibold text-zumi-shu-deep"
       >
         退会する
       </button>
@@ -133,11 +133,11 @@ function WeekStartRow({
   }
 
   return (
-    <div className="border-zumi-line border-b px-[15px] py-3 last:border-b-0">
+    <div className="border-b border-zumi-line px-[15px] py-3 last:border-b-0">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[13.5px] font-semibold">週の始まり</div>
-          <div className="text-zumi-soft mt-0.5 text-[11px]">週次サマリー・達成率の区切り</div>
+          <div className="mt-0.5 text-[11px] text-zumi-soft">週次サマリー・達成率の区切り</div>
         </div>
         <label
           className={cn(
@@ -163,7 +163,7 @@ function WeekStartRow({
         </label>
       </div>
       {error && (
-        <p role="alert" className="text-zumi-shu mt-2 text-[11px]">
+        <p role="alert" className="mt-2 text-[11px] text-zumi-shu">
           {error}
         </p>
       )}

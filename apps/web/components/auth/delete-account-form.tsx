@@ -37,13 +37,13 @@ export function DeleteAccountForm() {
         退会すると、登録した
         Duty・記録などすべてのデータが完全に削除されます。この操作は取り消せません。
       </p>
-      <p className="text-zumi-soft text-[12px] leading-relaxed">
+      <p className="text-[12px] leading-relaxed text-zumi-soft">
         登録しているメールアドレスに確認メールを送ります。メール内のリンクを開くと退会が完了します。
       </p>
       {error && (
         <p
           role="alert"
-          className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+          className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
         >
           {error}
         </p>
@@ -52,7 +52,7 @@ export function DeleteAccountForm() {
         type="button"
         onClick={handleDelete}
         disabled={pending}
-        className="border-zumi-shu-deep text-zumi-shu-deep w-full rounded-2xl border-[1.6px] p-[13px] text-[14px] font-bold disabled:opacity-40"
+        className="w-full rounded-2xl border-[1.6px] border-zumi-shu-deep p-[13px] text-[14px] font-bold text-zumi-shu-deep disabled:opacity-40"
       >
         {pending ? "送信しています…" : "確認メールを送って退会する"}
       </button>

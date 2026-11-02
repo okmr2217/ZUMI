@@ -53,7 +53,7 @@ export function DutyFormFields({
           onChange={(event) => set("name", event.target.value)}
           maxLength={DUTY_NAME_MAX_LENGTH}
           placeholder="例：換気扇の掃除"
-          className="border-zumi-line bg-zumi-card placeholder:text-zumi-soft focus:border-zumi-shu w-full rounded-[14px] border px-3.5 py-[13px] text-[14.5px] font-semibold outline-none placeholder:font-normal"
+          className="w-full rounded-[14px] border border-zumi-line bg-zumi-card px-3.5 py-[13px] text-[14.5px] font-semibold outline-none placeholder:font-normal placeholder:text-zumi-soft focus:border-zumi-shu"
         />
       </div>
 
@@ -185,9 +185,9 @@ function ScheduleFields({
                     onChange({ ...value, anchor: event.target.value, anchorTouched: true });
                   }
                 }}
-                className="border-zumi-line bg-zumi-card focus:border-zumi-shu w-full rounded-[14px] border px-3.5 py-[11px] text-[14.5px] outline-none"
+                className="w-full rounded-[14px] border border-zumi-line bg-zumi-card px-3.5 py-[11px] text-[14.5px] outline-none focus:border-zumi-shu"
               />
-              <p className="text-zumi-soft mt-1.5 text-[11px]">
+              <p className="mt-1.5 text-[11px] text-zumi-soft">
                 この日を含む週から、1週おきになります
               </p>
             </div>
@@ -213,7 +213,7 @@ function ScheduleFields({
           </div>
           {value.monthlyMode === "DAY" ? (
             <div>
-              <label className="border-zumi-line bg-zumi-card flex items-center justify-between rounded-[14px] border px-[15px] py-2.5 text-[13.5px] font-semibold">
+              <label className="flex items-center justify-between rounded-[14px] border border-zumi-line bg-zumi-card px-[15px] py-2.5 text-[13.5px] font-semibold">
                 日付
                 <span className="flex items-center gap-1.5">
                   毎月
@@ -222,7 +222,7 @@ function ScheduleFields({
                     onChange={(event) =>
                       onChange({ ...value, dayOfMonth: Number(event.target.value) })
                     }
-                    className="border-zumi-line bg-zumi-bg rounded-[10px] border-[1.6px] px-2 py-1.5 text-[15px] font-bold tabular-nums"
+                    className="rounded-[10px] border-[1.6px] border-zumi-line bg-zumi-bg px-2 py-1.5 text-[15px] font-bold tabular-nums"
                   >
                     {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
                       <option key={day} value={day}>
@@ -234,7 +234,7 @@ function ScheduleFields({
                 </span>
               </label>
               {value.dayOfMonth >= 29 && (
-                <p className="text-zumi-soft mt-1.5 text-[11px]">
+                <p className="mt-1.5 text-[11px] text-zumi-soft">
                   その日がない月は、月末になります
                 </p>
               )}
@@ -396,7 +396,7 @@ function Stepper({
   const buttonClass =
     "flex size-9 items-center justify-center rounded-full border-[1.6px] border-zumi-line bg-zumi-card text-zumi-ink disabled:opacity-40";
   return (
-    <div className="border-zumi-line bg-zumi-card flex items-center justify-between rounded-[14px] border px-[15px] py-2.5">
+    <div className="flex items-center justify-between rounded-[14px] border border-zumi-line bg-zumi-card px-[15px] py-2.5">
       <span className="text-[13.5px] font-semibold">
         {prefix} <span className="text-[17px] font-bold tabular-nums">{value}</span> {suffix}
       </span>
@@ -444,13 +444,13 @@ export function ToggleRow({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={cn(
-        "border-zumi-line bg-zumi-card flex w-full items-center justify-between gap-3 rounded-[14px] border px-[15px] py-[13px] text-left",
+        "flex w-full items-center justify-between gap-3 rounded-[14px] border border-zumi-line bg-zumi-card px-[15px] py-[13px] text-left",
         className,
       )}
     >
       <span>
         <span className="block text-[13.5px] font-semibold">{title}</span>
-        <span className="text-zumi-soft mt-0.5 block text-[11px]">{description}</span>
+        <span className="mt-0.5 block text-[11px] text-zumi-soft">{description}</span>
       </span>
       <span
         aria-hidden

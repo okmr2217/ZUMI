@@ -19,13 +19,13 @@ export const LEGAL_ENACTED_AT = "2026年11月";
 
 export function LegalDocument({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-zumi-bg text-zumi-ink font-zumi min-h-screen">
-      <header className="border-zumi-line border-b">
+    <div className="min-h-screen bg-zumi-bg font-zumi text-zumi-ink">
+      <header className="border-b border-zumi-line">
         <div className="mx-auto flex max-w-[720px] items-center justify-between px-5 py-4">
           <Link href="/" className="text-[15px] font-black tracking-[.04em] no-underline">
             ZUMI<span className="text-zumi-shu">（済）</span>
           </Link>
-          <Link href="/app" className="text-zumi-soft text-[12.5px] font-bold">
+          <Link href="/app" className="text-[12.5px] font-bold text-zumi-soft">
             アプリを開く
           </Link>
         </div>
@@ -33,13 +33,13 @@ export function LegalDocument({ title, children }: { title: string; children: Re
 
       <main className="mx-auto max-w-[720px] px-5 pb-16 pt-10 text-[15px] leading-[1.95] [overflow-wrap:anywhere]">
         <h1 className="text-[26px] font-black tracking-[.02em]">{title}</h1>
-        <div className="bg-zumi-shu mt-4 h-[3px] w-10" aria-hidden />
-        <p className="text-zumi-soft mt-4 text-[13px]">{LEGAL_ENACTED_AT} 制定</p>
+        <div className="mt-4 h-[3px] w-10 bg-zumi-shu" aria-hidden />
+        <p className="mt-4 text-[13px] text-zumi-soft">{LEGAL_ENACTED_AT} 制定</p>
         <div className="mt-8 flex flex-col gap-9">{children}</div>
       </main>
 
-      <footer className="border-zumi-line border-t">
-        <nav className="text-zumi-soft mx-auto flex max-w-[720px] flex-wrap gap-x-5 gap-y-2 px-5 pb-10 pt-6 text-[13px]">
+      <footer className="border-t border-zumi-line">
+        <nav className="mx-auto flex max-w-[720px] flex-wrap gap-x-5 gap-y-2 px-5 pb-10 pt-6 text-[13px] text-zumi-soft">
           <Link href="/" className="hover:text-zumi-shu">
             トップ
           </Link>
@@ -59,7 +59,7 @@ export function LegalDocument({ title, children }: { title: string; children: Re
 export function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="border-zumi-shu border-l-[3px] pl-3 text-[17px] font-bold leading-[1.6]">
+      <h2 className="border-l-[3px] border-zumi-shu pl-3 text-[17px] font-bold leading-[1.6]">
         {title}
       </h2>
       {children}
@@ -74,13 +74,13 @@ export function LegalList({ children }: { children: React.ReactNode }) {
 
 /** 箇条書き（番号なし） */
 export function LegalBullets({ children }: { children: React.ReactNode }) {
-  return <ul className="marker:text-zumi-shu flex list-disc flex-col gap-1.5 pl-6">{children}</ul>;
+  return <ul className="flex list-disc flex-col gap-1.5 pl-6 marker:text-zumi-shu">{children}</ul>;
 }
 
 /** 小見出しと内容の組（取得する情報・送信先の一覧など） */
 export function LegalItem({ term, children }: { term: string; children: React.ReactNode }) {
   return (
-    <div className="border-zumi-line bg-zumi-card rounded-xl border px-4 py-3">
+    <div className="rounded-xl border border-zumi-line bg-zumi-card px-4 py-3">
       <p className="text-[14.5px] font-bold">{term}</p>
       <div className="mt-1 flex flex-col gap-1.5 text-[14px] leading-[1.85]">{children}</div>
     </div>
@@ -90,7 +90,7 @@ export function LegalItem({ term, children }: { term: string; children: React.Re
 /** 未定の値。オーナーが埋めるまで、本文中で目立つように出す */
 function Placeholder({ children }: { children: string }) {
   return (
-    <mark className="bg-zumi-shu-bg text-zumi-shu-deep rounded px-1 font-bold">【{children}】</mark>
+    <mark className="rounded bg-zumi-shu-bg px-1 font-bold text-zumi-shu-deep">【{children}】</mark>
   );
 }
 

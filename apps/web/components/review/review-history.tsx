@@ -94,7 +94,7 @@ export function ReviewHistory({
       <div className="flex flex-col gap-4">
         {days.map((day) => (
           <section key={day.date} className="flex flex-col gap-2">
-            <h3 className="text-zumi-soft mb-0.5 text-xs font-bold">{formatDayLabel(day.date)}</h3>
+            <h3 className="mb-0.5 text-xs font-bold text-zumi-soft">{formatDayLabel(day.date)}</h3>
             {day.entries.map((entry) => (
               <HistoryRow key={entry.dutyId} entry={entry} />
             ))}
@@ -102,14 +102,14 @@ export function ReviewHistory({
         ))}
       </div>
 
-      <div ref={sentinel} className="text-zumi-soft py-5 text-center text-xs">
+      <div ref={sentinel} className="py-5 text-center text-xs text-zumi-soft">
         {loading && "読み込み中…"}
         {failed && (
           <span>
             読み込めませんでした。
             <button
               type="button"
-              className="text-zumi-shu font-bold underline-offset-2 hover:underline"
+              className="font-bold text-zumi-shu underline-offset-2 hover:underline"
               onClick={() => void load(dutyId, days.length === 0 ? null : nextBefore)}
             >
               もう一度読み込む
@@ -179,21 +179,21 @@ function FilterChip({
 
 function HistoryRow({ entry }: { entry: HistoryEntry }) {
   return (
-    <div className="border-zumi-line bg-zumi-card flex items-center gap-2.5 rounded-[14px] border px-[13px] py-[11px]">
-      <span className="bg-zumi-base flex size-[34px] shrink-0 items-center justify-center rounded-[10px]">
+    <div className="flex items-center gap-2.5 rounded-[14px] border border-zumi-line bg-zumi-card px-[13px] py-[11px]">
+      <span className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-zumi-base">
         <DutyIcon name={entry.icon} className="size-[17px]" strokeWidth={1.6} />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-[13.5px] font-bold">{entry.name}</span>
-        {entry.note && <span className="text-zumi-soft truncate text-[11.5px]">{entry.note}</span>}
+        {entry.note && <span className="truncate text-[11.5px] text-zumi-soft">{entry.note}</span>}
       </span>
-      <span className="text-zumi-soft mr-1 shrink-0 text-[10.5px]">{entry.loggedTime}</span>
+      <span className="mr-1 shrink-0 text-[10.5px] text-zumi-soft">{entry.loggedTime}</span>
       {entry.status === "DONE" ? (
-        <span className="bg-zumi-shu-bg text-zumi-shu shrink-0 rounded-[20px] px-[9px] py-[3px] text-[10px] font-bold">
+        <span className="shrink-0 rounded-[20px] bg-zumi-shu-bg px-[9px] py-[3px] text-[10px] font-bold text-zumi-shu">
           済
         </span>
       ) : (
-        <span className="bg-zumi-pill text-zumi-soft shrink-0 rounded-[20px] px-[9px] py-[3px] text-[10px] font-bold">
+        <span className="shrink-0 rounded-[20px] bg-zumi-pill px-[9px] py-[3px] text-[10px] font-bold text-zumi-soft">
           スキップ
         </span>
       )}

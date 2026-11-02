@@ -9,21 +9,21 @@ import { cn } from "@/lib/utils";
  */
 export function WeeklySummaryCard({ summary }: { summary: WeeklySummary }) {
   return (
-    <div className="border-zumi-line bg-zumi-card rounded-[22px] border px-6 pb-5 pt-7 shadow-[0_14px_32px_rgba(30,26,20,0.06)]">
-      <div className="text-zumi-soft mb-[22px] flex items-baseline justify-between text-[13.5px]">
+    <div className="rounded-[22px] border border-zumi-line bg-zumi-card px-6 pb-5 pt-7 shadow-[0_14px_32px_rgba(30,26,20,0.06)]">
+      <div className="mb-[22px] flex items-baseline justify-between text-[13.5px] text-zumi-soft">
         <span className="tracking-[.06em]">{formatPeriod(summary.weekStart, summary.weekEnd)}</span>
         <span className="opacity-65">第{summary.weekNumber}週</span>
       </div>
 
       <div className="mb-1.5 flex items-baseline gap-2.5">
         <span className="text-[52px] font-medium leading-none">{summary.done}</span>
-        <span className="text-zumi-soft text-[21px]">/ {summary.total}</span>
+        <span className="text-[21px] text-zumi-soft">/ {summary.total}</span>
         <DiffChip diff={summary.diff} />
       </div>
-      <p className="text-zumi-soft mb-5 text-sm">{summary.caption}</p>
+      <p className="mb-5 text-sm text-zumi-soft">{summary.caption}</p>
 
       {summary.duties.length > 0 && (
-        <ul className="border-zumi-line border-t">
+        <ul className="border-t border-zumi-line">
           {summary.duties.map((duty, index) => (
             <SummaryRow
               key={duty.id}
@@ -35,9 +35,9 @@ export function WeeklySummaryCard({ summary }: { summary: WeeklySummary }) {
         </ul>
       )}
 
-      <div className="border-zumi-line mt-4 flex items-center justify-between border-t pt-4">
+      <div className="mt-4 flex items-center justify-between border-t border-zumi-line pt-4">
         <span className="text-sm font-bold tracking-[.12em]">ZUMI</span>
-        <span className="text-zumi-soft text-[10.5px]">zumi.paritto.dev</span>
+        <span className="text-[10.5px] text-zumi-soft">zumi.paritto.dev</span>
       </div>
     </div>
   );
@@ -73,22 +73,22 @@ function SummaryRow({
   // 未達の名前を薄くするのは終わった週だけ（今週はまだ途中のため）
   const missed = !complete && !isCurrentWeek;
   return (
-    <li className="border-zumi-line flex items-center gap-3 border-b py-3.5 last:border-b-0">
+    <li className="flex items-center gap-3 border-b border-zumi-line py-3.5 last:border-b-0">
       <DutyIcon
         name={duty.icon}
-        className="text-zumi-soft size-[19px] shrink-0"
+        className="size-[19px] shrink-0 text-zumi-soft"
         strokeWidth={1.6}
       />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className={cn("truncate text-[15px]", missed && "text-zumi-soft")}>{duty.name}</span>
-        <span className="text-zumi-soft mt-0.5 truncate text-xs">
+        <span className="mt-0.5 truncate text-xs text-zumi-soft">
           {duty.schedule} · {duty.done}/{duty.total}
         </span>
       </span>
       {complete ? (
         <span
           className={cn(
-            "border-zumi-shu text-zumi-shu font-seal flex size-[42px] shrink-0 items-center justify-center rounded-full border-2 text-xl",
+            "flex size-[42px] shrink-0 items-center justify-center rounded-full border-2 border-zumi-shu font-seal text-xl text-zumi-shu",
             SEAL_ROTATIONS[index % SEAL_ROTATIONS.length],
           )}
           role="img"
@@ -97,7 +97,7 @@ function SummaryRow({
           済
         </span>
       ) : (
-        <span className="border-zumi-line text-zumi-soft flex size-[42px] shrink-0 items-center justify-center rounded-full border-2 border-dashed text-[10.5px] font-bold">
+        <span className="flex size-[42px] shrink-0 items-center justify-center rounded-full border-2 border-dashed border-zumi-line text-[10.5px] font-bold text-zumi-soft">
           {isCurrentWeek ? `あと${duty.total - duty.done}` : "来週"}
         </span>
       )}

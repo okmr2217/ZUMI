@@ -3,7 +3,8 @@ import { yujiSyuku, zenKakuGothicNew } from "./fonts";
 import "./globals.css";
 
 const title = "ZUMI（済）";
-const description = "定期的な「やらなきゃ」を、可視化しよう。毎日のことも、月イチのことも。同じ場所で、押すだけ。";
+const description =
+  "定期的な「やらなきゃ」を、可視化しよう。毎日のことも、月イチのことも。同じ場所で、押すだけ。";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://zumi.paritto.dev"),

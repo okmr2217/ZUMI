@@ -32,7 +32,7 @@ export function TodayHeader({ date, today, mode }: { date: string; today: string
             <ChevronLeft className="size-3.5" strokeWidth={2} aria-hidden />
           </Link>
           <div className="min-w-0 flex-1">
-            <p className="text-zumi-soft text-[13px] tracking-[.02em]">{formatDayLabel(date)}</p>
+            <p className="text-[13px] tracking-[.02em] text-zumi-soft">{formatDayLabel(date)}</p>
             <h1 className="mt-0.5 text-[22px] font-bold">{TITLES[mode]}</h1>
           </div>
           <Link
@@ -50,7 +50,7 @@ export function TodayHeader({ date, today, mode }: { date: string; today: string
       {mode !== "today" && (
         <Link
           href="/app"
-          className="border-zumi-line bg-zumi-card text-zumi-shu mx-[22px] mt-3 inline-flex w-fit items-center gap-1 rounded-[20px] border px-3 py-1.5 text-xs font-bold"
+          className="mx-[22px] mt-3 inline-flex w-fit items-center gap-1 rounded-[20px] border border-zumi-line bg-zumi-card px-3 py-1.5 text-xs font-bold text-zumi-shu"
         >
           <Clock className="size-3" strokeWidth={1.8} aria-hidden />
           今日へ戻る

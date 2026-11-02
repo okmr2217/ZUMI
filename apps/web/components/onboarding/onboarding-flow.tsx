@@ -78,7 +78,7 @@ function StepHeader({
   return (
     <header className="px-6 pb-1 pt-[30px]">
       <div className="mb-1.5 flex items-center justify-between">
-        <p className="text-zumi-soft text-[12px] font-bold tracking-[.08em]">{eyebrow}</p>
+        <p className="text-[12px] font-bold tracking-[.08em] text-zumi-soft">{eyebrow}</p>
         <ol className="flex gap-1.5" aria-label={`${STEP_INDEX[step] + 1} / 3`}>
           {[0, 1, 2].map((index) => (
             <li
@@ -99,7 +99,7 @@ function StepHeader({
 /** 下部のボタン（モックの footer: padding 18px 22px 30px、主ボタン 15px / 700・角丸 16px） */
 function StepFooter({ children }: { children: React.ReactNode }) {
   return (
-    <footer className="bg-zumi-bg sticky bottom-0 mt-auto flex flex-col items-center gap-2.5 px-[22px] pb-[calc(30px+env(safe-area-inset-bottom))] pt-[18px]">
+    <footer className="sticky bottom-0 mt-auto flex flex-col items-center gap-2.5 bg-zumi-bg px-[22px] pb-[calc(30px+env(safe-area-inset-bottom))] pt-[18px]">
       {children}
     </footer>
   );
@@ -148,7 +148,7 @@ function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () =
           </>
         }
       />
-      <p className="text-zumi-soft px-6 text-[12.5px]">
+      <p className="px-6 text-[12.5px] text-zumi-soft">
         選ぶと、内容が入った状態で追加画面が開きます。同じものを何件でも追加できます。
       </p>
 
@@ -262,18 +262,18 @@ function NotifyStep({
           </>
         }
       />
-      <p className="text-zumi-soft px-6 text-[12.5px]">あとから設定でいつでも変えられます。</p>
+      <p className="px-6 text-[12.5px] text-zumi-soft">あとから設定でいつでも変えられます。</p>
 
       <div className="flex flex-col gap-4 px-[22px] pt-[18px]">
-        <div className="border-zumi-line bg-zumi-card overflow-hidden rounded-2xl border">
+        <div className="overflow-hidden rounded-2xl border border-zumi-line bg-zumi-card">
           {rows.map((row) => (
             <div
               key={row.key}
-              className="border-zumi-line flex items-center justify-between gap-3 border-b px-[15px] py-3 last:border-b-0"
+              className="flex items-center justify-between gap-3 border-b border-zumi-line px-[15px] py-3 last:border-b-0"
             >
               <div className="min-w-0">
                 <div className="text-[13.5px] font-semibold">{row.label}</div>
-                <div className="text-zumi-soft mt-0.5 text-[11px]">{row.sub}</div>
+                <div className="mt-0.5 text-[11px] text-zumi-soft">{row.sub}</div>
               </div>
               <div className="flex shrink-0 items-center gap-2.5">
                 <input
@@ -286,7 +286,7 @@ function NotifyStep({
                     const value = event.target.value;
                     if (value) setTimes((t) => ({ ...t, [row.field]: value }));
                   }}
-                  className="bg-zumi-base rounded-[20px] px-2.5 py-1 text-[13px] font-bold tabular-nums outline-none disabled:opacity-40"
+                  className="rounded-[20px] bg-zumi-base px-2.5 py-1 text-[13px] font-bold tabular-nums outline-none disabled:opacity-40"
                 />
                 <Toggle
                   checked={enabled[row.key]}
@@ -299,7 +299,7 @@ function NotifyStep({
         </div>
 
         <section className="flex flex-col gap-2">
-          <h2 className="text-zumi-soft text-[11.5px] font-bold tracking-[.06em]">週の始まり</h2>
+          <h2 className="text-[11.5px] font-bold tracking-[.06em] text-zumi-soft">週の始まり</h2>
           <div role="radiogroup" aria-label="週の始まり" className="flex gap-2">
             {(
               [
@@ -316,7 +316,7 @@ function NotifyStep({
                 className={cn(
                   "flex-1 rounded-[20px] border px-1 py-[9px] text-[12px] font-bold",
                   weekStart === value
-                    ? "bg-zumi-shu border-zumi-shu text-white"
+                    ? "border-zumi-shu bg-zumi-shu text-white"
                     : "border-zumi-line bg-zumi-card text-zumi-ink",
                 )}
               >
@@ -324,19 +324,19 @@ function NotifyStep({
               </button>
             ))}
           </div>
-          <p className="text-zumi-soft text-[11px]">
+          <p className="text-[11px] text-zumi-soft">
             「週に何回か」と振り返りの達成率の区切りです。
           </p>
         </section>
 
-        <p className="text-zumi-soft text-[11px]">
+        <p className="text-[11px] text-zumi-soft">
           タイムゾーン: {timezone || "Asia/Tokyo"}（この端末から自動で設定します）
         </p>
 
         {error && (
           <p
             role="alert"
-            className="bg-zumi-pill rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+            className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
           >
             {error}
           </p>
@@ -376,7 +376,7 @@ function InstallStep({ onFinish }: { onFinish: () => void }) {
           </>
         }
       />
-      <p className="text-zumi-soft px-6 text-[12.5px] leading-relaxed">
+      <p className="px-6 text-[12.5px] leading-relaxed text-zumi-soft">
         iPhone・iPad では、Safari で開いたままだと通知を受け取れません。
       </p>
       <IosInstallGuide className="px-[22px] pt-[18px]" />
@@ -384,7 +384,7 @@ function InstallStep({ onFinish }: { onFinish: () => void }) {
         <button type="button" onClick={onFinish} className={PRIMARY}>
           はじめる
         </button>
-        <p className="text-zumi-soft text-[11px]">あとからでも、同じ手順で追加できます。</p>
+        <p className="text-[11px] text-zumi-soft">あとからでも、同じ手順で追加できます。</p>
       </StepFooter>
     </>
   );
@@ -432,7 +432,7 @@ function PermissionStep({
       {error && (
         <p
           role="alert"
-          className="bg-zumi-pill mx-[22px] mt-3 rounded-xl px-[13px] py-2.5 text-[12.5px] font-semibold"
+          className="mx-[22px] mt-3 rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
         >
           {error}
         </p>

@@ -77,7 +77,7 @@ export function ShareButton({ week }: { week: string }) {
       onClick={handleClick}
       disabled={state === "preparing"}
       aria-label={LABELS[state].aria}
-      className="bg-zumi-shu-bg text-zumi-shu ml-1 inline-flex items-center gap-[5px] rounded-[20px] px-[11px] py-[5px] text-[11.5px] font-bold disabled:opacity-60"
+      className="ml-1 inline-flex items-center gap-[5px] rounded-[20px] bg-zumi-shu-bg px-[11px] py-[5px] text-[11.5px] font-bold text-zumi-shu disabled:opacity-60"
     >
       <Share2 className="size-[13px]" strokeWidth={1.7} aria-hidden />
       <span aria-hidden>{LABELS[state].text}</span>
