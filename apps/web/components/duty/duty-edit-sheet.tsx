@@ -1,12 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { DutyLog, DutyPause, DutyStatus, ScheduleConfig } from "@zumi/types";
 import { presetIconNameSchema } from "@zumi/types";
-import { BottomSheet } from "@/components/app/bottom-sheet";
+import {
+  ResponsiveSheet,
+  SheetBody,
+  SheetFooter,
+  useRetained,
+  useSheetDirty,
+} from "@/components/app/responsive-sheet";
 import { draftFromConfig } from "@/lib/schedule-draft";
 import { DutyFormFields } from "./duty-form-fields";
-import { toDutyInput, type DutyDraft, type DutyFormContext } from "./duty-draft";
+import {
+  isDutyDraftChanged,
+  toDutyInput,
+  type DutyDraft,
+  type DutyFormContext,
+} from "./duty-draft";
 import { changeDutyStatusRequest, errorMessage, updateDutyRequest } from "./duty-api-client";
 import type { DutyCalendar } from "./duty-create-sheet";
 
@@ -40,10 +51,12 @@ export function DutyEditSheet({
   onChanged: () => void;
   calendar: DutyCalendar;
 }) {
+  // 閉じるアニメーションの間は、閉じる前の Duty を出しておく
+  const shown = useRetained(duty);
   return (
-    <BottomSheet open={duty !== null} onClose={onClose} title="Dutyを編集">
-      {duty && <EditForm key={duty.id} duty={duty} calendar={calendar} onChanged={onChanged} />}
-    </BottomSheet>
+    <ResponsiveSheet open={duty !== null} onClose={onClose} title="Dutyを編集">
+      {shown && <EditForm key={shown.id} duty={shown} calendar={calendar} onChanged={onChanged} />}
+    </ResponsiveSheet>
   );
 }
 
@@ -56,7 +69,8 @@ function EditForm({
   calendar: DutyCalendar;
   onChanged: () => void;
 }) {
-  const [draft, setDraft] = useState<DutyDraft>(() => {
+  const formId = useId();
+  const [initial] = useState<DutyDraft>(() => {
     // 一覧から外したアイコンが残っている場合は、選び直してもらうまでプリセットの先頭を選んでおく
     const icon = presetIconNameSchema.safeParse(duty.icon);
     return {
@@ -67,6 +81,8 @@ function EditForm({
       noteEnabled: duty.noteEnabled,
     };
   });
+  const [draft, setDraft] = useState(initial);
+  useSheetDirty(isDutyDraftChanged(draft, initial));
   const [context] = useState<DutyFormContext>(() => ({
     ...calendar,
     createdAt: duty.createdAt,
@@ -92,85 +108,93 @@ function EditForm({
   }
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        if (input) void run("save", () => updateDutyRequest(duty.id, input));
-      }}
-      className="flex flex-col gap-[18px]"
-    >
-      <DutyFormFields value={draft} onChange={setDraft} context={context} />
-      {error && (
-        <p
-          role="alert"
-          className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
+    <>
+      <SheetBody>
+        <form
+          id={formId}
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (input) void run("save", () => updateDutyRequest(duty.id, input));
+          }}
+          className="flex flex-col gap-[18px]"
         >
-          {error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={!input || pending !== null}
-        className="w-full rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
-      >
-        {pending === "save" ? "保存しています…" : "保存する"}
-      </button>
-
-      {confirmingArchive ? (
-        <div className="rounded-[14px] border border-zumi-line bg-zumi-card p-[15px]">
-          <p className="text-[13.5px] font-semibold">「{duty.name}」をアーカイブしますか？</p>
-          <p className="mt-1 text-[11.5px] text-zumi-soft">
-            今日の一覧と通知から外れます。これまでの記録は残ります。
-          </p>
-          <div className="mt-3 flex justify-end gap-[22px] text-[12.5px] font-semibold">
-            <button
-              type="button"
-              onClick={() => setConfirmingArchive(false)}
-              className="text-zumi-soft"
-            >
-              やめる
-            </button>
+          <DutyFormFields value={draft} onChange={setDraft} context={context} />
+        </form>
+        {/* 危険な操作は固定フッターの確定ボタンと離し、本文の末尾に置く（docs/04「4-5」） */}
+        {confirmingArchive ? (
+          <div className="rounded-[14px] border border-zumi-line bg-zumi-card p-[15px]">
+            <p className="text-[13.5px] font-semibold">「{duty.name}」をアーカイブしますか？</p>
+            <p className="mt-1 text-[11.5px] text-zumi-soft">
+              今日の一覧と通知から外れます。これまでの記録は残ります。
+            </p>
+            <div className="mt-3 flex justify-end gap-[22px] text-[12.5px] font-semibold">
+              <button
+                type="button"
+                onClick={() => setConfirmingArchive(false)}
+                className="text-zumi-soft"
+              >
+                やめる
+              </button>
+              <button
+                type="button"
+                disabled={pending !== null}
+                onClick={() => run("archive", () => changeDutyStatusRequest(duty.id, "archive"))}
+                className="text-zumi-shu-deep disabled:opacity-40"
+              >
+                {pending === "archive" ? "アーカイブしています…" : "アーカイブする"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center gap-[22px] pt-0.5 text-[12.5px] font-semibold">
+            {duty.status === "PAUSED" ? (
+              <button
+                type="button"
+                disabled={pending !== null}
+                onClick={() => run("resume", () => changeDutyStatusRequest(duty.id, "resume"))}
+                className="text-zumi-soft disabled:opacity-40"
+              >
+                {pending === "resume" ? "再開しています…" : "再開する"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled={pending !== null}
+                onClick={() => run("pause", () => changeDutyStatusRequest(duty.id, "pause"))}
+                className="text-zumi-soft disabled:opacity-40"
+              >
+                {pending === "pause" ? "一時停止しています…" : "一時停止する"}
+              </button>
+            )}
             <button
               type="button"
               disabled={pending !== null}
-              onClick={() => run("archive", () => changeDutyStatusRequest(duty.id, "archive"))}
+              onClick={() => setConfirmingArchive(true)}
               className="text-zumi-shu-deep disabled:opacity-40"
             >
-              {pending === "archive" ? "アーカイブしています…" : "アーカイブする"}
+              アーカイブする
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="flex justify-center gap-[22px] pt-0.5 text-[12.5px] font-semibold">
-          {duty.status === "PAUSED" ? (
-            <button
-              type="button"
-              disabled={pending !== null}
-              onClick={() => run("resume", () => changeDutyStatusRequest(duty.id, "resume"))}
-              className="text-zumi-soft disabled:opacity-40"
-            >
-              {pending === "resume" ? "再開しています…" : "再開する"}
-            </button>
-          ) : (
-            <button
-              type="button"
-              disabled={pending !== null}
-              onClick={() => run("pause", () => changeDutyStatusRequest(duty.id, "pause"))}
-              className="text-zumi-soft disabled:opacity-40"
-            >
-              {pending === "pause" ? "一時停止しています…" : "一時停止する"}
-            </button>
-          )}
-          <button
-            type="button"
-            disabled={pending !== null}
-            onClick={() => setConfirmingArchive(true)}
-            className="text-zumi-shu-deep disabled:opacity-40"
+        )}
+      </SheetBody>
+      <SheetFooter>
+        {error && (
+          <p
+            role="alert"
+            className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
           >
-            アーカイブする
-          </button>
-        </div>
-      )}
-    </form>
+            {error}
+          </p>
+        )}
+        <button
+          type="submit"
+          form={formId}
+          disabled={!input || pending !== null}
+          className="w-full rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
+        >
+          {pending === "save" ? "保存しています…" : "保存する"}
+        </button>
+      </SheetFooter>
+    </>
   );
 }
