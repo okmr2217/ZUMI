@@ -95,6 +95,7 @@ export function ResponsiveSheet({
             )}
           />
           <Dialog.Content
+            ref={lockBackgroundTouchScroll}
             aria-describedby={undefined}
             className={cn(
               panel,
@@ -119,6 +120,7 @@ export function ResponsiveSheet({
       <Drawer.Portal>
         <Drawer.Overlay className={overlay} />
         <Drawer.Content
+          ref={lockBackgroundTouchScroll}
           aria-describedby={undefined}
           onPointerDownOutside={() => dirty && requestClose()}
           onEscapeKeyDown={() => dirty && requestClose()}
@@ -189,6 +191,60 @@ export function useRetained<T>(value: T | null): T | null {
   const [retained, setRetained] = useState(value);
   if (value !== null && value !== retained) setRetained(value);
   return value ?? retained;
+}
+
+/**
+ * シートの中を縦になぞったとき、裏の画面がスクロールしないようにする（ドロワー・モーダルの ref に渡す）。
+ * vaul は iOS で、なぞり始めた要素の最寄りのスクロール要素が縦に動けないとき（アイコンの横スクロールの行や、
+ * 中身が収まって動かない本文）に何もしないため、Safari がそのまま裏の画面をスクロールしてしまう。
+ * 指の向きに動ける要素がドロワーの中にないときは touchmove を止める。横になぞるときと、ピンチは止めない
+ */
+function lockBackgroundTouchScroll(content: HTMLElement | null) {
+  if (!content) return;
+  let startX = 0;
+  let startY = 0;
+  let lastY = 0;
+  let vertical: boolean | null = null;
+
+  const onTouchStart = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    startX = touch.clientX;
+    startY = lastY = touch.clientY;
+    vertical = null;
+  };
+  const onTouchMove = (event: TouchEvent) => {
+    const touch = event.touches[0];
+    if (!touch || event.touches.length > 1 || !event.cancelable) return;
+    vertical ??= Math.abs(touch.clientY - startY) >= Math.abs(touch.clientX - startX);
+    const deltaY = touch.clientY - lastY;
+    lastY = touch.clientY;
+    if (!vertical || deltaY === 0) return;
+    if (!canScrollWithin(event.target, content, deltaY)) event.preventDefault();
+  };
+
+  content.addEventListener("touchstart", onTouchStart, { passive: true });
+  content.addEventListener("touchmove", onTouchMove, { passive: false });
+  return () => {
+    content.removeEventListener("touchstart", onTouchStart);
+    content.removeEventListener("touchmove", onTouchMove);
+  };
+}
+
+/** なぞった位置から `root` までに、指の向き（下へなぞる = deltaY > 0 は上へ戻る）にまだ動ける縦スクロールの要素があるか */
+function canScrollWithin(target: EventTarget | null, root: HTMLElement, deltaY: number) {
+  for (let node = target instanceof Element ? target : null; node; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node);
+    if (/(auto|scroll)/.test(overflowY) && node.scrollHeight > node.clientHeight) {
+      const canMove =
+        deltaY > 0
+          ? node.scrollTop > 0
+          : node.scrollTop + node.clientHeight < node.scrollHeight - 1;
+      if (canMove) return true;
+    }
+    if (node === root) break;
+  }
+  return false;
 }
 
 const DESKTOP_QUERY = "(min-width: 768px)";

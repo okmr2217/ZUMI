@@ -28,11 +28,12 @@ export default async function AppLayout({
   }
 
   // 各タブの見出しはページ側で持つ。下端はタブバー（66px + セーフエリア）に覆われるため余白を空ける
+  // （iOS のホーム画面アプリではタブバーがセーフエリアぶん下にずれる。tab-bar.tsx 参照）
   return (
     <div className="min-h-dvh bg-zumi-bg font-zumi text-zumi-ink">
       <TimezoneSync />
       <ServiceWorkerRegister />
-      <div className="mx-auto max-w-[430px] pb-[calc(96px+env(safe-area-inset-bottom))]">
+      <div className="mx-auto max-w-[430px] pb-[calc(96px+env(safe-area-inset-bottom))] ios-standalone:pb-[96px]">
         {children}
       </div>
       <TabBar />

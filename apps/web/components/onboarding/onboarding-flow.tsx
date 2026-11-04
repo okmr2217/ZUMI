@@ -54,7 +54,7 @@ export function OnboardingFlow({
   const finish = () => router.replace("/app");
 
   // ホーム画面アプリかどうかはブラウザでしか分からないため、ハイドレーションまでは何も出さない
-  if (!install.ready) return <div className="min-h-dvh" />;
+  if (!install.ready) return <div className="min-h-svh" />;
 
   // 開いた時点でホーム画面アプリかどうかで決める（途中でインストールしても、点の数は変えない）
   const steps: Step[] = install.standalone
@@ -64,7 +64,7 @@ export function OnboardingFlow({
   const position = { index: steps.indexOf(step), total: steps.length };
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col">
+    <div className="mx-auto flex min-h-svh max-w-[430px] flex-col">
       {step === "install" && (
         <InstallStep position={position} onNext={() => setChosen("duties")} {...install} />
       )}
