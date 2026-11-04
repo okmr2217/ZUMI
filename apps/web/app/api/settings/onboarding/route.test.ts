@@ -73,7 +73,7 @@ describe("POST /api/settings/onboarding", () => {
     expect(await needsOnboarding("alice")).toBe(true);
   });
 
-  it("ステップ2の値を保存し、完了日時を記録する", async () => {
+  it("ステップ3の値を保存し、完了日時を記録する", async () => {
     const before = Math.floor(Date.now() / 1000);
     const res = await post({
       morningNotifyEnabled: true,

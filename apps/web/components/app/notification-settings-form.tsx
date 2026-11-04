@@ -173,7 +173,7 @@ function DevicePushRow({ vapidPublicKey }: { vapidPublicKey: string | null }) {
 
   const footer =
     status === "ios-install" ? (
-      <IosInstallGuide variant="compact" className="mt-2" />
+      <IosInstallGuide className="mt-2" />
     ) : status === "denied" ? (
       <p className={cn("mt-2 text-[11px] leading-relaxed", INK_SOFT)}>
         アドレスバーのサイト設定から、通知を「許可」に変えてください。

@@ -22,7 +22,7 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  // オンボーディング（ステップ2）を終えるか飛ばすまでは、`/app` を開くたびにオンボーディングへ送る（docs/03）
+  // オンボーディングの通知の時刻のステップ（3）を終えるか飛ばすまでは、`/app` を開くたびにオンボーディングへ送る（docs/03）
   if (await needsOnboarding(session.user.id)) {
     redirect("/onboarding");
   }
