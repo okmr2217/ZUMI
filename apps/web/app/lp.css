@@ -259,7 +259,7 @@
   margin-top: 1.4rem;
   font-size: 1.08rem;
   color: var(--ink-soft);
-  max-width: 34ch;
+  max-width: 28em;
 }
 .zumi-lp .hero .cta-row {
   margin-top: 2.3rem;
@@ -323,14 +323,6 @@
     border-color 0.18s ease,
     color 0.18s ease;
 }
-.zumi-lp .app-navbtn:hover:not(:disabled) {
-  border-color: var(--vermillion);
-  color: var(--vermillion);
-}
-.zumi-lp .app-navbtn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
 .zumi-lp .app-navbtn:focus-visible {
   outline: 2px solid var(--vermillion);
   outline-offset: 2px;
@@ -362,25 +354,6 @@
   align-items: center;
   justify-content: center;
   color: var(--ink-soft);
-}
-.zumi-lp .app-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin: 10px auto 0;
-  padding: 5px 12px;
-  border-radius: 20px;
-  background: var(--paper-raised);
-  border: 1px solid var(--line);
-  color: var(--vermillion);
-  font-size: 0.72rem;
-  font-weight: 700;
-  width: fit-content;
-  cursor: pointer;
-  visibility: hidden;
-}
-.zumi-lp .app-pill.visible {
-  visibility: visible;
 }
 .zumi-lp .app-progress-row {
   padding: 14px 2px 4px;
@@ -524,20 +497,6 @@
     opacity: 1;
   }
 }
-.zumi-lp .lock-badge {
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
-  border: 2px dashed var(--line-strong);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink-soft);
-}
-.zumi-lp .app-row.dim {
-  opacity: 0.6;
-}
 .zumi-lp .app-collapsed {
   display: flex;
   align-items: center;
@@ -546,13 +505,6 @@
   color: var(--ink-soft);
   font-size: 0.78rem;
   font-weight: 500;
-}
-.zumi-lp .app-hint {
-  font-size: 0.7rem;
-  color: var(--ink-soft);
-  text-align: center;
-  padding: 2px 8px 0;
-  min-height: 1.4em;
 }
 .zumi-lp .app-tabbar {
   display: flex;
@@ -925,6 +877,64 @@
   padding-left: 12px;
 }
 
+/* ============ origin (つくった理由) ============ */
+.zumi-lp .origin-num {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 14px;
+  border: 1.5px solid var(--vermillion);
+  border-radius: 50%;
+  color: var(--vermillion);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.zumi-lp .origin-card p {
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+.zumi-lp .origin-note {
+  margin-top: 2rem;
+  max-width: 62ch;
+}
+
+/* 全部済ませた日は夜の通知が来ない、を通知の並びの最後に添える */
+.zumi-lp .toast-quiet {
+  margin: 0;
+  padding: 12px 16px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 18px;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* 月次ヒートマップと履歴は、週次サマリーより小さく横並びに添える */
+.zumi-lp .review-mini-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 4vw, 40px);
+}
+.zumi-lp .review-mini-grid > * {
+  min-width: 0;
+}
+@media (max-width: 860px) {
+  .zumi-lp .review-mini-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.zumi-lp h4.mini-heading {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+}
+.zumi-lp .mini-text {
+  margin: 0.5rem 0 1.2rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
 /* ============ review (weekly / heatmap / history) ============ */
 .zumi-lp .review-block + .review-block {
   margin-top: clamp(28px, 4vw, 40px);
@@ -1126,12 +1136,6 @@
   width: 11px;
   height: 11px;
   border-radius: 3px;
-}
-.zumi-lp .heat-note2 {
-  font-size: 0.7rem;
-  color: var(--ink-soft);
-  text-align: center;
-  margin-top: 12px;
 }
 
 .zumi-lp .hist-filters {
