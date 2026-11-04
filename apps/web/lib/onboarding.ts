@@ -7,7 +7,7 @@ import { weekStartSchema } from "./user-settings";
 import { DEFAULT_EVENING_AT, DEFAULT_MORNING_AT } from "./notification-defaults";
 
 /**
- * オンボーディングのステップ2（通知の時刻・週の始まり）で送る値。飛ばしたときは空で送る。
+ * オンボーディングのステップ3（通知の時刻・週の始まり）で送る値。飛ばしたときは空で送る。
  * タイムゾーンは送らない（`TimezoneSync` がブラウザの値で別に保存する）。
  */
 export const onboardingInputSchema = notificationSettingsFields
@@ -29,7 +29,7 @@ export async function needsOnboarding(userId: string) {
 }
 
 /**
- * ステップ2の値を保存し、`onboardedAt` を記録する。記録済みなら最初の日時を残す
+ * ステップ3の値を保存し、`onboardedAt` を記録する。記録済みなら最初の日時を残す
  * （オンボーディングを開き直して保存しても、完了日時は変わらない）。
  * 時刻を送らずに通知を ON にしたときは、未設定の時刻だけ初期値で埋める（notify は時刻が null の行を送れない）。
  */

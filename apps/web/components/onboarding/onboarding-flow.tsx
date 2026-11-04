@@ -4,17 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toLocalDate, type DutyTemplate, type WeekStart } from "@zumi/types";
 import type { OnboardingInput } from "@/lib/onboarding";
-import { isIos, isStandalone } from "@/lib/push-client";
 import { usePushSubscription } from "@/lib/use-push-subscription";
 import { cn } from "@/lib/utils";
 import { DutyCreateSheet, type DutyCalendar } from "@/components/duty/duty-create-sheet";
 import { dutyDraftFromTemplate } from "@/components/duty/duty-draft";
 import { TemplateGrid } from "@/components/duty/template-grid";
-import { IosInstallGuide } from "@/components/app/ios-install-guide";
+import {
+  InstalledNotice,
+  PwaPlatformSteps,
+  usePwaInstall,
+} from "@/components/app/pwa-install-guide";
 import { getBrowserTimezone } from "@/components/app/timezone-sync";
 import { Toggle } from "@/components/app/notification-settings-form";
 
-type Step = "duties" | "notify" | "install" | "permission";
+type Step = "install" | "duties" | "notify" | "permission";
+
+/** 何ステップ目か（上部の点の表示用） */
+interface Position {
+  index: number;
+  total: number;
+}
 
 interface Times {
   morningNotifyAt: string;
@@ -24,8 +33,9 @@ interface Times {
 
 /**
  * オンボーディングの4ステップ。すべて飛ばせる（初回の離脱を防ぐため）。
- * 3（ホーム画面に追加）と 4（通知の許可）はどちらか一方だけを出す。
- * iOS の Safari ではホーム画面に追加しないと通知を許可できないため。
+ * 1（ホーム画面に追加）はホーム画面アプリとして開いているときは出さない。iOS では Safari で
+ * 1 の手順どおりに追加し、ホーム画面のアプリでログインし直すと、ここから 2 以降を続けられる
+ * （`onboardedAt` は 3 で記録するため、それまではアプリを開くたびにここへ送られる）。
  */
 export function OnboardingFlow({
   calendar,
@@ -37,41 +47,57 @@ export function OnboardingFlow({
   vapidPublicKey: string | null;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("duties");
+  const install = usePwaInstall();
+  const [chosen, setChosen] = useState<Step | null>(null);
   const [weekStart, setWeekStart] = useState<WeekStart>(calendar.weekStart);
 
   const finish = () => router.replace("/app");
 
+  // ホーム画面アプリかどうかはブラウザでしか分からないため、ハイドレーションまでは何も出さない
+  if (!install.ready) return <div className="min-h-dvh" />;
+
+  // 開いた時点でホーム画面アプリかどうかで決める（途中でインストールしても、点の数は変えない）
+  const steps: Step[] = install.standalone
+    ? ["duties", "notify", "permission"]
+    : ["install", "duties", "notify", "permission"];
+  const step = chosen ?? (install.standalone ? "duties" : "install");
+  const position = { index: steps.indexOf(step), total: steps.length };
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-[430px] flex-col">
+      {step === "install" && (
+        <InstallStep position={position} onNext={() => setChosen("duties")} {...install} />
+      )}
       {step === "duties" && (
-        <DutiesStep calendar={{ ...calendar, weekStart }} onNext={() => setStep("notify")} />
+        <DutiesStep
+          position={position}
+          calendar={{ ...calendar, weekStart }}
+          onNext={() => setChosen("notify")}
+        />
       )}
       {step === "notify" && (
         <NotifyStep
+          position={position}
           initialTimes={initialTimes}
           weekStart={weekStart}
           onWeekStartChange={setWeekStart}
-          onDone={() => setStep(isIos() && !isStandalone() ? "install" : "permission")}
+          onDone={() => setChosen("permission")}
         />
       )}
-      {step === "install" && <InstallStep onFinish={finish} />}
       {step === "permission" && (
-        <PermissionStep vapidPublicKey={vapidPublicKey} onFinish={finish} />
+        <PermissionStep position={position} vapidPublicKey={vapidPublicKey} onFinish={finish} />
       )}
     </div>
   );
 }
 
-const STEP_INDEX: Record<Step, number> = { duties: 0, notify: 1, install: 2, permission: 2 };
-
 /** 上部の見出し（モックの topbar: padding 30px 24px 4px、アイブロウ 12px、見出し 20px / 700） */
 function StepHeader({
-  step,
+  position,
   eyebrow,
   title,
 }: {
-  step: Step;
+  position: Position;
   eyebrow: string;
   title: React.ReactNode;
 }) {
@@ -79,13 +105,13 @@ function StepHeader({
     <header className="px-6 pb-1 pt-[30px]">
       <div className="mb-1.5 flex items-center justify-between">
         <p className="text-[12px] font-bold tracking-[.08em] text-zumi-soft">{eyebrow}</p>
-        <ol className="flex gap-1.5" aria-label={`${STEP_INDEX[step] + 1} / 3`}>
-          {[0, 1, 2].map((index) => (
+        <ol className="flex gap-1.5" aria-label={`${position.index + 1} / ${position.total}`}>
+          {Array.from({ length: position.total }, (_, index) => (
             <li
               key={index}
               className={cn(
                 "size-1.5 rounded-full",
-                index === STEP_INDEX[step] ? "bg-zumi-shu" : "bg-zumi-line",
+                index === position.index ? "bg-zumi-shu" : "bg-zumi-line",
               )}
             />
           ))}
@@ -109,7 +135,68 @@ const PRIMARY =
   "bg-zumi-shu w-full rounded-2xl p-[15px] text-[15px] font-bold text-white disabled:opacity-40";
 const SECONDARY = "text-zumi-soft text-[12.5px] underline underline-offset-2 disabled:opacity-40";
 
-// ステップ1: やることを選ぶ ---------------------------------------------------------------
+// ステップ1: ホーム画面に追加（ホーム画面アプリで開いているときは出さない） ------------
+
+function InstallStep({
+  position,
+  onNext,
+  platform,
+  installed,
+  canInstall,
+  install,
+}: {
+  position: Position;
+  onNext: () => void;
+} & Pick<ReturnType<typeof usePwaInstall>, "platform" | "installed" | "canInstall" | "install">) {
+  return (
+    <>
+      <StepHeader
+        position={position}
+        eyebrow="ようこそ"
+        title={
+          <>
+            まずは、ホーム画面に
+            <br />
+            追加しましょう
+          </>
+        }
+      />
+      <p className="px-6 text-[12.5px] leading-relaxed text-zumi-soft">
+        アプリのように1タップで開けます。iPhone・iPad
+        では、追加すると通知も受け取れるようになります。
+        {!installed && !platform && " スマートフォンで ZUMI を開き、次の手順で追加できます。"}
+      </p>
+
+      <div className="flex flex-col gap-3 px-[22px] pt-[18px]">
+        {installed ? <InstalledNotice /> : <PwaPlatformSteps platform={platform} />}
+      </div>
+
+      <StepFooter>
+        {!installed && canInstall ? (
+          <>
+            <button type="button" onClick={() => void install()} className={PRIMARY}>
+              ホーム画面に追加する
+            </button>
+            <button type="button" onClick={onNext} className={SECONDARY}>
+              あとで
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={onNext} className={PRIMARY}>
+              次へ
+            </button>
+            <p className="text-[11px] text-zumi-soft">
+              手順は設定の「ホーム画面に追加する」からいつでも見られます。
+            </p>
+          </>
+        )}
+      </StepFooter>
+    </>
+  );
+}
+
+// ステップ2: やることを選ぶ ---------------------------------------------------------------
 
 /**
  * 追加シートで開いている中身。`template: null` は「自由に追加する」。
@@ -123,7 +210,15 @@ function browserCalendar(calendar: DutyCalendar): DutyCalendar {
   return { ...calendar, timeZone, today: toLocalDate(new Date(), timeZone) };
 }
 
-function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () => void }) {
+function DutiesStep({
+  position,
+  calendar,
+  onNext,
+}: {
+  position: Position;
+  calendar: DutyCalendar;
+  onNext: () => void;
+}) {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [addedIds, setAddedIds] = useState<ReadonlySet<string>>(new Set());
   const [count, setCount] = useState(0);
@@ -138,8 +233,8 @@ function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () =
   return (
     <>
       <StepHeader
-        step="duties"
-        eyebrow="ようこそ"
+        position={position}
+        eyebrow={position.index === 0 ? "ようこそ" : "やること"}
         title={
           <>
             まずは、やることを
@@ -188,14 +283,16 @@ function DutiesStep({ calendar, onNext }: { calendar: DutyCalendar; onNext: () =
   );
 }
 
-// ステップ2: 通知の時刻・週の始まり ------------------------------------------------------
+// ステップ3: 通知の時刻・週の始まり ------------------------------------------------------
 
 function NotifyStep({
+  position,
   initialTimes,
   weekStart,
   onWeekStartChange,
   onDone,
 }: {
+  position: Position;
   initialTimes: Times;
   weekStart: WeekStart;
   onWeekStartChange: (value: WeekStart) => void;
@@ -252,7 +349,7 @@ function NotifyStep({
   return (
     <>
       <StepHeader
-        step="notify"
+        position={position}
         eyebrow="通知"
         title={
           <>
@@ -360,42 +457,14 @@ function NotifyStep({
   );
 }
 
-// ステップ3: ホーム画面に追加（iOS の Safari だけ） -------------------------------------
-
-function InstallStep({ onFinish }: { onFinish: () => void }) {
-  return (
-    <>
-      <StepHeader
-        step="install"
-        eyebrow="ホーム画面に追加"
-        title={
-          <>
-            ホーム画面に追加すると
-            <br />
-            通知が届きます
-          </>
-        }
-      />
-      <p className="px-6 text-[12.5px] leading-relaxed text-zumi-soft">
-        iPhone・iPad では、Safari で開いたままだと通知を受け取れません。
-      </p>
-      <IosInstallGuide className="px-[22px] pt-[18px]" />
-      <StepFooter>
-        <button type="button" onClick={onFinish} className={PRIMARY}>
-          はじめる
-        </button>
-        <p className="text-[11px] text-zumi-soft">あとからでも、同じ手順で追加できます。</p>
-      </StepFooter>
-    </>
-  );
-}
-
-// ステップ4: 通知の許可（iOS 以外、またはホーム画面アプリ） ------------------------------
+// ステップ4: 通知の許可 ---------------------------------------------------------------
 
 function PermissionStep({
+  position,
   vapidPublicKey,
   onFinish,
 }: {
+  position: Position;
   vapidPublicKey: string | null;
   onFinish: () => void;
 }) {
@@ -406,14 +475,16 @@ function PermissionStep({
       ? "この端末に通知が届きます。"
       : status === "denied"
         ? "ブラウザの設定で通知がブロックされています。アドレスバーのサイト設定から「許可」に変えると届くようになります。"
-        : status === "unsupported" || status === "ios-install"
-          ? "このブラウザは通知に対応していません。今日タブを開いて確かめてください。"
-          : "設定した時刻に、その日のやることや済んでいないものをお知らせします。";
+        : status === "ios-install"
+          ? "iPhone・iPad では、ホーム画面に追加したアプリから通知を許可できます。アプリを開いてログインし直したら、今日タブのお知らせから許可してください。"
+          : status === "unsupported"
+            ? "このブラウザは通知に対応していません。今日タブを開いて確かめてください。"
+            : "設定した時刻に、その日のやることや済んでいないものをお知らせします。";
 
   return (
     <>
       <StepHeader
-        step="permission"
+        position={position}
         eyebrow="通知の許可"
         title={
           <>

@@ -5,7 +5,7 @@ import { completeOnboarding, onboardingInputSchema } from "@/lib/onboarding";
 export const dynamic = "force-dynamic";
 
 /**
- * オンボーディングのステップ2を終えた（または飛ばした）ときに呼ぶ。値を保存して
+ * オンボーディングのステップ3（通知の時刻）を終えた（または飛ばした）ときに呼ぶ。値を保存して
  * `onboardedAt` を記録し、以後 `/app` からオンボーディングへリダイレクトしない（docs/03）。
  */
 export async function POST(request: Request) {

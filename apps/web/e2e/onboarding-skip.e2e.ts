@@ -7,8 +7,10 @@ test("オンボーディングをすべて飛ばすと、空の今日タブに�
 }) => {
   await signUpAndLogIn(page, request, "skip");
 
+  const skipDuties = page.getByRole("button", { name: "あとで追加する" });
+  await clickUntilVisible(page.getByRole("button", { name: /^(次へ|あとで)$/ }), skipDuties);
   const skipNotify = page.getByRole("button", { name: "あとで設定する" });
-  await clickUntilVisible(page.getByRole("button", { name: "あとで追加する" }), skipNotify);
+  await skipDuties.click();
   // 「あとで設定する」で onboardedAt が記録される（docs/03）
   await skipNotify.click();
   await page.getByRole("button", { name: /^(あとで|はじめる)$/ }).click();
