@@ -76,9 +76,24 @@ export default {
           "60%": { opacity: "1", transform: "scale(0.94) rotate(-8deg)" },
           "100%": { opacity: "1", transform: "scale(1) rotate(-8deg)" },
         },
+        // PC で中央に出すシート（components/app/responsive-sheet.tsx）。中央寄せの translate を含めて動かす
+        "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
+        "fade-out": { from: { opacity: "1" }, to: { opacity: "0" } },
+        "sheet-in": {
+          from: { opacity: "0", transform: "translate(-50%, -50%) scale(.96)" },
+          to: { opacity: "1", transform: "translate(-50%, -50%) scale(1)" },
+        },
+        "sheet-out": {
+          from: { opacity: "1", transform: "translate(-50%, -50%) scale(1)" },
+          to: { opacity: "0", transform: "translate(-50%, -50%) scale(.96)" },
+        },
       },
       animation: {
         stamp: "stamp 260ms cubic-bezier(.2,.8,.3,1) both",
+        "fade-in": "fade-in 180ms ease-out",
+        "fade-out": "fade-out 150ms ease-in",
+        "sheet-in": "sheet-in 200ms cubic-bezier(.2,.8,.3,1)",
+        "sheet-out": "sheet-out 150ms ease-in",
       },
       borderRadius: {
         lg: "var(--radius)",

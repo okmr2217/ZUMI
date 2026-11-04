@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BottomSheet } from "@/components/app/bottom-sheet";
+import { ResponsiveSheet, SheetBody } from "@/components/app/responsive-sheet";
 
 /**
  * 今日タブの歯車（`/app/settings` へのリンク）から開く設定モーダル。
@@ -11,8 +11,8 @@ import { BottomSheet } from "@/components/app/bottom-sheet";
 export function SettingsModal({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   return (
-    <BottomSheet open onClose={() => router.back()} title="設定">
-      {children}
-    </BottomSheet>
+    <ResponsiveSheet open onClose={() => router.back()} title="設定">
+      <SheetBody>{children}</SheetBody>
+    </ResponsiveSheet>
   );
 }
