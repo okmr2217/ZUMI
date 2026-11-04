@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: ["class"],
@@ -102,5 +103,14 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addVariant }) => {
+      // iOS のホーム画面アプリだけ（-webkit-touch-callout は iOS の WebKit だけが解する）。
+      // ビューポートの下端がホームインジケーターの上で切れるのに safe-area-inset-bottom が残る不具合の補正に使う
+      addVariant(
+        "ios-standalone",
+        "@supports (-webkit-touch-callout: none) { @media (display-mode: standalone) { & } }",
+      );
+    }),
+  ],
 } satisfies Config;
