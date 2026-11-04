@@ -4,7 +4,7 @@ import "./globals.css";
 
 const title = "ZUMI（済）";
 const description =
-  "定期的な「やらなきゃ」を、可視化しよう。毎日のことも、月イチのことも。同じ場所で、押すだけ。";
+  "やったら「済」。忘れていたら、教えてくれる。毎日のことも、週に何回かのことも、月イチのことも。まだのものは、夜に通知が知らせてくれます。";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://zumi.paritto.dev"),
