@@ -12,7 +12,12 @@ import {
 } from "@/components/app/responsive-sheet";
 import { draftFromConfig } from "@/lib/schedule-draft";
 import { DutyFormFields } from "./duty-form-fields";
-import { toDutyInput, type DutyDraft, type DutyFormContext } from "./duty-draft";
+import {
+  isDutyDraftChanged,
+  toDutyInput,
+  type DutyDraft,
+  type DutyFormContext,
+} from "./duty-draft";
 import { changeDutyStatusRequest, errorMessage, updateDutyRequest } from "./duty-api-client";
 import type { DutyCalendar } from "./duty-create-sheet";
 
@@ -77,7 +82,7 @@ function EditForm({
     };
   });
   const [draft, setDraft] = useState(initial);
-  useSheetDirty(JSON.stringify(draft) !== JSON.stringify(initial));
+  useSheetDirty(isDutyDraftChanged(draft, initial));
   const [context] = useState<DutyFormContext>(() => ({
     ...calendar,
     createdAt: duty.createdAt,

@@ -32,25 +32,32 @@ export function ResponsiveSheet({
   title: string;
   children: React.ReactNode;
 }) {
-  const isDesktop = useIsDesktop();
-  const [dirty, setDirty] = useState(false);
-  const [confirming, setConfirming] = useState(false);
-  if (!open && confirming) setConfirming(false);
+  // 開いている間は切り替えない。ドロワーとモーダルは別の木なので、切り替えると中身がマウントし直されて入力が消える
+  const liveDesktop = useIsDesktop();
+  const [openedDesktop, setOpenedDesktop] = useState(liveDesktop);
+  if (!open && openedDesktop !== liveDesktop) setOpenedDesktop(liveDesktop);
+  const isDesktop = open ? openedDesktop : liveDesktop;
 
-  function requestClose() {
-    if (dirty) setConfirming(true);
-    else onClose();
+  const [dirty, setDirty] = useState(false);
+  // 破棄の確認を出している間の、「破棄する」を押したときの操作
+  const [discardAction, setDiscardAction] = useState<(() => void) | null>(null);
+  if (!open && discardAction) setDiscardAction(null);
+
+  function guard(action: () => void) {
+    if (dirty) setDiscardAction(() => action);
+    else action();
   }
+  const requestClose = () => guard(onClose);
 
   // タイトルはドロワーとモーダルで別の部品（それぞれの Root の中でしか使えない）
   const content = (Title: typeof Dialog.Title | typeof Drawer.Title) => (
-    <DirtyContext.Provider value={setDirty}>
-      {confirming && (
+    <SheetContext.Provider value={{ setDirty, guard }}>
+      {discardAction && (
         <DiscardConfirm
-          onKeep={() => setConfirming(false)}
+          onKeep={() => setDiscardAction(null)}
           onDiscard={() => {
-            setConfirming(false);
-            onClose();
+            setDiscardAction(null);
+            discardAction();
           }}
         />
       )}
@@ -71,7 +78,7 @@ export function ResponsiveSheet({
         </div>
       </div>
       {children}
-    </DirtyContext.Provider>
+    </SheetContext.Provider>
   );
 
   const overlay = "fixed inset-0 z-50 bg-[rgba(43,38,32,0.42)]";
@@ -113,8 +120,8 @@ export function ResponsiveSheet({
         <Drawer.Overlay className={overlay} />
         <Drawer.Content
           aria-describedby={undefined}
-          onPointerDownOutside={() => dirty && setConfirming(true)}
-          onEscapeKeyDown={() => dirty && setConfirming(true)}
+          onPointerDownOutside={() => dirty && requestClose()}
+          onEscapeKeyDown={() => dirty && requestClose()}
           className={cn(
             panel,
             "fixed inset-x-0 bottom-0 mx-auto max-h-[94dvh] w-full max-w-[430px] rounded-t-[26px] shadow-[0_-10px_40px_rgba(30,26,20,.25)]",
@@ -156,15 +163,22 @@ export function SheetFooter({ children }: { children: React.ReactNode }) {
   );
 }
 
-const DirtyContext = createContext<(dirty: boolean) => void>(() => {});
+const SheetContext = createContext<{
+  setDirty: (dirty: boolean) => void;
+  guard: (action: () => void) => void;
+}>({ setDirty: () => {}, guard: (action) => action() });
 
-/** シートの中身が開いた時点から変わっているかを伝える。変わっていれば、閉じる前に破棄の確認を出す */
+/**
+ * シートの中身が開いた時点から変わっているかを伝える。変わっていれば、閉じる前に破棄の確認を出す。
+ * 返す関数は、シートの外へ移る操作（リンクなど）を同じ確認にかける
+ */
 export function useSheetDirty(dirty: boolean) {
-  const setDirty = useContext(DirtyContext);
+  const { setDirty, guard } = useContext(SheetContext);
   useEffect(() => {
     setDirty(dirty);
     return () => setDirty(false);
   }, [dirty, setDirty]);
+  return guard;
 }
 
 /**

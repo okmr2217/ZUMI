@@ -26,6 +26,11 @@ export interface DutyFormContext {
 
 const DEFAULT_ICON: PresetIconName = "sparkles";
 
+/** 開いた時点の下書きから変わっているか（シートを閉じる前の破棄の確認に使う） */
+export function isDutyDraftChanged(draft: DutyDraft, initial: DutyDraft) {
+  return JSON.stringify(draft) !== JSON.stringify(initial);
+}
+
 export function emptyDutyDraft(today: string): DutyDraft {
   return {
     name: "",

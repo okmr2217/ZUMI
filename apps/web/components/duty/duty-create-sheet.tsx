@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LayoutGrid } from "lucide-react";
 import type { WeekStart } from "@zumi/types";
 import {
@@ -11,7 +12,7 @@ import {
   useSheetDirty,
 } from "@/components/app/responsive-sheet";
 import { DutyFormFields } from "./duty-form-fields";
-import { emptyDutyDraft, toDutyInput, type DutyDraft } from "./duty-draft";
+import { emptyDutyDraft, isDutyDraftChanged, toDutyInput, type DutyDraft } from "./duty-draft";
 import { LIMIT_MESSAGE, createDutyRequest, errorMessage } from "./duty-api-client";
 
 /** ユーザーの暦。`today` はユーザーのタイムゾーンでの今日 */
@@ -77,7 +78,9 @@ function CreateForm({
   const [initial] = useState(initialDraft);
   const [draft, setDraft] = useState(initialDraft);
   // テンプレートから開いて値が入っているだけなら、閉じるときに確認を出さない
-  useSheetDirty(JSON.stringify(draft) !== JSON.stringify(initial));
+  const changed = isDutyDraftChanged(draft, initial);
+  const guard = useSheetDirty(changed);
+  const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(limitReached ? LIMIT_MESSAGE : null);
   // 作成前のプレビューは、作成日時を今・ログと一時停止を空にして計算する
@@ -107,6 +110,12 @@ function CreateForm({
           {templatesHref && (
             <Link
               href={templatesHref}
+              onClick={(event) => {
+                // 入力途中なら、テンプレート画面へ移る前に破棄の確認を出す
+                if (!changed) return;
+                event.preventDefault();
+                guard(() => router.push(templatesHref));
+              }}
               className="-mt-1 flex items-center gap-1.5 self-start text-[12.5px] font-semibold text-zumi-shu-deep"
             >
               <LayoutGrid className="size-3.5" strokeWidth={1.8} aria-hidden />
