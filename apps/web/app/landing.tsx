@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./lp.css";
 import {
-  IconBath,
   IconBell,
   IconBook,
   IconChevronDown,
@@ -13,7 +12,6 @@ import {
   IconFan,
   IconGear,
   IconHistory,
-  IconLock,
   IconProtein,
   IconRead,
   IconSubscription,
@@ -40,212 +38,6 @@ function SignupCta({ enabled, small = false }: { enabled: boolean; small?: boole
     <a className={`btn btn-primary${size}`} href={SIGNUP_HREF}>
       無料ではじめる
     </a>
-  );
-}
-
-type DailyRowState = "done" | "empty" | "lock";
-
-type DailyRow = {
-  icon: "trash" | "protein" | "bath" | "book";
-  name: string;
-  sub: string;
-  state: DailyRowState;
-  warn?: boolean;
-};
-
-type DailyGroup = {
-  label: string;
-  warn?: boolean;
-  rows: DailyRow[];
-};
-
-type DailyState = {
-  date: string;
-  title: string;
-  pill: boolean;
-  progressLabel: string;
-  progressFrac: string;
-  progressPct: number;
-  groups: DailyGroup[];
-  collapsed?: string;
-  hint: string;
-};
-
-const DAILY_ICONS = { trash: IconTrash, protein: IconProtein, bath: IconBath, book: IconBook };
-
-const DAILY_STATES: DailyState[] = [
-  {
-    date: "8月22日（土）",
-    title: "過去の記録",
-    pill: true,
-    progressLabel: "この日の進捗",
-    progressFrac: "2 / 3",
-    progressPct: 67,
-    groups: [
-      {
-        label: "この日の Duty",
-        rows: [
-          { icon: "trash", name: "ゴミ出し（可燃）", sub: "火・金", state: "done" },
-          { icon: "protein", name: "プロテイン", sub: "毎日", state: "done" },
-          { icon: "bath", name: "お風呂", sub: "未記録", state: "empty" },
-        ],
-      },
-    ],
-    hint: "タップして、この日の分を後から記録できます",
-  },
-  {
-    date: "8月24日（月）",
-    title: "今日",
-    pill: false,
-    progressLabel: "今日の進捗",
-    progressFrac: "3 / 5",
-    progressPct: 60,
-    groups: [
-      {
-        label: "今日",
-        rows: [
-          { icon: "trash", name: "ゴミ出し（可燃）", sub: "火・金", state: "done" },
-          { icon: "protein", name: "プロテイン", sub: "毎日", state: "empty" },
-        ],
-      },
-      {
-        label: "そろそろ",
-        warn: true,
-        rows: [{ icon: "bath", name: "お風呂", sub: "最後から2日", state: "empty", warn: true }],
-      },
-      {
-        label: "今週",
-        rows: [{ icon: "book", name: "英語学習", sub: "あと1回・日曜まで", state: "empty" }],
-      },
-    ],
-    collapsed: "済んだもの 2件",
-    hint: "",
-  },
-  {
-    date: "8月26日（水）",
-    title: "予定の確認",
-    pill: true,
-    progressLabel: "この日の予定",
-    progressFrac: "0 / 2",
-    progressPct: 0,
-    groups: [
-      {
-        label: "この日の予定",
-        rows: [
-          { icon: "trash", name: "ゴミ出し（資源）", sub: "火・金", state: "lock" },
-          { icon: "protein", name: "プロテイン", sub: "毎日", state: "lock" },
-        ],
-      },
-    ],
-    hint: "先の予定です。「済」にできるのは、その日になってから",
-  },
-];
-
-function DailyRowView({ row }: { row: DailyRow }) {
-  const Icon = DAILY_ICONS[row.icon];
-  let control: React.ReactNode;
-  if (row.state === "done") {
-    control = <div className="hanko">済</div>;
-  } else if (row.state === "lock") {
-    control = (
-      <div className="lock-badge">
-        <IconLock />
-      </div>
-    );
-  } else {
-    control = <div className="tap-empty" />;
-  }
-  return (
-    <div className={`app-row${row.state === "lock" ? "dim" : ""}`}>
-      <div className="app-icon-badge">
-        <Icon />
-      </div>
-      <div className="app-row-main">
-        <div className="app-row-name">{row.name}</div>
-        {row.warn ? (
-          <div className="badge-warn">{row.sub}</div>
-        ) : (
-          <div className="app-row-sub">{row.sub}</div>
-        )}
-      </div>
-      {control}
-    </div>
-  );
-}
-
-function DailyDemo() {
-  const [index, setIndex] = useState(1);
-  const s = DAILY_STATES[index]!;
-
-  return (
-    <div className="app-shell">
-      <div className="app-topbar">
-        <div className="app-datebar">
-          <button
-            className="app-navbtn"
-            aria-label="前の日へ"
-            disabled={index === 0}
-            onClick={() => setIndex((i) => Math.max(0, i - 1))}
-          >
-            <IconChevronLeft />
-          </button>
-          <div className="app-datecenter">
-            <div className="app-date">{s.date}</div>
-            <div className="app-title">{s.title}</div>
-          </div>
-          <button
-            className="app-navbtn"
-            aria-label="次の日へ"
-            disabled={index === DAILY_STATES.length - 1}
-            onClick={() => setIndex((i) => Math.min(DAILY_STATES.length - 1, i + 1))}
-          >
-            <IconChevronRight />
-          </button>
-        </div>
-        <div className="app-gear" aria-hidden="true">
-          <IconGear />
-        </div>
-      </div>
-
-      <button
-        className={`app-pill${s.pill ? "visible" : ""}`}
-        type="button"
-        onClick={() => setIndex(1)}
-      >
-        <IconHistory />
-        今日へ戻る
-      </button>
-
-      <div className="app-progress-row">
-        <div className="app-progress-label">
-          <span>{s.progressLabel}</span>
-          <span>{s.progressFrac}</span>
-        </div>
-        <div className="app-progress-track">
-          <div className="app-progress-fill" style={{ width: `${s.progressPct}%` }} />
-        </div>
-      </div>
-
-      <div className="app-scroll">
-        {s.groups.map((g) => (
-          <div key={g.label}>
-            <div className={`app-group-label${g.warn ? "warn" : ""}`}>{g.label}</div>
-            <div className="app-cardlist">
-              {g.rows.map((row) => (
-                <DailyRowView key={row.name} row={row} />
-              ))}
-            </div>
-          </div>
-        ))}
-        {s.collapsed && (
-          <div className="app-collapsed">
-            <span>{s.collapsed}</span>
-            <IconChevronDown />
-          </div>
-        )}
-      </div>
-      <p className="app-hint">{s.hint}</p>
-    </div>
   );
 }
 
@@ -332,11 +124,11 @@ function HeroCard() {
           <div className="app-cardlist">
             <div className="app-row">
               <div className="app-icon-badge">
-                <IconBath />
+                <IconClock />
               </div>
               <div className="app-row-main">
-                <div className="app-row-name">お風呂</div>
-                <div className="badge-warn">最後から2日</div>
+                <div className="app-row-name">水回り掃除</div>
+                <div className="badge-warn">前回から10日</div>
               </div>
               <div className="tap-empty" aria-hidden="true" />
             </div>
@@ -414,11 +206,11 @@ function useRevealOnScroll() {
 
 const DUTY_EXAMPLES = [
   { icon: IconTrash, name: "ゴミ出し（可燃）", sub: "火・金" },
-  { icon: IconBath, name: "お風呂", sub: "前回から2日空いたら" },
+  { icon: IconHistory, name: "洗濯槽の掃除", sub: "前回から1ヶ月空いたら" },
   { icon: IconProtein, name: "プロテイン", sub: "毎日" },
   { icon: IconBook, name: "英語学習", sub: "週に2回" },
   { icon: IconRead, name: "シーツ交換", sub: "月に1回くらい" },
-  { icon: IconClock, name: "水回り掃除", sub: "前回から◯日空いたら" },
+  { icon: IconClock, name: "水回り掃除", sub: "前回から10日空いたら" },
   { icon: IconFan, name: "換気扇掃除", sub: "月イチくらいで十分" },
   { icon: IconSubscription, name: "サブスク見直し", sub: "月イチで棚卸し" },
   { icon: IconRead, name: "読書", sub: "月に1冊は読みたい" },
@@ -435,7 +227,7 @@ const HISTORY_GROUPS = [
   {
     date: "8月23日（日）",
     rows: [
-      { icon: IconBath, name: "お風呂", time: "22:30", badge: "skip" as const },
+      { icon: IconClock, name: "水回り掃除", time: "22:30", badge: "skip" as const },
       { icon: IconBook, name: "英語学習", time: "19:05", badge: "done" as const },
     ],
   },
@@ -472,18 +264,20 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
         <div className="wrap">
           <section className="hero">
             <div>
-              <span className="eyebrow">定期的な「やらなきゃ」の記録アプリ</span>
+              <span className="eyebrow">毎日・定期的な「やらなきゃ」の記録アプリ</span>
               <h1>
-                定期的な
+                やったら「済」。
                 <br />
-                「やらなきゃ」を、
+                忘れていたら、
                 <br />
-                可視化しよう。
+                教えてくれる。
               </h1>
               <p className="sub">
-                なりたい自分のためでも、やらなきゃいけないことでもいい。
+                毎日のことも、週に何回かのことも、月イチのことも。
                 <br />
-                毎日のことも、月イチのことも。同じ場所で、押すだけ。
+                やったら「済」を押すだけ。
+                <br />
+                まだのものは、夜に通知が知らせてくれます。
               </p>
               <div className="cta-row">
                 <SignupCta enabled={signupEnabled} />
@@ -499,108 +293,68 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
 
         <div className="rule" />
 
-        {/* どんな「やらなきゃ」を扱うのか + 期日パターン */}
+        {/* つくった理由 + しくみは2つだけ。起点は「続けたいことを続ける」こと */}
         <div className="wrap">
           <section className="reveal">
-            <span className="eyebrow">どんな「やらなきゃ」を扱うのか</span>
+            <span className="eyebrow">ZUMI をつくった理由</span>
             <h2>
-              なりたい自分のためでも、
+              続けようと決めたことが、
               <br />
-              すでにやらなきゃいけないことでもいい。
+              意外と続かない。
             </h2>
             <p className="body-text">
-              大事なのは、それが定期的にやってくること。以下はDutyの例です。テンプレートから選ぶだけでも、自由入力で追加してもかまいません。
+              プロテインも、英語の勉強も、筋トレも。始めるときは本気なのに、気づくと何日も空いている。
             </p>
-
-            <div className="duty-grid">
-              {DUTY_EXAMPLES.map((d) => (
-                <div className="card duty-card" key={d.name}>
-                  <div className="duty-icon">
-                    <d.icon size={20} />
-                  </div>
-                  <div>
-                    <div className="duty-name">{d.name}</div>
-                    <div className="duty-sub">{d.sub}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="cat-note">毎日じゃなくていい活動も、ちゃんと拾えます。</p>
+            <p className="body-text">
+              足りなかったのは、意志ではありませんでした。やったかどうかを残しておく場所と、忘れたときに思い出させてくれる仕組み。ZUMIは、それをつくるところから始まっています。
+            </p>
 
             <div className="subsection">
               <div className="subrule" />
-              <span className="sub-eyebrow">期日パターン</span>
-              <h3 className="sub-heading">「変な周期」も、ちゃんと設定できる。</h3>
-              <p className="body-text">
-                「隔週の資源ゴミ」も、「お風呂、最後に入ってから2日経ったら」も、同じアプリの中で扱えます。
-              </p>
-
+              <span className="sub-eyebrow">しくみ</span>
+              <h3 className="sub-heading">しくみは、2つだけ。</h3>
               <div className="pattern-grid">
-                <div className="card pattern-card">
-                  <h4>決まっているもの</h4>
-                  <ul className="tag-list">
-                    <li>毎日</li>
-                    <li>曜日を指定（月・木だけ、など）</li>
-                    <li>週に◯回</li>
-                    <li>月に1回</li>
-                  </ul>
+                <div className="card pattern-card origin-card">
+                  <span className="origin-num">1</span>
+                  <h4>やったら、「済」を押す。</h4>
+                  <p>
+                    書くことも、数えることもありません。朱印をワンタップすれば、その日の分は記録されます。
+                  </p>
                 </div>
-                <div className="card pattern-card accent">
-                  <h4>なんとなく空いたら</h4>
-                  <ul className="tag-list">
-                    <li>前回やってから◯日経ったら</li>
-                  </ul>
-                  <p className="since-quote">
-                    「そろそろ」は、お風呂や水回り掃除のような、起点を固定すると破綻する活動と相性がいい設定です。
+                <div className="card pattern-card origin-card">
+                  <span className="origin-num">2</span>
+                  <h4>やっていなければ、教えてくれる。</h4>
+                  <p>
+                    まだ済んでいないものは、夜に通知が教えてくれます。忘れていたことを、寝る前に拾えます。
                   </p>
                 </div>
               </div>
-            </div>
-          </section>
-        </div>
-
-        <div className="rule" />
-
-        {/* デイリー画面 */}
-        <div className="wrap">
-          <section className="split reveal">
-            <div>
-              <span className="eyebrow">デイリー画面</span>
-              <h2>
-                今日だけじゃない。
-                <br />
-                その日やることが、日付ごとに並ぶ。
-              </h2>
-              <p className="body-text">
-                ◀ ▶
-                で日付を送れば、過去の記録づけも、数日先の予定確認もできます。「今日」だけを見るための画面ではありません。
+              <p className="since-quote origin-note">
+                何日続いたかは数えません。途切れても、また次の日に押せばいい。
               </p>
-              <ul className="feature-list">
-                <li>過去の日付に戻れば、その日にやったことを後から記録できる</li>
-                <li>未来の日付は内容を確認できるだけ。「済」にできるのは、その日になってから</li>
-                <li>今日以外を見ているときは「今日へ戻る」でワンタップ</li>
-              </ul>
-            </div>
-            <div className="split-visual">
-              <DailyDemo />
             </div>
           </section>
         </div>
 
         <div className="rule" />
 
-        {/* 通知 */}
+        {/* 通知。「やっていないことを教えてくれる」は訴求の柱なので、Duty の例より前に置く */}
         <div className="wrap">
           <section className="reveal">
-            <span className="eyebrow">通知は、1日2通だけ</span>
+            <span className="eyebrow">通知</span>
             <h2>
-              通知が多すぎて、全部消してしまう。
+              やっていないことを、
               <br />
-              それを、しくみで防ぎます。
+              夜に教えてくれる。
             </h2>
             <p className="body-text">
-              朝は今日やるべき分をまとめて1通。夜は、まだ終わってない分だけもう1通。時間は設定からいつでも変更できます。
+              朝は、今日やる分をまとめて1通。夜は、まだ済んでいないものだけをもう1通。済ませたものは載らないので、全部済ませた日の夜は何も届きません。
             </p>
+            <ul className="feature-list">
+              <li>「前回から◯日」のものは、日が空いてきたら「そろそろ」として届きます</li>
+              <li>「週に2回」のものは、このままだと今週に間に合わなくなる日から届きます</li>
+              <li>届くのは1日に最大2通。通知が多すぎて全部切ってしまう、を防ぎます</li>
+            </ul>
 
             <div className="notify-grid">
               <div className="toast-stack">
@@ -610,8 +364,10 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                   </div>
                   <div className="toast-body">
                     <div className="toast-app">ZUMI</div>
-                    <div className="toast-title">今日は3件あります</div>
-                    <div className="toast-msg">ゴミ出し・プロテイン・英語学習</div>
+                    <div className="toast-title">今日の Duty 3件</div>
+                    <div className="toast-msg">
+                      ゴミ出し（可燃）・プロテイン・水回り掃除（そろそろ）
+                    </div>
                   </div>
                   <div className="toast-time">7:30</div>
                 </div>
@@ -621,11 +377,12 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                   </div>
                   <div className="toast-body">
                     <div className="toast-app">ZUMI</div>
-                    <div className="toast-title">まだ済んでいないものが1件</div>
-                    <div className="toast-msg">寝る前に、お風呂だけ残っています</div>
+                    <div className="toast-title">まだ済んでいないもの 1件</div>
+                    <div className="toast-msg">英語学習（あと1回・日曜まで）</div>
                   </div>
                   <div className="toast-time">22:00</div>
                 </div>
+                <p className="toast-quiet">全部「済」にした日は、夜の通知は届きません</p>
               </div>
 
               <div className="card settings-card">
@@ -666,25 +423,88 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
               </div>
             </div>
             <p className="notify-total">
-              1日に届く通知は、朝・夜あわせて最大<strong>2通</strong>
-              。時間は設定画面からいつでも変更できます。
+              iPhone では、ZUMI をホーム画面に追加すると通知が届くようになります。
             </p>
           </section>
         </div>
 
         <div className="rule" />
 
-        {/* 振り返り */}
+        {/* 毎日も、定期的も。どんな「やらなきゃ」を扱うのか + 期日パターン */}
+        <div className="wrap">
+          <section className="reveal">
+            <span className="eyebrow">毎日も、定期的も</span>
+            <h2>
+              毎日のことも、定期的なことも、
+              <br />
+              ひとつの場所で。
+            </h2>
+            <p className="body-text">
+              毎日続けたいことのために作った仕組みは、ゴミ出しや月イチの掃除のような「定期的にやってくること」にも、そのまま使えます。なりたい自分のためでも、やらなきゃいけないことでもかまいません。
+            </p>
+
+            <div className="duty-grid">
+              {DUTY_EXAMPLES.map((d) => (
+                <div className="card duty-card" key={d.name}>
+                  <div className="duty-icon">
+                    <d.icon size={20} />
+                  </div>
+                  <div>
+                    <div className="duty-name">{d.name}</div>
+                    <div className="duty-sub">{d.sub}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="cat-note">
+              ここに挙げたのは一例です。テンプレートから選ぶことも、自由入力で追加することもできます。
+            </p>
+
+            <div className="subsection">
+              <div className="subrule" />
+              <span className="sub-eyebrow">期日パターン</span>
+              <h3 className="sub-heading">「変な周期」も、ちゃんと設定できる。</h3>
+              <p className="body-text">
+                「隔週の資源ゴミ」も、「シーツ、前回替えてから2週間経ったら」も、同じアプリの中で扱えます。
+              </p>
+
+              <div className="pattern-grid">
+                <div className="card pattern-card">
+                  <h4>決まっているもの</h4>
+                  <ul className="tag-list">
+                    <li>毎日</li>
+                    <li>曜日を指定（月・木だけ、など）</li>
+                    <li>週に◯回</li>
+                    <li>月に1回</li>
+                  </ul>
+                </div>
+                <div className="card pattern-card accent">
+                  <h4>なんとなく空いたら</h4>
+                  <ul className="tag-list">
+                    <li>前回やってから◯日経ったら</li>
+                  </ul>
+                  <p className="since-quote">
+                    「そろそろ」は、シーツ交換や水回り掃除のような、起点を固定すると破綻する活動と相性がいい設定です。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div className="rule" />
+
+        {/* 振り返り。週次サマリーを主役にし、月次ヒートマップと履歴は小さく添える */}
         <div className="wrap">
           <section className="reveal">
             <span className="eyebrow">振り返り</span>
             <h2>
-              週次は成績表、
+              今週どれだけ済ませたかを、
               <br />
-              月次は可視化、履歴はログ。
+              成績表みたいに受け取る。
             </h2>
             <p className="body-text">
-              連続記録（ストリーク）は競いません。サボった週があっても、先週との差分だけ見えればいい。3つとも見せたい情報なので、1画面に詰め込まず、上部の切り替えで行き来できるページに分けています。
+              連続記録（ストリーク）は競いません。サボった週があっても、先週との差分だけ見えればいい。
             </p>
 
             {/* 週次サマリー */}
@@ -693,9 +513,9 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
               <div className="split">
                 <div>
                   <span className="sub-eyebrow">週次サマリー</span>
-                  <h3 className="sub-heading">今週の「済」具合を、成績表みたいに受け取る。</h3>
+                  <h3 className="sub-heading">今週の「済」具合が、1枚のカードで届く。</h3>
                   <p className="body-text">
-                    毎週、達成した数と先週との差分が届きます。Duty一つひとつの内訳も、済んだものも未達のものも隠さず並びます。そのままシェア画像として保存・投稿できます。
+                    毎週、達成した数と先週との差分が届きます。済んだものも未達のものも隠さず並び、そのままシェア画像として保存・投稿できます。
                   </p>
                 </div>
                 <div className="split-visual">
@@ -725,11 +545,11 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                       </div>
                       <div className="summary-row">
                         <div className="icon">
-                          <IconBath size={19} />
+                          <IconRead size={19} />
                         </div>
                         <div className="info">
-                          <div className="name">風呂</div>
-                          <div className="sub">7日中 5日</div>
+                          <div className="name">シーツ交換</div>
+                          <div className="sub">月に1回</div>
                         </div>
                         <div className="summary-stamp" style={{ transform: "rotate(6deg)" }}>
                           済
@@ -767,18 +587,16 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
               </div>
             </div>
 
-            {/* 月次カレンダーヒートマップ */}
+            {/* 月次カレンダーヒートマップと履歴 */}
             <div className="review-block subsection">
               <div className="subrule" />
-              <div className="split reverse">
+              <div className="review-mini-grid">
                 <div>
-                  <span className="sub-eyebrow">月次カレンダーヒートマップ</span>
-                  <h3 className="sub-heading">続いていることを、濃淡で眺める。</h3>
-                  <p className="body-text">
-                    1ヶ月分のマスに、その日の達成度をグラデーションで敷いていきます。数値よりも、途切れずに続いている実感そのものが伝わるように。タップすれば、その日の記録・予定ページも開けます。
+                  <span className="sub-eyebrow">月次カレンダー</span>
+                  <h4 className="mini-heading">続いていることを、濃淡で眺める。</h4>
+                  <p className="mini-text">
+                    1ヶ月分のマスに、その日の達成度を敷いていきます。タップすれば、その日の記録を開けます。
                   </p>
-                </div>
-                <div className="split-visual">
                   <div className="card heat-visual">
                     <div className="heat-head2">
                       <div className="heat-navbtn">
@@ -855,31 +673,19 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
                       </div>
                       <span className="lbl">全て済</span>
                     </div>
-                    <p className="heat-note2">タップすると、その日の記録・予定ページを開けます</p>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* 履歴 */}
-            <div className="review-block subsection">
-              <div className="subrule" />
-              <div className="split">
                 <div>
                   <span className="sub-eyebrow">履歴</span>
-                  <h3 className="sub-heading">
-                    済ませたことも、スキップしたことも、そのままログに残す。
-                  </h3>
-                  <p className="body-text">
-                    日付ごとに、済ませたDutyとスキップしたDutyを並べて記録します。Duty名で絞り込んで、過去に遡って確認することもできます。
+                  <h4 className="mini-heading">済ませたことも、スキップしたことも残る。</h4>
+                  <p className="mini-text">
+                    日付ごとに並べて記録します。Duty名で絞り込んで、過去に遡ることもできます。
                   </p>
-                </div>
-                <div className="split-visual">
                   <div className="card hist-visual">
                     <div className="hist-filters">
                       <span className="hist-chip active">すべて</span>
                       <span className="hist-chip">ゴミ出し</span>
-                      <span className="hist-chip">お風呂</span>
+                      <span className="hist-chip">水回り掃除</span>
                       <span className="hist-chip">プロテイン</span>
                     </div>
                     {HISTORY_GROUPS.map((g) => (
@@ -920,7 +726,7 @@ export function LandingPage({ signupEnabled }: { signupEnabled: boolean }) {
 
       <footer>
         <div className="wrap footer-row">
-          <span>ZUMI（済） — 定期的な「やらなきゃ」を記録するアプリ</span>
+          <span>ZUMI（済） — 毎日・定期的な「やらなきゃ」の記録アプリ</span>
           <ul className="footer-links">
             <li>
               <a href="/login">ログイン</a>
