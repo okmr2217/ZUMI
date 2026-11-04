@@ -104,7 +104,7 @@ Web Push のみで通知を成立させる。
 - [x] 設定モーダル: データ（エクスポートはMVP対象外）
 - [x] 設定モーダル: 表示（週の始まり 月/日）
 - [x] 設定モーダル: ヘルプ（繰り返し設定の説明）
-- [x] オンボーディングフロー（[03](./03-duty-log-review-account.md#オンボーディング202611-再設計)）: やることを選ぶ（1件ずつ追加シートで確定）→ 通知の時刻・週の始まり → ホーム画面に追加（iOS Safari のみ）→ 通知の許可。全ステップ飛ばせる
+- [x] オンボーディングフロー（[03](./03-duty-log-review-account.md#オンボーディング202611-再設計)）: ホーム画面に追加（ホーム画面アプリでは出さない）→ やることを選ぶ（1件ずつ追加シートで確定）→ 通知の時刻・週の始まり → 通知の許可。全ステップ飛ばせる
 - [x] `onboardedAt` が null のとき `/app` からオンボーディングへリダイレクト
 
 ### フェーズ8: LP
@@ -119,7 +119,8 @@ Web Push のみで通知を成立させる。
 
 - [x] `manifest.json`（アイコン、テーマカラー、`display: standalone`）
 - [x] Service Worker のキャッシュ戦略（最小限のオフライン対応。キャッシュするのは `public/offline.html` だけで、`/app` 配下のナビゲーションがネットワークエラーのときに返す。認証が必要なページ・API はキャッシュしない）
-- [x] iOS「ホーム画面に追加」導線UI（iOS Web Push制約の案内。オンボーディングのステップ3と共通）
+- [x] iOS「ホーム画面に追加」導線UI（iOS Web Push制約の案内。設定の通知の行に短い手順）
+- [x] ホーム画面に追加する案内ページ `/install`（iPhone・Safari / iPhone・Chrome / Android・Chrome の手順タブ、Chromium 系のインストールボタン）。オンボーディングのステップ1と共通の部品で、設定のヘルプからリンク
 - [x] iOS のスタンドアロン起動用 meta（`appleWebApp` と `apple-mobile-web-app-capable`。clipnote の `apps/web/src/app/layout.tsx` と同じ対応）、manifest のアイコン
 - [x] Lighthouse PWA監査・インストール可能性の確認（Lighthouse 11 の PWA カテゴリで全項目合格。v12 以降は PWA カテゴリが廃止されたため 11 で計測）
 

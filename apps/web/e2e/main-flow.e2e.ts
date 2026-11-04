@@ -78,7 +78,7 @@ test("サインアップし、メールを確認してログインする", async
   await logIn(page, email);
   // 初回はオンボーディングへ送られる
   await expect(page).toHaveURL(/\/onboarding$/);
-  await expect(page.getByRole("heading", { name: /やることを/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /ホーム画面に/ })).toBeVisible();
   await expect.poll(() => timezonePosts.length).toBe(1);
   // 2回目の読み込みが遅れて来ないことも見る（ソフト遷移のあとは networkidle を待っても待たずに返る）
   await page.waitForTimeout(1500);
@@ -88,7 +88,15 @@ test("サインアップし、メールを確認してログインする", async
 });
 
 test("オンボーディングでテンプレートから Duty を1件作る", async () => {
-  await expect(page.getByRole("heading", { name: /やることを/ })).toBeVisible();
+  // ステップ1（ホーム画面に追加）は飛ばす。Android の Chrome として開くので、そのタブが選ばれている
+  await expect(page.getByRole("tab", { name: /Android・Chrome/ })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await clickUntilVisible(
+    page.getByRole("button", { name: /^(次へ|あとで)$/ }),
+    page.getByRole("heading", { name: /やることを/ }),
+  );
   // 「お風呂」は SINCE_LAST（前回から2日）のテンプレート
   const sheet = page.getByRole("dialog", { name: "Dutyを追加" });
   await clickUntilVisible(page.getByRole("button", { name: /^お風呂/ }), sheet);

@@ -24,7 +24,7 @@ type SubSheet = "password" | "delete" | "help" | null;
 
 /**
  * 設定の中身（docs/04「4-4. 設定（モーダル）」、モックの Settings.dc.html）。
- * 並びはモックの 通知 → 表示 → アカウント → データ に、モックにないヘルプと退会を足したもの。
+ * 並びはモックの 通知 → 表示 → アカウント → データ に、モックにないヘルプ（ホーム画面に追加する手順など）と退会を足したもの。
  * 今日タブの歯車から開くモーダルと、`/app/settings` を直接開いたときのページで共通。
  */
 export function SettingsPanel({ email, notificationSettings, vapidPublicKey }: SettingsPanelData) {
@@ -57,6 +57,7 @@ export function SettingsPanel({ email, notificationSettings, vapidPublicKey }: S
       </SettingsGroup>
 
       <SettingsGroup title="ヘルプ">
+        <SettingsLinkRow label="ホーム画面に追加する" sub="アプリとして使う手順" href="/install" />
         <SettingsLinkRow
           label="繰り返し設定について"
           sub="5つの決め方と「そろそろ」の考え方"
