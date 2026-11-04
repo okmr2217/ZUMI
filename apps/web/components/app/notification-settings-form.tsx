@@ -240,6 +240,7 @@ function ScheduleRow({
         )}
       >
         {dayLabel && <span>{dayLabel}</span>}
+        {/* 矢印は右の ChevronRight だけにする。iOS Safari は時刻入力に下向きの矢印を付けるため appearance で外す */}
         <input
           type="time"
           value={time}
@@ -248,7 +249,7 @@ function ScheduleRow({
           onChange={(event) => onTimeChange(event.target.value)}
           onBlur={onTimeCommit}
           onClick={(event) => event.currentTarget.showPicker?.()}
-          className="w-[42px] cursor-[inherit] bg-transparent p-0 font-[inherit] tabular-nums outline-none [&::-webkit-calendar-picker-indicator]:hidden"
+          className="w-[42px] cursor-[inherit] appearance-none bg-transparent p-0 font-[inherit] tabular-nums outline-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-date-and-time-value]:text-left"
         />
         <ChevronRight aria-hidden size={11} strokeWidth={2} className={INK_SOFT} />
       </label>

@@ -27,7 +27,7 @@ export function ErrorScreen({
       className={cn(
         "mx-auto flex w-full max-w-[430px] flex-col items-center px-7 pb-7 text-center",
         fullScreen
-          ? "pt-safe min-h-dvh justify-center bg-zumi-bg font-zumi text-zumi-ink"
+          ? "pt-safe min-h-svh justify-center bg-zumi-bg font-zumi text-zumi-ink"
           : "pt-24",
       )}
     >

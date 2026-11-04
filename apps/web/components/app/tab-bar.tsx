@@ -28,12 +28,18 @@ const TABS: { href: string; label: string; icon: LucideIcon; match: (path: strin
     },
   ];
 
-/** 下部タブ（docs/04-screens.md「4. 画面構成」）。高さはモックの 66px + セーフエリア */
+/**
+ * 下部タブ（docs/04-screens.md「4. 画面構成」）。高さはモックの 66px + セーフエリア。
+ *
+ * iOS のホーム画面アプリでは、ビューポートの下端がホームインジケーターの上で切れるのに
+ * safe-area-inset-bottom は残るため、セーフエリアぶんの余白がバーの下にもう一度空いて背景が見える。
+ * そこでバーをその分だけ下へずらし、それでも残る隙間は下に敷いたタブの地の色で埋める
+ */
 export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-zumi-line bg-zumi-card pb-[max(12px,env(safe-area-inset-bottom))]">
+    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-zumi-line bg-zumi-card pb-[max(12px,env(safe-area-inset-bottom))] after:absolute after:inset-x-0 after:top-full after:h-[100px] after:bg-zumi-card after:content-[''] ios-standalone:bottom-[calc(-1*env(safe-area-inset-bottom))]">
       <ul className="mx-auto flex h-[66px] max-w-[430px] items-center justify-around">
         {TABS.map((tab) => {
           const active = tab.match(pathname);
