@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { WeekStart } from "@zumi/types";
 import type { NotificationSettings } from "@/lib/notification-settings";
-import { BottomSheet } from "@/components/app/bottom-sheet";
 import { NotificationSettingsForm } from "@/components/app/notification-settings-form";
 import { ChangePasswordForm } from "@/components/auth/change-password-form";
 import { DeleteAccountForm } from "@/components/auth/delete-account-form";
@@ -20,78 +19,114 @@ export interface SettingsPanelData {
   vapidPublicKey: string | null;
 }
 
-type SubSheet = "password" | "delete" | "help" | null;
+type SubScreen = "password" | "delete" | "help";
+
+const SUB_SCREEN_TITLE: Record<SubScreen, string> = {
+  password: "パスワード変更",
+  help: "繰り返し設定について",
+  delete: "退会",
+};
 
 /**
  * 設定の中身（docs/04「4-4. 設定（モーダル）」、モックの Settings.dc.html）。
  * 並びはモックの 通知 → 表示 → アカウント → データ に、モックにないヘルプ（ホーム画面に追加する手順など）と退会を足したもの。
  * 今日タブの歯車から開くモーダルと、`/app/settings` を直接開いたときのページで共通。
+ * パスワード変更・繰り返し設定の説明・退会は、シートを重ねずにこの中で画面を切り替える（docs/04「4-5」）。
  */
 export function SettingsPanel({ email, notificationSettings, vapidPublicKey }: SettingsPanelData) {
   const [weekStart, setWeekStart] = useState<WeekStart>(notificationSettings.weekStart);
-  const [subSheet, setSubSheet] = useState<SubSheet>(null);
+  const [subScreen, setSubScreen] = useState<SubScreen | null>(null);
 
   return (
-    <div className="flex flex-col gap-4">
-      <NotificationSettingsForm
-        initial={notificationSettings}
-        vapidPublicKey={vapidPublicKey}
-        weekStart={weekStart}
-      />
-
-      <SettingsGroup title="表示">
-        <WeekStartRow value={weekStart} onChange={setWeekStart} />
-      </SettingsGroup>
-
-      <SettingsGroup title="アカウント">
-        <SettingsRow label="メールアドレス">
-          <span className="max-w-[180px] truncate">{email}</span>
-        </SettingsRow>
-        <SettingsLinkRow label="パスワード変更" onClick={() => setSubSheet("password")} />
-        <SignOutButton className="flex w-full border-b border-zumi-line px-[15px] py-3 text-left text-[13.5px] font-semibold last:border-b-0 disabled:opacity-40" />
-      </SettingsGroup>
-
-      {/* エクスポートは v1.1（docs/07）。モックにある項目なので、準備中として出しておく */}
-      <SettingsGroup title="データ">
-        <SettingsLinkRow label="データをエクスポート" value="準備中" disabled />
-      </SettingsGroup>
-
-      <SettingsGroup title="ヘルプ">
-        <SettingsLinkRow label="ホーム画面に追加する" sub="アプリとして使う手順" href="/install" />
-        <SettingsLinkRow
-          label="繰り返し設定について"
-          sub="5つの決め方と「そろそろ」の考え方"
-          onClick={() => setSubSheet("help")}
+    <>
+      {subScreen && (
+        <SubScreenView title={SUB_SCREEN_TITLE[subScreen]} onBack={() => setSubScreen(null)}>
+          {subScreen === "password" && <ChangePasswordForm />}
+          {subScreen === "help" && <RepeatHelp />}
+          {subScreen === "delete" && <DeleteAccountForm />}
+        </SubScreenView>
+      )}
+      {/* 通知・週の始まりの入力を残すため、サブ画面の間も一覧はマウントしたまま隠す */}
+      <div className={cn("flex flex-col gap-4", subScreen && "hidden")}>
+        <NotificationSettingsForm
+          initial={notificationSettings}
+          vapidPublicKey={vapidPublicKey}
+          weekStart={weekStart}
         />
-        <SettingsLinkRow label="利用規約" href="/terms" />
-        <SettingsLinkRow label="プライバシーポリシー" href="/privacy" />
-      </SettingsGroup>
 
-      <button
-        type="button"
-        onClick={() => setSubSheet("delete")}
-        className="self-center py-1 text-[12.5px] font-semibold text-zumi-shu-deep"
-      >
-        退会する
-      </button>
+        <SettingsGroup title="表示">
+          <WeekStartRow value={weekStart} onChange={setWeekStart} />
+        </SettingsGroup>
 
-      <BottomSheet
-        open={subSheet === "password"}
-        onClose={() => setSubSheet(null)}
-        title="パスワード変更"
-      >
-        <ChangePasswordForm />
-      </BottomSheet>
-      <BottomSheet
-        open={subSheet === "help"}
-        onClose={() => setSubSheet(null)}
-        title="繰り返し設定について"
-      >
-        <RepeatHelp />
-      </BottomSheet>
-      <BottomSheet open={subSheet === "delete"} onClose={() => setSubSheet(null)} title="退会">
-        <DeleteAccountForm />
-      </BottomSheet>
+        <SettingsGroup title="アカウント">
+          <SettingsRow label="メールアドレス">
+            <span className="max-w-[180px] truncate">{email}</span>
+          </SettingsRow>
+          <SettingsLinkRow label="パスワード変更" onClick={() => setSubScreen("password")} />
+          <SignOutButton className="flex w-full border-b border-zumi-line px-[15px] py-3 text-left text-[13.5px] font-semibold last:border-b-0 disabled:opacity-40" />
+        </SettingsGroup>
+
+        {/* エクスポートは v1.1（docs/07）。モックにある項目なので、準備中として出しておく */}
+        <SettingsGroup title="データ">
+          <SettingsLinkRow label="データをエクスポート" value="準備中" disabled />
+        </SettingsGroup>
+
+        <SettingsGroup title="ヘルプ">
+          <SettingsLinkRow
+            label="ホーム画面に追加する"
+            sub="アプリとして使う手順"
+            href="/install"
+          />
+          <SettingsLinkRow
+            label="繰り返し設定について"
+            sub="5つの決め方と「そろそろ」の考え方"
+            onClick={() => setSubScreen("help")}
+          />
+          <SettingsLinkRow label="利用規約" href="/terms" />
+          <SettingsLinkRow label="プライバシーポリシー" href="/privacy" />
+        </SettingsGroup>
+
+        <button
+          type="button"
+          onClick={() => setSubScreen("delete")}
+          className="self-center py-1 text-[12.5px] font-semibold text-zumi-shu-deep"
+        >
+          退会する
+        </button>
+      </div>
+    </>
+  );
+}
+
+/** 設定の中のサブ画面。先頭に戻るボタンと見出しを出し、開いたら先頭までスクロールする */
+function SubScreenView({
+  title,
+  onBack,
+  children,
+}: {
+  title: string;
+  onBack: () => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.scrollIntoView({ block: "start" });
+  }, []);
+
+  return (
+    <div ref={ref} className="flex scroll-mt-4 flex-col gap-4">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="設定に戻る"
+          className="-ml-1.5 flex size-[30px] items-center justify-center rounded-full text-zumi-soft"
+        >
+          <ChevronLeft className="size-[18px]" strokeWidth={1.8} aria-hidden />
+        </button>
+        <h3 className="text-[15px] font-bold">{title}</h3>
+      </div>
+      {children}
     </div>
   );
 }

@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { LayoutGrid } from "lucide-react";
 import type { WeekStart } from "@zumi/types";
-import { BottomSheet } from "@/components/app/bottom-sheet";
+import {
+  ResponsiveSheet,
+  SheetBody,
+  SheetFooter,
+  useSheetDirty,
+} from "@/components/app/responsive-sheet";
 import { DutyFormFields } from "./duty-form-fields";
 import { emptyDutyDraft, toDutyInput, type DutyDraft } from "./duty-draft";
 import { LIMIT_MESSAGE, createDutyRequest, errorMessage } from "./duty-api-client";
@@ -42,7 +47,7 @@ export function DutyCreateSheet({
   limitReached?: boolean;
 }) {
   return (
-    <BottomSheet open={open} onClose={onClose} title="Dutyを追加">
+    <ResponsiveSheet open={open} onClose={onClose} title="Dutyを追加">
       <CreateForm
         calendar={calendar}
         initialDraft={initialDraft ?? emptyDutyDraft(calendar.today)}
@@ -50,7 +55,7 @@ export function DutyCreateSheet({
         limitReached={limitReached}
         onCreated={onCreated}
       />
-    </BottomSheet>
+    </ResponsiveSheet>
   );
 }
 
@@ -68,7 +73,11 @@ function CreateForm({
   limitReached: boolean;
   onCreated: () => void;
 }) {
+  const formId = useId();
+  const [initial] = useState(initialDraft);
   const [draft, setDraft] = useState(initialDraft);
+  // テンプレートから開いて値が入っているだけなら、閉じるときに確認を出さない
+  useSheetDirty(JSON.stringify(draft) !== JSON.stringify(initial));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(limitReached ? LIMIT_MESSAGE : null);
   // 作成前のプレビューは、作成日時を今・ログと一時停止を空にして計算する
@@ -92,32 +101,39 @@ function CreateForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-[18px]">
-      {templatesHref && (
-        <Link
-          href={templatesHref}
-          className="-mt-1 flex items-center gap-1.5 self-start text-[12.5px] font-semibold text-zumi-shu-deep"
+    <>
+      <SheetBody>
+        <form id={formId} onSubmit={handleSubmit} className="flex flex-col gap-[18px]">
+          {templatesHref && (
+            <Link
+              href={templatesHref}
+              className="-mt-1 flex items-center gap-1.5 self-start text-[12.5px] font-semibold text-zumi-shu-deep"
+            >
+              <LayoutGrid className="size-3.5" strokeWidth={1.8} aria-hidden />
+              テンプレートから作成する
+            </Link>
+          )}
+          <DutyFormFields value={draft} onChange={setDraft} context={context} />
+        </form>
+      </SheetBody>
+      <SheetFooter>
+        {error && (
+          <p
+            role="alert"
+            className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
+          >
+            {error}
+          </p>
+        )}
+        <button
+          type="submit"
+          form={formId}
+          disabled={!input || submitting || limitReached}
+          className="w-full rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
         >
-          <LayoutGrid className="size-3.5" strokeWidth={1.8} aria-hidden />
-          テンプレートから作成する
-        </Link>
-      )}
-      <DutyFormFields value={draft} onChange={setDraft} context={context} />
-      {error && (
-        <p
-          role="alert"
-          className="rounded-xl bg-zumi-pill px-[13px] py-2.5 text-[12.5px] font-semibold"
-        >
-          {error}
-        </p>
-      )}
-      <button
-        type="submit"
-        disabled={!input || submitting || limitReached}
-        className="w-full rounded-2xl bg-zumi-shu p-[15px] text-[15px] font-bold text-white disabled:opacity-40"
-      >
-        {submitting ? "追加しています…" : "追加する"}
-      </button>
-    </form>
+          {submitting ? "追加しています…" : "追加する"}
+        </button>
+      </SheetFooter>
+    </>
   );
 }

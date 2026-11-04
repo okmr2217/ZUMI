@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { BottomSheet } from "@/components/app/bottom-sheet";
+import {
+  ResponsiveSheet,
+  SheetBody,
+  SheetFooter,
+  useRetained,
+  useSheetDirty,
+} from "@/components/app/responsive-sheet";
 import { isLocalDate, NOTE_MAX_LENGTH, type LogInput } from "@/lib/log-input";
 import type { TodayItem, TodayLog } from "@/lib/today";
 import { formatShortDate } from "@/lib/schedule-text";
@@ -13,7 +19,8 @@ const field =
 
 /**
  * 長押しの詳細モーダル（docs/03「記録操作」）。対象日の変更・スキップ・メモ（`noteEnabled` のときだけ）。
- * モックに専用のアートボードはないため、DutyEdit と同じボトムシートの部品で組む。
+ * モックに専用のアートボードはないため、DutyEdit と同じシートの部品で組む。
+ * 「済にする」「スキップする」は固定フッターに、「記録を取り消す」は本文の末尾に置く（docs/04「4-5」）。
  */
 export function LogSheet({
   item,
@@ -34,12 +41,14 @@ export function LogSheet({
   onSubmit: (targetDate: string, input: LogInput) => Promise<LogApiResult>;
   onUndo: () => void;
 }) {
+  // 閉じるアニメーションの間は、閉じる前の Duty を出しておく
+  const shown = useRetained(item);
   return (
-    <BottomSheet open={item !== null} onClose={onClose} title={item?.name ?? ""}>
-      {item && (
+    <ResponsiveSheet open={item !== null} onClose={onClose} title={shown?.name ?? ""}>
+      {shown && (
         <LogSheetForm
-          key={item.id}
-          item={item}
+          key={shown.id}
+          item={shown}
           log={log}
           date={date}
           today={today}
@@ -47,7 +56,7 @@ export function LogSheet({
           onUndo={onUndo}
         />
       )}
-    </BottomSheet>
+    </ResponsiveSheet>
   );
 }
 
@@ -70,6 +79,7 @@ function LogSheetForm({
   const [note, setNote] = useState(log?.note ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useSheetDirty(targetDate !== date || note !== (log?.note ?? ""));
 
   async function submit(status: LogInput["status"]) {
     if (!isLocalDate(targetDate) || targetDate > today || targetDate < item.createdDate) {
@@ -92,44 +102,55 @@ function LogSheetForm({
 
   return (
     <>
-      <p className="-mt-2 text-xs text-zumi-soft">
-        {formatShortDate(date)}の記録：{status}
-      </p>
+      <SheetBody>
+        <p className="-mt-2 text-xs text-zumi-soft">
+          {formatShortDate(date)}の記録：{status}
+        </p>
 
-      <label>
-        <span className={fieldLabel}>対象日</span>
-        <input
-          type="date"
-          value={targetDate}
-          min={item.createdDate}
-          max={today}
-          required
-          onChange={(event) => setTargetDate(event.target.value)}
-          className={field}
-        />
-      </label>
-
-      {item.noteEnabled && (
         <label>
-          <span className={fieldLabel}>メモ</span>
-          <textarea
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            maxLength={NOTE_MAX_LENGTH}
-            rows={3}
-            placeholder="任意"
-            className={`${field} resize-none font-medium`}
+          <span className={fieldLabel}>対象日</span>
+          <input
+            type="date"
+            value={targetDate}
+            min={item.createdDate}
+            max={today}
+            required
+            onChange={(event) => setTargetDate(event.target.value)}
+            className={field}
           />
         </label>
-      )}
 
-      {error && (
-        <p role="alert" className="text-[12.5px] font-semibold text-zumi-shu-deep">
-          {error}
-        </p>
-      )}
+        {item.noteEnabled && (
+          <label>
+            <span className={fieldLabel}>メモ</span>
+            <textarea
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              maxLength={NOTE_MAX_LENGTH}
+              rows={3}
+              placeholder="任意"
+              className={`${field} resize-none font-medium`}
+            />
+          </label>
+        )}
 
-      <div className="flex flex-col gap-2.5">
+        {log && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onUndo}
+            className="self-center py-1.5 text-[12.5px] font-semibold text-zumi-soft disabled:opacity-60"
+          >
+            記録を取り消す
+          </button>
+        )}
+      </SheetBody>
+      <SheetFooter>
+        {error && (
+          <p role="alert" className="text-[12.5px] font-semibold text-zumi-shu-deep">
+            {error}
+          </p>
+        )}
         <button
           type="button"
           disabled={busy}
@@ -146,17 +167,7 @@ function LogSheetForm({
         >
           スキップする
         </button>
-        {log && (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onUndo}
-            className="py-1.5 text-[12.5px] font-semibold text-zumi-soft disabled:opacity-60"
-          >
-            記録を取り消す
-          </button>
-        )}
-      </div>
+      </SheetFooter>
     </>
   );
 }
