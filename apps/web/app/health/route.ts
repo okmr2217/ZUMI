@@ -32,7 +32,10 @@ async function checkDb(): Promise<"ok" | "error"> {
   try {
     const { env } = getCloudflareContext();
     const timeout = new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new Error(`D1 did not respond in ${DB_TIMEOUT_MS}ms`)), DB_TIMEOUT_MS);
+      timer = setTimeout(
+        () => reject(new Error(`D1 did not respond in ${DB_TIMEOUT_MS}ms`)),
+        DB_TIMEOUT_MS,
+      );
     });
     await Promise.race([env.DB.prepare("SELECT 1").first(), timeout]);
     return "ok";
