@@ -65,6 +65,8 @@ export function TodayView({
   items,
   hasDuties,
   vapidPublicKey,
+  onLogChanged,
+  onInvalidate,
 }: {
   date: string;
   today: string;
@@ -72,6 +74,10 @@ export function TodayView({
   items: TodayItem[];
   hasDuties: boolean;
   vapidPublicKey: string | null;
+  /** 記録がサーバーで確定したとき。先読みした同じ日のデータに反映してもらう */
+  onLogChanged: (id: string, log: TodayLog | null) => void;
+  /** 他の日の先読みが古くなりうるとき（別の日への記録・付け替え） */
+  onInvalidate: () => void;
 }) {
   const router = useRouter();
   /** サーバーで確定した状態。失敗したときは、ここに戻る */
@@ -133,8 +139,10 @@ export function TodayView({
     if (keep) setKept((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
     void enqueue(id, async () => {
       const result = await request();
-      if (result.ok) setConfirmed((prev) => ({ ...prev, [id]: next }));
-      else showToast(logErrorMessage(result.error));
+      if (result.ok) {
+        setConfirmed((prev) => ({ ...prev, [id]: next }));
+        onLogChanged(id, next);
+      } else showToast(logErrorMessage(result.error));
       if (latest.current.get(id) === seq) {
         setPending((prev) => {
           const rest = { ...prev };
@@ -182,6 +190,7 @@ export function TodayView({
     if (result.ok) {
       setDetailId(null);
       showToast(`「${item.name}」を${formatShortDate(targetDate)}の分として記録しました`);
+      onInvalidate();
       router.refresh();
     }
     return result;

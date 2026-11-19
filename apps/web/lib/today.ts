@@ -45,6 +45,14 @@ export interface TodayItem {
   log: TodayLog | null;
 }
 
+/** 今日タブの1日ぶんのデータ。隣の日を先に取っておき、日付の移動をクライアントだけで済ませる */
+export interface DayData {
+  date: string;
+  mode: DayMode;
+  items: TodayItem[];
+  hasDuties: boolean;
+}
+
 const SECTION_ORDER: Record<TodaySection, number> = { TODAY: 0, SOON: 1, THIS_WEEK: 2 };
 
 /**
