@@ -54,9 +54,9 @@ function sealIcon(size, seal, paper) {
           alignItems: "center",
           justifyContent: "center",
           fontFamily: "Yuji Syuku",
-          fontSize: Math.round(d * 0.56),
-          // 字形の重心が上に寄るため、わずかに下げて視覚的な中心に合わせる
-          paddingTop: Math.round(d * 0.04),
+          fontSize: Math.round(d * 0.66),
+          // 「済」を視覚的な中心より少し上に置く（下余白で持ち上げる）
+          paddingBottom: Math.round(d * 0.07),
           transform: "rotate(-8deg)",
         },
       },
