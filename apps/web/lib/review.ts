@@ -3,6 +3,7 @@ import { loadScheduleInputs } from "@zumi/db/queries";
 import { duties, logs } from "@zumi/db/schema";
 import {
   addDays,
+  evaluateDutyOn,
   getDaysInMonth,
   getWeekRange,
   getWeekday,
@@ -199,6 +200,111 @@ export async function loadWeeklySummary(
 ): Promise<WeeklySummary> {
   const summaryDuties = await loadSummaryDuties(db, userId, weekDate, calendar);
   return buildWeeklySummary(summaryDuties, weekDate, today, calendar.weekStart);
+}
+
+// ---- 月次ヒートマップ ----
+
+/** 振り返りで開ける月（`YYYY-MM`）の範囲。最古は無料プランの履歴の初日を含む月、最新は今月 */
+export function getHeatmapMonthRange(today: string): { oldest: string; current: string } {
+  return { oldest: getHistoryStartDate(today).slice(0, 7), current: today.slice(0, 7) };
+}
+
+const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+export const isMonth = (value: string): boolean => MONTH_PATTERN.test(value);
+
+/** `YYYY-MM` の月を `delta` か月ずらす */
+export function addMonths(month: string, delta: number): string {
+  const [y, m] = month.split("-").map(Number) as [number, number];
+  const index = y * 12 + (m - 1) + delta;
+  return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`;
+}
+
+/** ヒートマップの1日分。`total` が 0 の日は予定がなかった日（または今日より先・履歴の範囲外） */
+export interface HeatmapDay {
+  date: string;
+  done: number;
+  total: number;
+}
+
+export interface MonthHeatmap {
+  /** `YYYY-MM` */
+  month: string;
+  /** 月の初日の前に空ける日数（週の始まりの曜日からの位置） */
+  leadingBlanks: number;
+  days: HeatmapDay[];
+}
+
+/**
+ * ある日の分母・分子（純粋関数）。週次の達成率（`getWeeklyAchievement`）と同じく、期日の考え方は `@zumi/types` に任せる。
+ *
+ * - 期日確定型: 期日の日が分母。その日に済ませたら分子
+ * - `WEEKLY_COUNT`・`SINCE_LAST`: 期日がない型なので、その日に記録した（済・スキップ）ときだけ分母に入る。
+ *   済ませたら分子（済ませていない日を未達として数えないのは、週・催促の単位で見る設計のため。docs/04「4-2」）
+ * - 期日でない日に付いた記録（対象日の変更で付けたもの）は、今日タブの進捗と同じく数えない
+ */
+function dayAchievement(
+  summaryDuties: readonly SummaryDuty[],
+  date: string,
+): { done: number; total: number } {
+  let done = 0;
+  let total = 0;
+  for (const { schedule } of summaryDuties) {
+    const evaluation = evaluateDutyOn(schedule, date);
+    if (evaluation.section === null) continue;
+    if (evaluation.section !== "TODAY" && evaluation.log === null) continue;
+    total += 1;
+    if (evaluation.log === "DONE") done += 1;
+  }
+  return { done, total };
+}
+
+/**
+ * 月次ヒートマップ（純粋関数）。`today` より後の日と、無料プランの履歴の範囲（`getHistoryStartDate`）より前の日は
+ * 数えない（`total` が 0）。`summaryDuties` の `logs` には、月の初日を含む週の初日から月末（今日まで）の分が必要
+ * （`WEEKLY_COUNT` の残回数が週をまたぐため）。
+ */
+export function buildMonthHeatmap(
+  summaryDuties: readonly SummaryDuty[],
+  month: string,
+  today: string,
+  weekStart: WeekStart,
+): MonthHeatmap {
+  const [year, monthNumber] = month.split("-").map(Number) as [number, number];
+  const first = `${month}-01`;
+  const historyStart = getHistoryStartDate(today);
+  const days: HeatmapDay[] = [];
+  for (let day = 1; day <= getDaysInMonth(year, monthNumber); day++) {
+    const date = `${month}-${String(day).padStart(2, "0")}`;
+    const counted = date <= today && date >= historyStart;
+    days.push({ date, ...(counted ? dayAchievement(summaryDuties, date) : { done: 0, total: 0 }) });
+  }
+  return { month, leadingBlanks: (getWeekday(first) - weekStart + 7) % 7, days };
+}
+
+/** `dutyId` を渡すと、その Duty だけで集計する（ヒートマップの「全体 / 個別」） */
+export async function loadMonthHeatmap(
+  db: Db,
+  userId: string,
+  month: string,
+  today: string,
+  calendar: UserCalendar,
+  dutyId?: string,
+): Promise<MonthHeatmap> {
+  const first = `${month}-01`;
+  const [year, monthNumber] = month.split("-").map(Number) as [number, number];
+  const last = `${month}-${String(getDaysInMonth(year, monthNumber)).padStart(2, "0")}`;
+  // 月の初日を含む週の初日から読む（`WEEKLY_COUNT` の残回数は週内のログで決まる）
+  const from = getWeekRange(first, calendar.weekStart).start;
+  const rows = await loadScheduleInputs(db, {
+    users: [{ userId, ...calendar }],
+    from,
+    to: last < today ? last : today,
+    archivedSince: instantBefore(from),
+  });
+  const summaryDuties = rows
+    .map(({ duty, schedule }) => ({ duty, schedule }))
+    .filter(({ duty }) => dutyId === undefined || duty.id === dutyId);
+  return buildMonthHeatmap(summaryDuties, month, today, calendar.weekStart);
 }
 
 // ---- 履歴 ----
