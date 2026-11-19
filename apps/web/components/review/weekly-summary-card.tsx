@@ -88,7 +88,7 @@ function SummaryRow({
       {complete ? (
         <span
           className={cn(
-            "flex size-[42px] shrink-0 items-center justify-center rounded-full border-2 border-zumi-shu font-seal text-xl text-zumi-shu",
+            "flex size-[42px] shrink-0 items-center justify-center rounded-full border-[3px] border-zumi-shu pb-[3px] font-seal text-[28px] text-zumi-shu",
             SEAL_ROTATIONS[index % SEAL_ROTATIONS.length],
           )}
           role="img"
