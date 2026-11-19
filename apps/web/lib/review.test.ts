@@ -4,7 +4,10 @@ import { addDays, type LogStatus, type ScheduleConfig } from "@zumi/types";
 // 週次通知と同じ数字になることを確かめるため、notify の読み込みと集計をそのまま使う
 import { summarizeWeek, type NotifyDuty } from "../../notify/src/digest";
 import {
+  addMonths,
+  buildMonthHeatmap,
   buildWeeklySummary,
+  getHeatmapMonthRange,
   getHistoryStartDate,
   getIsoWeekNumber,
   HISTORY_PAGE_DAYS,
@@ -566,5 +569,113 @@ describe("履歴", () => {
     const active = await addDuty("今の", { type: "DAILY" });
     const options = await listHistoryDuties(testDb.db, userId, TODAY);
     expect(options.map((option) => option.id)).toEqual([active, archived]);
+  });
+});
+
+describe("月次ヒートマップ", () => {
+  const makeDuty = (
+    id: string,
+    scheduleConfig: ScheduleConfig,
+    logMap: Record<string, LogStatus>,
+    createdOn = "2026-09-01",
+  ): SummaryDuty => {
+    const duty = {
+      id,
+      name: id,
+      icon: "circle",
+      scheduleConfig,
+      createdAt: jst(createdOn),
+      archivedAt: null,
+    };
+    const dutyLogs = Object.entries(logMap).map(([targetDate, status]) => ({ targetDate, status }));
+    return {
+      duty,
+      schedule: { duty, logs: dutyLogs, pauses: [], timeZone: TZ, weekStart: 1 as const },
+    };
+  };
+  const day = (heatmap: ReturnType<typeof buildMonthHeatmap>, date: string) =>
+    heatmap.days.find((d) => d.date === date)!;
+
+  it("月の日数分の日があり、初日の前の空きは週の始まりで変わる", () => {
+    const monday = buildMonthHeatmap([], "2026-11", TODAY, 1);
+    expect(monday.days).toHaveLength(30);
+    expect(monday.leadingBlanks).toBe(6); // 11/1 は日曜
+    expect(buildMonthHeatmap([], "2026-11", TODAY, 0).leadingBlanks).toBe(0);
+    expect(buildMonthHeatmap([], "2026-10", TODAY, 1).leadingBlanks).toBe(3); // 10/1 は木曜
+  });
+
+  it("期日確定型は、期日の日が分母・済んだ日が分子。スキップは分母だけ", () => {
+    const daily = makeDuty(
+      "daily",
+      { type: "DAILY" },
+      { "2026-11-02": "DONE", "2026-11-03": "SKIP" },
+    );
+    const heatmap = buildMonthHeatmap([daily], "2026-11", TODAY, 1);
+    expect(day(heatmap, "2026-11-02")).toMatchObject({ done: 1, total: 1 });
+    expect(day(heatmap, "2026-11-03")).toMatchObject({ done: 0, total: 1 });
+    expect(day(heatmap, "2026-11-04")).toMatchObject({ done: 0, total: 1 });
+  });
+
+  it("複数の Duty は日ごとに合計する。期日でない日は数えない", () => {
+    const daily = makeDuty("daily", { type: "DAILY" }, { "2026-11-02": "DONE" });
+    // 日曜だけ。11/1 と 11/8 が期日（今日 11/5 より後は数えない）
+    const sunday = makeDuty(
+      "sunday",
+      { type: "WEEKDAYS", weekdays: [0] },
+      { "2026-11-01": "DONE" },
+    );
+    const heatmap = buildMonthHeatmap([daily, sunday], "2026-11", TODAY, 1);
+    expect(day(heatmap, "2026-11-01")).toMatchObject({ done: 1, total: 2 });
+    expect(day(heatmap, "2026-11-02")).toMatchObject({ done: 1, total: 1 });
+  });
+
+  it("期日でない日に付いた記録は数えない", () => {
+    const sunday = makeDuty(
+      "sunday",
+      { type: "WEEKDAYS", weekdays: [0] },
+      { "2026-11-03": "DONE" },
+    );
+    expect(day(buildMonthHeatmap([sunday], "2026-11", TODAY, 1), "2026-11-03")).toMatchObject({
+      done: 0,
+      total: 0,
+    });
+  });
+
+  it("今日より後の日は数えない", () => {
+    const daily = makeDuty("daily", { type: "DAILY" }, {});
+    const heatmap = buildMonthHeatmap([daily], "2026-11", TODAY, 1);
+    expect(day(heatmap, TODAY).total).toBe(1);
+    expect(day(heatmap, "2026-11-06").total).toBe(0);
+  });
+
+  it("週N回・前回からN日は、記録した日だけ数える（済ませていない日を未達にしない）", () => {
+    const weekly = makeDuty(
+      "weekly",
+      { type: "WEEKLY_COUNT", timesPerWeek: 2 },
+      {
+        "2026-11-02": "DONE",
+        "2026-11-04": "SKIP",
+      },
+    );
+    const since = makeDuty("since", { type: "SINCE_LAST", days: 3 }, { "2026-11-01": "DONE" });
+    const heatmap = buildMonthHeatmap([weekly, since], "2026-11", TODAY, 1);
+    expect(day(heatmap, "2026-11-01")).toMatchObject({ done: 1, total: 1 }); // since
+    expect(day(heatmap, "2026-11-02")).toMatchObject({ done: 1, total: 1 }); // weekly
+    expect(day(heatmap, "2026-11-03")).toMatchObject({ done: 0, total: 0 });
+    expect(day(heatmap, "2026-11-04")).toMatchObject({ done: 0, total: 1 }); // weekly のスキップ
+  });
+
+  it("無料プランの履歴の範囲より前の日は数えない", () => {
+    // 今日 11/5 の3ヶ月前は 8/5。8/4 以前は数えず、8/5 からは数える
+    const duty = makeDuty("daily", { type: "DAILY" }, {}, "2026-07-01");
+    const heatmap = buildMonthHeatmap([duty], "2026-08", TODAY, 1);
+    expect(day(heatmap, "2026-08-04").total).toBe(0);
+    expect(day(heatmap, "2026-08-05").total).toBe(1);
+  });
+
+  it("開ける月は、履歴の初日を含む月から今月まで", () => {
+    expect(getHeatmapMonthRange(TODAY)).toEqual({ oldest: "2026-08", current: "2026-11" });
+    expect(addMonths("2026-01", -1)).toBe("2025-12");
+    expect(addMonths("2026-12", 1)).toBe("2027-01");
   });
 });
