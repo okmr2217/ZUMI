@@ -240,6 +240,37 @@ test("振り返りタブに今週の達成が出る", async () => {
   await expect(summary.getByRole("listitem").filter({ hasText: "換気扇の掃除" })).toContainText(
     "前回から3日空いたら · 0/1",
   );
+});
+
+test("振り返りのヒートマップに今日の記録が出て、日をタップするとその日の今日タブを開く", async () => {
+  const tabs = page.getByRole("navigation", { name: "振り返りの表示" });
+  await tabs.getByRole("link", { name: "ヒートマップ" }).click();
+  await expect(page).toHaveURL(/\/app\/review\?view=heatmap$/);
+  const heatmap = page.getByRole("region", { name: "月次ヒートマップ" });
+  await expect(heatmap.getByText("タップすると、その日の記録・予定ページを開けます")).toBeVisible();
+
+  // 今日のセル。今日の DAILY は済なので、「済が1件以上」だけ見る（期日が曜日で変わる Duty があるため件数は固定しない）
+  const today = heatmap.locator('a[aria-current="date"]');
+  await expect(today).toHaveAttribute("href", "/app");
+  await expect(today).toHaveAccessibleName(/\d+件中[1-9]\d*件済/);
+
+  // 今日でない日のセルを開くと、その日の今日タブになる
+  const other = heatmap.locator('a[href^="/app?date="]').first();
+  const href = (await other.getAttribute("href"))!;
+  await other.click();
+  await expect(page).toHaveURL(new RegExp(`${href.replace("?", "\\?")}$`));
+  await expect(page.getByRole("main")).toBeVisible();
+
+  // 戻るとヒートマップのまま
+  await page.goBack();
+  await expect(page).toHaveURL(/view=heatmap/);
+  await expect(heatmap).toBeVisible();
+});
+
+test("振り返りの履歴に今日の記録が出る", async () => {
+  const tabs = page.getByRole("navigation", { name: "振り返りの表示" });
+  await tabs.getByRole("link", { name: "履歴" }).click();
+  await expect(page).toHaveURL(/view=history/);
 
   // 履歴に今日の記録が1件出る（絞り込みのボタンにも同じ名前が出るため、記録の行の方を見る）
   const history = page.getByRole("region", { name: "履歴" });
@@ -250,6 +281,12 @@ test("振り返りタブに今週の達成が出る", async () => {
 });
 
 test("シェアボタンでトークンが発行され、PNG を共有に渡す", async ({ request }) => {
+  // 共有は週次サマリーの表示にある
+  await page
+    .getByRole("navigation", { name: "振り返りの表示" })
+    .getByRole("link", { name: "週次サマリー" })
+    .click();
+  await expect(page.getByRole("region", { name: "週次サマリー" })).toBeVisible();
   const issued = page.waitForResponse(
     (response) =>
       response.request().method() === "POST" && response.url().endsWith("/api/review/share"),
